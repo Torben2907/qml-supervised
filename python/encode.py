@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 
-def parse_biomed_data_csv_to_numpy(
+def parse_biomed_data_to_ndarray(
     dataset_name: str, return_X_y=True
 ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
     """Function to read in biomedical datasets as .csv-files
@@ -48,4 +48,5 @@ def parse_biomed_data_csv_to_numpy(
         y = (2 * y) - 1
         return (X, y)
     else:
-        return df.iloc[:, 1:].to_numpy()
+        return df.to_numpy(dtype=np.float32)
+    
