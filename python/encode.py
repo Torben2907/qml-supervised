@@ -1,15 +1,16 @@
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA, KernelPCA
 
 
 def parse_biomed_data_to_ndarray(
     dataset_name: str, return_X_y=True
 ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
-    """Function to read in biomedical datasets as .csv-files
+    """Function to read in the biomedical datasets as .csv-files
        and output as numpy.ndarrays.
 
-       Consistent with the notation in the thesis I use the
-       convention:
+       Consistent with the the thesis I use the notation:
         - m for the number of examples in the dataset,
         - n for the number of features in the dataset,
         - k for the number of classes in the dataset.
@@ -49,4 +50,28 @@ def parse_biomed_data_to_ndarray(
         return (X, y)
     else:
         return df.to_numpy(dtype=np.float32)
-    
+
+
+def standard_scale_data(
+    X_train: np.ndarray, X_test: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    scaler = StandardScaler()
+    X_train_scaled: np.ndarray = scaler.fit_transform(X_train)
+    X_test_scaled: np.ndarray = scaler.fit_transform(X_test)
+
+    return X_train_scaled, X_test_scaled
+
+
+def reduce_feature_dim(
+    X: np.ndarray, num_features: int = 2, method: str = "PCA"
+) -> np.ndarray:
+    if method == "PCA":
+        pca = PCA(n_components=num_features)
+        X_reduced = pca.fit_transform(X)
+        return X_reduced
+    elif method == "kPCA":
+        kpca = KernelPCA(n_components=num_features)
+        X_reduced = kpca.fit_transform(X)
+        return X_reduced
+    else:
+        raise ValueError("provide either PCA or kPCA as reduction method")

@@ -1,0 +1,5 @@
+# ignore vs code configs
+.vscode
+
+# ignore MAC os files
+.DS_Store*
