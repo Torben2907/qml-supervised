@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.decomposition import PCA, KernelPCA
 
 
@@ -50,16 +50,6 @@ def parse_biomed_data_to_ndarray(
         return (X, y)
     else:
         return df.to_numpy(dtype=np.float32)
-
-
-def standard_scale_data(
-    X_train: np.ndarray, X_test: np.ndarray
-) -> tuple[np.ndarray, np.ndarray]:
-    scaler = StandardScaler()
-    X_train_scaled: np.ndarray = scaler.fit_transform(X_train)
-    X_test_scaled: np.ndarray = scaler.fit_transform(X_test)
-
-    return X_train_scaled, X_test_scaled
 
 
 def reduce_feature_dim(

@@ -1,99 +1,124 @@
+import os
+from typing import Optional
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
-from sklearn import svm
-from sklearn.inspection import DecisionBoundaryDisplay
+import seaborn as sns
+
+os.makedirs("figures/", exist_ok=True)
+
+matplotlib.rcParams["mathtext.fontset"] = "stix"
+sns.set_theme(font_scale=1.3)
+sns.set_style("white")
+
+color_palette = sns.color_palette("deep")
+
+matplotlib.rcParams["axes.spines.right"] = False
+matplotlib.rcParams["axes.spines.top"] = False
 
 
-def plot_training_data_with_svm_decision_boundary(
-    kernel, X_train, y_train, ax=None, long_title=True, support_vectors=True, dpi=300
+def plot_2d_data(
+    X: np.ndarray,
+    y: np.ndarray,
+    data_name: Optional[str] = None,
+    save_plot: bool = False,
 ):
-    # Train the SVC
-    clf = svm.SVC(kernel=kernel, gamma=2).fit(X_train, y_train)
+    assert X.shape[1] == 2
+    assert len(np.unique(y)) == 2
+    assert +1 in y
+    assert -1 in y
 
-    # Settings for plotting
-    if ax is None:
-        _, ax = plt.subplots(figsize=(4, 3))
-    x_min, x_max, y_min, y_max = -3, 3, -3, 3
-    ax.set(xlim=(x_min, x_max), ylim=(y_min, y_max))
+    fig = plt.figure()
+    ax = plt.gca()
 
-    # Plot decision boundary and margins
-    common_params = {"estimator": clf, "X": X_train, "ax": ax}
-    DecisionBoundaryDisplay.from_estimator(
-        **common_params,
-        response_method="predict",
-        plot_method="pcolormesh",
-        alpha=0.3,
+    X_pos = X[y == +1]
+    X_neg = X[y == -1]
+
+    plt.scatter(
+        X_pos[:, 0],
+        X_pos[:, 1],
+        c=np.array(color_palette[0]).reshape(1, -1),
+        marker=".",
     )
-    DecisionBoundaryDisplay.from_estimator(
-        **common_params,
-        response_method="decision_function",
-        plot_method="contour",
-        levels=[-1, 0, 1],
-        colors=["k", "k", "k"],
-        linestyles=["--", "-", "--"],
+    plt.scatter(
+        X_neg[:, 0],
+        X_neg[:, 1],
+        c=np.array(color_palette[1]).reshape(1, -1),
+        marker=".",
     )
 
-    if support_vectors:
-        # Plot bigger circles around samples that serve as support vectors
-        ax.scatter(
-            clf.support_vectors_[:, 0],
-            clf.support_vectors_[:, 1],
-            s=150,
-            facecolors="none",
-            edgecolors="k",
-        )
+    plt.xlabel("$x_1$", fontsize=20)
+    plt.ylabel("$x_2$", fontsize=20)
+    plt.tight_layout()
 
-    # Plot samples by color and add legend
-    scatter = ax.scatter(X_train[:, 0], X_train[:, 1], c=y_train, s=30, edgecolors="k")
-    ax.legend(*scatter.legend_elements(), loc="upper right", title="Classes")
-    if long_title:
-        ax.set_title(f" Decision boundaries of {kernel} kernel in SVC")
-    else:
-        ax.set_title(kernel)
-
-    if ax is None:
-        plt.show(dpi=300)
-
-def plot_features(ax, features, labels, class_label, marker, face, edge, label):
-    # A train plot
-    ax.scatter(
-        # x coordinate of labels where class is class_label
-        features[np.where(labels[:] == class_label), 0],
-        # y coordinate of labels where class is class_label
-        features[np.where(labels[:] == class_label), 1],
-        marker=marker,
-        facecolors=face,
-        edgecolors=edge,
-        label=label,
-    )
-
-def plot_dataset(train_features, train_labels, test_features, test_labels, adhoc_total):
-
-    plt.figure(figsize=(5, 5))
-    plt.ylim(0, 2 * np.pi)
-    plt.xlim(0, 2 * np.pi)
-    plt.imshow(
-        np.asmatrix(adhoc_total).T,
-        interpolation="nearest",
-        origin="lower",
-        cmap="RdBu",
-        extent=[0, 2 * np.pi, 0, 2 * np.pi],
-    )
-
-    # A train plot
-    plot_features(plt, train_features, train_labels, 0, "s", "w", "b", "A train")
-
-    # B train plot
-    plot_features(plt, train_features, train_labels, 1, "o", "w", "r", "B train")
-
-    # A test plot
-    plot_features(plt, test_features, test_labels, 0, "s", "b", "w", "A test")
-
-    # B test plot
-    plot_features(plt, test_features, test_labels, 1, "o", "r", "w", "B test")
-
-    plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0.0)
-    plt.title("Ad hoc dataset")
+    if save_plot:
+        if data_name is None:
+            raise ValueError("cannot write file when data_name is not provided.")
+        plt.savefig(f"figures/{data_name}" + "_plot", dpi=300)
 
     plt.show()
 
+
+def plot_2d_data_with_train_test_split(
+    X_train: np.ndarray,
+    y_train: np.ndarray,
+    X_test: np.ndarray,
+    y_test: np.ndarray,
+    data_name: Optional[str] = None,
+    save_plot: bool = False,
+):
+    assert X_train.shape[1] == 2 and X_test.shape[1] == 2
+    assert len(np.unique(y_train)) == 2 and len(np.unique(y_test)) == 2
+    assert +1 in y_train and -1 in y_train
+    assert +1 in y_test and -1 in y_test
+
+    X_train_pos = X_train[y_train == +1]
+    X_train_neg = X_train[y_train == -1]
+    X_test_pos = X_test[y_test == +1]
+    X_test_neg = X_test[y_test == -1]
+
+    plt.scatter(
+        X_train_pos[:, 0],
+        X_train_pos[:, 1],
+        c=np.array(color_palette[0]).reshape(1, -1),
+        marker=".",
+        label=r"$+1 \, Training$",
+    )
+    plt.scatter(
+        X_train_neg[:, 0],
+        X_train_neg[:, 1],
+        c=np.array(color_palette[1]).reshape(1, -1),
+        marker=".",
+        label=r"$-1 \, Training$",
+    )
+    plt.scatter(
+        X_test_pos[:, 0],
+        X_test_pos[:, 1],
+        c=np.array(color_palette[0]).reshape(1, -1),
+        marker="x",
+        label=r"$+1 \, Test$",
+    )
+    plt.scatter(
+        X_test_neg[:, 0],
+        X_test_neg[:, 1],
+        c=np.array(color_palette[1]).reshape(1, -1),
+        marker="x",
+        label=r"$-1 \, Test$",
+    )
+
+    plt.xlabel("$x_1$", fontsize=20)
+    plt.ylabel("$x_2$", fontsize=20)
+
+    # legend is going to be correctly displayed when rendered to .png
+    plt.legend(bbox_to_anchor=(1.05, 1), loc="best", borderaxespad=0.0)
+
+    if save_plot:
+        if data_name is None:
+            raise ValueError("cannot write file when data_name is not provided.")
+        plt.savefig(
+            f"figures/{data_name}" + "_train_test_plot.png",
+            dpi=300,
+            bbox_inches="tight",
+        )
+
+    plt.show()

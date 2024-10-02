@@ -1,1 +1,2 @@
-from plots.plot_2d_data import *
+from plots import *
+from models import *
