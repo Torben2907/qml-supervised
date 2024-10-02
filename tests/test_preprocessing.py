@@ -2,7 +2,7 @@ import sys
 import numpy as np
 
 sys.path.append("./python")
-from encode import parse_biomed_data_to_ndarray
+from preprocessing import parse_biomed_data_to_ndarray
 
 
 def test_cervical_cancer_new_dataset():
@@ -10,6 +10,7 @@ def test_cervical_cancer_new_dataset():
     assert X.shape == (761, 7)
     assert y.shape == (761,)
     assert df.shape == (761, 8)
+
 
 def test_correct_parsing_of_start_and_end_of_file():
     X, y, df = parsing_helper("cervical_new")

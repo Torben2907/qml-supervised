@@ -2,7 +2,7 @@ import sys
 
 sys.path.append("./python")
 
-from encode import parse_biomed_data_to_ndarray, reduce_feature_dim
+from preprocessing import parse_biomed_data_to_ndarray, reduce_feature_dim
 from plots.helper_plots import plot_2d_data, plot_2d_data_with_train_test_split
 from sklearn.model_selection import train_test_split
 
