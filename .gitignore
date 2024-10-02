@@ -3,3 +3,8 @@
 
 # ignore MAC os files
 .DS_Store*
+
+# I won't add the figures explicitely 
+# however all of them are reproducable 
+# by the python scripts provided in here
+/figures/

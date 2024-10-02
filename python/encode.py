@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.decomposition import PCA, KernelPCA
 
 
@@ -55,6 +54,24 @@ def parse_biomed_data_to_ndarray(
 def reduce_feature_dim(
     X: np.ndarray, num_features: int = 2, method: str = "PCA"
 ) -> np.ndarray:
+    """Reduces the dimension of the input feature matrix X which is
+        assummed to have shape (m, n), where
+        - m is the number of examples,
+        - n is the number of features.
+
+    Args:
+        X (np.ndarray): feature matrix of shape `(m, n)`
+        num_features (int, optional): the number of features of the reduced feature
+        matrix. Defaults to 2.
+        method (str, optional): method of dimensionality reduction. Defaults to "PCA".
+        Supported methods are "PCA" and "kPCA" (short for kernel PCA using rbf kernel).
+
+    Raises:
+        ValueError: if no supported method for dimensionality reduction is provided.
+
+    Returns:
+        np.ndarray: the reduced feature matrix of shape `(m, num_features)`.
+    """
     if method == "PCA":
         pca = PCA(n_components=num_features)
         X_reduced = pca.fit_transform(X)
