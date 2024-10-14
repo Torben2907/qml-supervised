@@ -6,7 +6,7 @@ from pennylane.optimize import NesterovMomentumOptimizer
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
-pnp.random.seed(0) # reproducability
+pnp.random.seed(0)  # reproducability
 
 # default pennylane device
 dev = qml.device("default.qubit")
@@ -147,7 +147,7 @@ def training_loop(
     opt,
     batch_size=5,
     epochs=100,
-    print_training=False
+    print_training=False,
 ):
     num_train = len(y_train)
     for it in range(epochs):
@@ -165,15 +165,16 @@ def training_loop(
 
         acc_train = accuracy(y_train, predictions_train)
         acc_val = accuracy(y_val, predictions_val)
-        if print_training: 
+        if print_training:
             if (it + 1) % 2 == 0:
                 _cost = cost(weights, bias, feats_train, y_train)
                 print(
                     f"Iter: {it + 1:5d} | Cost: {_cost:0.7f} | "
                     f"Acc train: {acc_train:0.7f} | Acc val: {acc_val:0.7f}"
                 )
-    
-    return weights, bias 
+
+    return weights, bias
+
 
 num_data = len(y)
 num_train = int(0.75 * num_data)
@@ -218,17 +219,23 @@ Z = pnp.reshape(predictions_grid, xx.shape)
 # plot decision regions
 levels = pnp.arange(-1, 1.1, 0.1)
 cnt = plt.contourf(xx, yy, Z, levels=levels, cmap=cm, alpha=0.8, extend="both")
-plt.contour(xx, yy, Z, levels=[0.0], colors=("black",), linestyles=("--",), linewidths=(0.8,))
+plt.contour(
+    xx, yy, Z, levels=[0.0], colors=("black",), linestyles=("--",), linewidths=(0.8,)
+)
 plt.colorbar(cnt, ticks=[-1, 0, 1])
 
 # plot data
 for color, label in zip(["b", "r"], [1, -1]):
     plot_x = X_train[:, 0][y_train == label]
     plot_y = X_train[:, 1][y_train == label]
-    plt.scatter(plot_x, plot_y, c=color, marker="o", ec="k", label=f"class {label} train")
+    plt.scatter(
+        plot_x, plot_y, c=color, marker="o", ec="k", label=f"class {label} train"
+    )
     plot_x = (X_val[:, 0][y_val == label],)
     plot_y = (X_val[:, 1][y_val == label],)
-    plt.scatter(plot_x, plot_y, c=color, marker="^", ec="k", label=f"class {label} validation")
+    plt.scatter(
+        plot_x, plot_y, c=color, marker="^", ec="k", label=f"class {label} validation"
+    )
 
 print(X_val)
 # plt.legend()

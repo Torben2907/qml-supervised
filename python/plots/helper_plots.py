@@ -53,7 +53,7 @@ def plot_2d_data(
 
     if save_plot:
         if data_name is None:
-            raise ValueError("cannot write file when data_name is not provided.")
+            raise ValueError("cannot write file when data_name isn't provided.")
         plt.savefig(f"figures/{data_name}" + "_plot", dpi=300)
 
     plt.show()
@@ -109,12 +109,12 @@ def plot_2d_data_with_train_test_split(
     plt.xlabel("$x_1$", fontsize=20)
     plt.ylabel("$x_2$", fontsize=20)
 
-    # legend is going to be correctly displayed when rendered to .png
-    plt.legend(bbox_to_anchor=(1.05, 1), loc="best", borderaxespad=0.0)
+    # legend is going to be displayed fully when rendered to .png
+    # plt.legend(bbox_to_anchor=(1.05, 1), loc="best", borderaxespad=0.0)
 
     if save_plot:
         if data_name is None:
-            raise ValueError("cannot write file when data_name is not provided.")
+            raise ValueError("cannot write file when data_name isn't provided.")
         plt.savefig(
             f"figures/{data_name}" + "_train_test_plot.png",
             dpi=300,
