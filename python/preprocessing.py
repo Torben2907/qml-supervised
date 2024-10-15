@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.decomposition import PCA, KernelPCA
+from sklearn.preprocessing import MinMaxScaler
 
 
 def parse_biomed_data_to_ndarray(
@@ -75,10 +76,19 @@ def reduce_feature_dim(
     if method == "PCA":
         pca = PCA(n_components=num_features)
         X_reduced = pca.fit_transform(X)
-        return X_reduced
     elif method == "kPCA":
         kpca = KernelPCA(n_components=num_features)
         X_reduced = kpca.fit_transform(X)
-        return X_reduced
     else:
         raise ValueError("provide either PCA or kPCA as reduction method")
+    return X_reduced
+
+
+def scale_data_to_range(
+    X: np.ndarray, range: tuple = (-np.pi / 2, np.pi / 2), scaling: float = 1.0
+):
+    assert len(range) == 2, "range must be a tuple of size 2"
+    scaler = MinMaxScaler(range)
+    scaler.fit(X)
+    X = scaler.transform(X)
+    return X * scaling
