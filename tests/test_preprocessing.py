@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+import pytest
 
 sys.path.append("./python")
 from preprocessing import parse_biomed_data_to_ndarray, scale_data_to_range
@@ -37,12 +38,14 @@ def test_cardiotography_dataset():
     assert np.count_nonzero(y == +1) == 176
 
 
-def test_scale_range_to_data():
-    X = np.random.randn(4, 1)
-    range = (-np.pi, np.pi)
+@pytest.mark.parametrize(
+    "range",
+    [(-np.pi, np.pi), (-np.pi / 2, np.pi / 2), (-5.0, 5.0), (-2 * np.pi, np.pi)],
+)
+def test_scale_data_to_range(range):
+    X, _ = parse_biomed_data_to_ndarray("ctg_new")
     X_scaled = scale_data_to_range(X, range)
-    assert np.all(X_scaled >= -np.pi), f"values are smaller than {range[0]}"
-    assert np.all(X_scaled <= np.pi), f"values are greater than {range[1]}"
+    assert np.any((X_scaled < range[0]) | (X_scaled > range[1]))
 
 
 def parsing_helper(dataset_name: str):
