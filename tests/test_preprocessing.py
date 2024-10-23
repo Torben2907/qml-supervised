@@ -28,14 +28,26 @@ def test_datatypes():
     assert df.dtype == np.float32
 
 
-def test_cardiotography_dataset():
-    X, y, df = parsing_helper("ctg_new")
-    assert X.shape == (1831, 22)
-    assert y.shape == (1831,)
-    assert df.shape == (1831, 23)
+data_with_associated_shape = [
+    {"name": "wdbc_new", "shape": (569, 30), "pos": 212, "neg": 357},
+    {"name": "fertility_new", "shape": (100, 9), "pos": 12, "neg": 88},
+    {"name": "haberman_new", "shape": (306, 3), "pos": 81, "neg": 225},
+]
 
-    assert np.count_nonzero(y == -1) == 1655
-    assert np.count_nonzero(y == +1) == 176
+
+@pytest.mark.parametrize("data", data_with_associated_shape)
+def test_shape_datasets(data):
+    name = data["name"]
+    shape = data["shape"]
+    pos = data["pos"]
+    neg = data["neg"]
+    X, y, df = parsing_helper(name)
+    assert X.shape == shape
+    assert y.shape == (shape[0],)
+    assert df.shape == (shape[0], shape[1] + 1)
+
+    assert np.count_nonzero(y == -1) == neg
+    assert np.count_nonzero(y == +1) == pos
 
 
 @pytest.mark.parametrize(
