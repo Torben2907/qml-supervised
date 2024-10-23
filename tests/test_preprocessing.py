@@ -28,10 +28,14 @@ def test_datatypes():
     assert df.dtype == np.float32
 
 
+# Using the information about the datasets from
+# https://biodatamining.biomedcentral.com/articles/10.1186/s13040-021-00283-6
 data_with_associated_shape = [
     {"name": "wdbc_new", "shape": (569, 30), "pos": 212, "neg": 357},
     {"name": "fertility_new", "shape": (100, 9), "pos": 12, "neg": 88},
     {"name": "haberman_new", "shape": (306, 3), "pos": 81, "neg": 225},
+    {"name": "cervical_new", "shape": (761, 7), "pos": 17, "neg": 744},
+    {"name": "hcv_new", "shape": (546, 12), "pos": 20, "neg": 526},
 ]
 
 
