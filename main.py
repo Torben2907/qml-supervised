@@ -3,16 +3,14 @@ import sys
 sys.path.append("./python")
 import pennylane as qml
 import matplotlib.pyplot as plt
-from qiskit_machine_learning.neural_networks import SamplerQNN
+from models.qsvc import QSVC
 from preprocessing import parse_biomed_data_to_ndarray, reduce_feature_dim
-from plots.helper_plots import plot_2d_data_with_train_test_split
 from sklearn.model_selection import train_test_split
 from models.variational_classifier import VariationalClassifier
 
 
 X, y = parse_biomed_data_to_ndarray("sobar_new")
 X = reduce_feature_dim(X)
-print(y)
 # doing this only for debugging rn
 X = X[15:25, :]
 y = y[15:25]
@@ -40,6 +38,9 @@ model.fit(X_train, y_train)
 fig, ax = qml.draw_mpl(model.circuit)(params=model.params_, x=X_train[0])
 # score the model
 print(model.score(X_test, y_test))
+
+quantum_svc = QSVC()
+quantum_svc.fit(X_test)
 
 fig.show()
 plt.show()

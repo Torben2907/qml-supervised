@@ -2,7 +2,7 @@ import sys
 import numpy as np
 
 sys.path.append("./python")
-from preprocessing import parse_biomed_data_to_ndarray
+from preprocessing import parse_biomed_data_to_ndarray, scale_data_to_range
 
 
 def test_cervical_cancer_new_dataset():
@@ -35,6 +35,14 @@ def test_cardiotography_dataset():
 
     assert np.count_nonzero(y == -1) == 1655
     assert np.count_nonzero(y == +1) == 176
+
+
+def test_scale_range_to_data():
+    X = np.random.randn(4, 1)
+    range = (-np.pi, np.pi)
+    X_scaled = scale_data_to_range(X, range)
+    assert np.all(X_scaled >= -np.pi), f"values are smaller than {range[0]}"
+    assert np.all(X_scaled <= np.pi), f"values are greater than {range[1]}"
 
 
 def parsing_helper(dataset_name: str):

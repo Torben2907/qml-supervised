@@ -12,25 +12,25 @@ def parse_biomed_data_to_ndarray(
 
        Consistent with the the thesis I use the notation:
         - m for the number of examples in the dataset,
-        - n for the number of features in the dataset,
+        - d for the number of features in the dataset,
         - k for the number of classes in the dataset.
 
     Args:
         dataset_name (str): Name of the dataset. DO NOT put `.csv` at the end.
         return_X_y (bool, optional): When `True` a tuple of np.ndarrays gets
-        returned where X is the feature matrix of shape (m, n) and
+        returned where X is the feature matrix of shape (m, d) and
         y is the (row) vector of labels of shape (m,).
         When `False` a single np.ndarray gets returned of shape
-        (m, n+1) where the one extra dimension is coming from the concatenation
+        (m, d+1) where the one extra dimension is coming from the concatenation
         of X and y (IMPORTANT: In this case y is the first column).
         Defaults to True.
 
     Returns:
         tuple[np.ndarray, np.ndarray] | np.ndarray:
-        Two arrays of shapes (m,n) and (n,) (in the following refered to as X and y)
-        or one single array of shape (m, n+1) (in the following refered to as df).
-        X is the feature matrix of shape (m, n).
-        y is the label vector of shape (n,) with labels in {-1, +1}.
+        Two arrays of shapes (m,n) and (d,) (in the following refered to as X and y)
+        or one single array of shape (m, d+1) (in the following refered to as df).
+        X is the feature matrix of shape (m, d).
+        y is the label vector of shape (d,) with labels in {-1, +1}.
         df is the concatenation of X and y.T (such that y is the first column).
         See also `return_X_y` for more information.
     """
@@ -56,12 +56,12 @@ def reduce_feature_dim(
     X: np.ndarray, num_features: int = 2, method: str = "PCA"
 ) -> np.ndarray:
     """Reduces the dimension of the input feature matrix X which is
-        assummed to have shape (m, n), where
+        assummed to have shape (m, d), where
         - m is the number of examples,
-        - n is the number of features.
+        - d is the number of features.
 
     Args:
-        X (np.ndarray): feature matrix of shape `(m, n)`
+        X (np.ndarray): feature matrix of shape `(m, d)`
         num_features (int, optional): the number of features of the reduced feature
         matrix. Defaults to 2.
         method (str, optional): method of dimensionality reduction. Defaults to "PCA".
@@ -93,12 +93,12 @@ def scale_data_to_range(
     in `range`.
 
     Args:
-        X (np.ndarray): 2D-feature matrix of dimension m x n.
+        X (np.ndarray): 2D-feature matrix of dimension m x d.
         range (tuple, optional): scaling interval of floating point values. Defaults to (-np.pi / 2, np.pi / 2).
-        scaling (float, optional): Extra scaling of X. Defaults to 1.0 (i.e. no extra scaling).
+        scaling (float, optional): Extra scaling of all values of X. Defaults to 1.0 (i.e. no extra scaling).
 
     Returns:
-        np.ndarray: Scaled feature matrix of size m x n.
+        np.ndarray: Scaled feature matrix of size m x d.
     """
     assert len(range) == 2, "range must be a tuple of size 2"
     for vals in range:

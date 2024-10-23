@@ -3,8 +3,11 @@ from typing import Optional
 import logging
 from abc import abstractmethod, ABC
 
-from pennylane import Operation, IQPEmbedding, QubitStateVector, device, qnode, adjoint
 import pennylane as qml
+
+# from pennylane import Operation, IQPEmbedding, QubitStateVector
+from pennylane.operation import Operation
+from pennylane.operation
 
 
 class QuantumKernel(ABC):
@@ -16,6 +19,10 @@ class QuantumKernel(ABC):
         self._feature_map = feature_map
 
     @abstractmethod
+    def build_circuit(self):
+        raise NotImplementedError()
+
+    @abstractmethod
     def evaluate_kernel(
         self, psi_vec: np.ndarray, phi_vec: Optional[np.ndarray] = None
     ):
@@ -24,6 +31,7 @@ class QuantumKernel(ABC):
                 "you passed only one data vector to the"
                 + f"kernel computation, i. e. evaluating self inner product of {psi_vec}."
             )
+        # evaluation will be implemented for each kernel individually
         raise NotImplementedError()
 
     @property
