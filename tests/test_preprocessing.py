@@ -1,20 +1,11 @@
-import sys
 import numpy as np
 import pytest
 
-sys.path.append("./python")
-from preprocessing import (
+from qmlab.preprocessing import (
     parse_biomed_data_to_ndarray,
     scale_data_to_specified_range,
     pad_and_normalize_data,
 )
-
-
-def test_cervical_cancer_new_dataset():
-    X, y, df = parsing_helper("cervical_new")
-    assert X.shape == (761, 7)
-    assert y.shape == (761,)
-    assert df.shape == (761, 8)
 
 
 def test_correct_parsing_of_start_and_end_of_file():

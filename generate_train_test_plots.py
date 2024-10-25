@@ -2,12 +2,8 @@
     test split
 """
 
-import sys
-
-sys.path.append("./python")
-
-from preprocessing import parse_biomed_data_to_ndarray, reduce_feature_dim
-from plots.helper_plots import plot_2d_data_with_train_test_split
+from qmlab.preprocessing import parse_biomed_data_to_ndarray, reduce_feature_dim
+from qmlab.plots.plot_data import plot_2d_data_with_train_test_split
 from sklearn.model_selection import train_test_split
 
 if __name__ == "__main__":

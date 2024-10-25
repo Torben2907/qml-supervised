@@ -3,10 +3,10 @@ import sys
 sys.path.append("./python")
 import pennylane as qml
 import matplotlib.pyplot as plt
-from models.qsvc import QSVC
-from preprocessing import parse_biomed_data_to_ndarray, reduce_feature_dim
+from qmlab.models.qsvc import QSVC
+from qmlab.preprocessing import parse_biomed_data_to_ndarray, reduce_feature_dim
 from sklearn.model_selection import train_test_split
-from models.variational_classifier import VariationalClassifier
+from qmlab.models.variational_classifier import VariationalClassifier
 
 
 X, y = parse_biomed_data_to_ndarray("sobar_new")
