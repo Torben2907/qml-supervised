@@ -5,7 +5,7 @@ from sklearn.svm import SVC
 from .quantum_kernel import QuantumKernel
 from .qfm import QuantumFeatureMap
 from qiskit import QuantumCircuit
-from qiskit_aer import AerSimulator
+from qiskit.primitives import StatevectorEstimator
 from qiskit_algorithms.utils import algorithm_globals
 
 
@@ -22,6 +22,12 @@ class QSVC(SVC):
         random_state=None,
         **kwargs,
     ):
+        if "kernel" in kwargs:
+            del kwargs["kernel"]
+            raise ValueError(
+                "do not use `kernel` argument - use `quantum_kernel` instead!"
+            )
+
         SVC.__init__(self, **kwargs)
 
         self.num_qubits = num_qubits
@@ -30,19 +36,12 @@ class QSVC(SVC):
         self.entanglement = entanglement
         self.random_state = random_state
 
-        # simulate classically
+        # if no quantum device is setup,
+        # simulate classically:
         if not quantum_backend:
             np.random.seed(self.random_state)
             algorithm_globals._random_seed = self.random_state
-            self.backend = AerSimulator(
-                method="statevector",
-                backend_options={
-                    "method": "automatic",
-                    "max_parallel_threads": 0,
-                    "max_parallel_experiments": 0,
-                    "max_parallel_shots": 0,
-                },
-            )
+            self.backend = StatevectorEstimator()
 
     def fit(self, X, y):
         num_samples, num_features = X.shape

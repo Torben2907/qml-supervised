@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 from sklearn.decomposition import PCA, KernelPCA
@@ -35,7 +36,8 @@ def parse_biomed_data_to_ndarray(
         df is the concatenation of X and y.T (such that y is the first column).
         See also `return_X_y` for more information.
     """
-    df = pd.read_csv("data/" + dataset_name + ".csv")
+    DATA_DIR = "~/ST24/bachelor-thesis/qml-supervised/data/"
+    df = pd.read_csv(DATA_DIR + dataset_name + ".csv")
     df = df.iloc[:, 1:]  # drop first column (contains only numbering of examples)
     if return_X_y:
         # "V1" is the column of labels
