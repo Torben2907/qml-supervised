@@ -1,10 +1,12 @@
 import numpy as np
+import copy
 from typing import Optional
 from sklearn.svm import SVC
-from .quantum_kernel import QuantumKernel, FidelityQuantumKernel
-from .embedding import QuantumFeatureMap
-from qiskit.utils import QuantumInstance, algorithm_globals
+from .quantum_kernel import QuantumKernel
+from .qfm import QuantumFeatureMap
+from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
+from qiskit_algorithms.utils import algorithm_globals
 
 
 class QSVC(SVC):
@@ -28,23 +30,23 @@ class QSVC(SVC):
         self.entanglement = entanglement
         self.random_state = random_state
 
-        self._quantum_kernel = (
-            quantum_kernel if quantum_kernel else FidelityQuantumKernel
-        )
-
+        # simulate classically
         if not quantum_backend:
             np.random.seed(self.random_state)
-            algorithm_globals.random_seed = self.random_state
-            self.backend = QuantumInstance(
-                AerSimulator(method="automatic"),
-                shots=1024,
-                seed_simulator=self.random_state,
-                seed_transpiler=self.random_state,
+            algorithm_globals._random_seed = self.random_state
+            self.backend = AerSimulator(
+                method="statevector",
+                backend_options={
+                    "method": "automatic",
+                    "max_parallel_threads": 0,
+                    "max_parallel_experiments": 0,
+                    "max_parallel_shots": 0,
+                },
             )
 
     def fit(self, X, y):
+        num_samples, num_features = X.shape
         if isinstance(self.feature_map, list):
-            num_samples, num_features = X.shape
             self._fm = QuantumFeatureMap(
                 num_features=num_features,
                 num_qubits=self.num_qubits,
@@ -54,12 +56,22 @@ class QSVC(SVC):
                 repeat=True,
                 scale=False,
             )
+        elif isinstance(self.feature_map, QuantumCircuit):
+            self._fm = copy.deepcopy(self.feature_map)
+
+        self.kernel = QuantumKernel(
+            self._fm, quantum_instance=self.backend
+        ).evaluate_kernel
+
+        SVC.fit(self, X, y)
+
+        return self
+
+    def set_params(self, **params):
+        for k, v in params.items():
+            setattr(self, k, v)
+        return self
 
     @property
     def quantum_kernel(self) -> QuantumKernel:
         return self._quantum_kernel
-
-    @quantum_kernel.setter
-    def set_quantum_kernel(self, quantum_kernel: QuantumKernel):
-        self._quantum_kernel = quantum_kernel
-        self.kernel = self._quantum_kernel.evaluate_kernel

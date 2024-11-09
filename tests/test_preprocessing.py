@@ -53,7 +53,7 @@ def test_shape_datasets(data):
     assert np.count_nonzero(y == +1) == pos
 
 
-# we specify common ranges used by papers to test the scaling
+# we specify a variety of ranges to test the scaling
 @pytest.mark.parametrize(
     "range",
     [
