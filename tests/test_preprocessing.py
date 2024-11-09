@@ -31,6 +31,9 @@ data_with_associated_attrs = [
     {"name": "haberman_new", "shape": (306, 3), "pos": 81, "neg": 225},
     {"name": "cervical_new", "shape": (761, 7), "pos": 17, "neg": 744},
     {"name": "hcv_new", "shape": (546, 12), "pos": 20, "neg": 526},
+    {"name": "nafld_new", "shape": (74, 9), "pos": 22, "neg": 52},
+    {"name": "heroin_new", "shape": (942, 11), "pos": 97, "neg": 845},
+    {"name": "ctg_new", "shape": (1831, 22), "pos": 176, "neg": 1655},
 ]
 
 
@@ -44,6 +47,7 @@ def test_shape_datasets(data):
     assert X.shape == shape
     assert y.shape == (shape[0],)
     assert df.shape == (shape[0], shape[1] + 1)
+    assert (pos + neg) == shape[0]
 
     assert np.count_nonzero(y == -1) == neg
     assert np.count_nonzero(y == +1) == pos

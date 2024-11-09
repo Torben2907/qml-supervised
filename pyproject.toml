@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "QMLab"
+version = "0.1.0"
+readme = "README.md"
+description = "Python package for comparing quantum-based kernel methods with their classical counterpart."
+authors = [{ name = "Torben Heckes" , email = "torben.heckes@hhu.de"}]
+requires-python = ">=3.13"
+dependencies = [
+    "numpy",
+    "pennylane",
+    "matplotlib",
+    "scikit-learn",
+    "pytest",
+    "pandas",
+    "seaborn",
+    "typing_extensions"
+]
+
+[project.optional-dependencies]
+docs = [
+  "sphinx-rtd-theme",
+  "myst_parser >=0.13",
+  "sphinx >=4.0",
+  "sphinx-copybutton",
+  "sphinx-autodoc-typehints",
+]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = ["error"]
+log_cli_level = "info"
+testpaths = [
+  "tests",
+]
