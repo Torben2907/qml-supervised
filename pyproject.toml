@@ -8,7 +8,7 @@ version = "0.1.0"
 readme = "README.md"
 description = "Python package for comparing quantum-based kernel methods with their classical counterpart."
 authors = [{ name = "Torben Heckes" , email = "torben.heckes@hhu.de"}]
-requires-python = ">=3.13"
+requires-python = ">=3.9"
 dependencies = [
     "numpy",
     "pennylane",

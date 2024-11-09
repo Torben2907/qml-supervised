@@ -2,6 +2,7 @@ import numpy as np
 from typing import Optional
 from sklearn.svm import SVC
 from .quantum_kernel import QuantumKernel, FidelityQuantumKernel
+from .embedding import QuantumFeatureMap
 from qiskit.utils import QuantumInstance, algorithm_globals
 from qiskit_aer import AerSimulator
 
@@ -34,10 +35,25 @@ class QSVC(SVC):
         if not quantum_backend:
             np.random.seed(self.random_state)
             algorithm_globals.random_seed = self.random_state
-            self.backend = Quant
+            self.backend = QuantumInstance(
+                AerSimulator(method="automatic"),
+                shots=1024,
+                seed_simulator=self.random_state,
+                seed_transpiler=self.random_state,
+            )
 
-        if not random_state:
-            self.random_state = set_global_seed(42)
+    def fit(self, X, y):
+        if isinstance(self.feature_map, list):
+            num_samples, num_features = X.shape
+            self._fm = QuantumFeatureMap(
+                num_features=num_features,
+                num_qubits=self.num_qubits,
+                num_layers=self.num_layers,
+                gates=[g.upper() for g in self.feature_map],
+                entanglement=self.entanglement,
+                repeat=True,
+                scale=False,
+            )
 
     @property
     def quantum_kernel(self) -> QuantumKernel:

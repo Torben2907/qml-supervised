@@ -2,7 +2,7 @@ import matplotlib.lines
 import matplotlib.pyplot
 import pytest
 import matplotlib
-from typing import SimpleNamespace
+from types import SimpleNamespace
 
 
 @pytest.fixture
@@ -17,6 +17,6 @@ def mock_matplotlib(mocker):
 
     return SimpleNamespace(fig=fig, ax=ax, mpl=mpl)
 
+
 def test_plot_2d_data(mock_matplotlib):
-    
-    
+    pass
