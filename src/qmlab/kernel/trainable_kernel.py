@@ -1,6 +1,6 @@
 from typing import Mapping, Sequence
 from .quantum_kernel import QuantumKernel
-from qiskit.circuit import ParameterVector, Parameter
+from qiskit.circuit import ParameterVector, Parameter, ParameterExpression
 from qiskit import QuantumCircuit
 from abc import ABC
 import numpy as np
@@ -29,7 +29,7 @@ class TrainableQuantumKernel(QuantumKernel, ABC):
     def assign_training_parameters(
         self,
         parameter_values: (
-            Mapping[Parameter, ParameterValueType] | Sequence[ParameterValueType]
+            Mapping[Parameter, ParameterExpression] | Sequence[ParameterExpression]
         ),
     ) -> None:
         """

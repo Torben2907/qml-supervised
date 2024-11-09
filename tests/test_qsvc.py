@@ -4,12 +4,12 @@ from qiskit.primitives import Sampler
 from qmlab.kernel.qfm import QuantumFeatureMap
 from qmlab.kernel.qsvc import QSVC
 from qiskit_algorithms.utils import algorithm_globals
-from qmlab_testcase import QMLabTestCase
+from qmlab_testcase import QMLabTest
 
 seed = 12345
 
 
-class TestQSVC(QMLabTestCase):
+class TestQSVC(QMLabTest):
     def setUp(self):
         super().setUp()
         algorithm_globals.random_seed = seed
