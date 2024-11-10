@@ -1,20 +1,34 @@
 import os
+from typing import Tuple
 import pandas as pd
 import numpy as np
 from sklearn.decomposition import PCA, KernelPCA
 from sklearn.preprocessing import MinMaxScaler
 
 
+DATA_DIR = "~/ST24/bachelor-thesis/qml-supervised/data/"
+
+
+def parse_biomed_data_to_df(dataset_name: str) -> pd.DataFrame:
+    df = pd.read_csv(DATA_DIR + dataset_name + ".csv")
+    df = df.iloc[:, 1:]
+    # TODO: Need to scale the values in y to [-1, +1]
+    # also need to put the label column at the end not at the beginning
+    # of the dataframe
+    return df
+
+
 def parse_biomed_data_to_ndarray(
     dataset_name: str, return_X_y=True
-) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
+) -> Tuple[np.ndarray, np.ndarray] | np.ndarray:
     """Function to read in the biomedical datasets as .csv-files
-       and output as numpy.ndarrays.
+       and output as `numpy.ndarrays`.
 
-       Consistent with the the thesis we use the notation:
+       Consistent with the the thesis the notation
         - m for the number of examples in the dataset,
         - d for the number of features in the dataset,
-        - k for the number of classes in the dataset.
+        - k for the number of classes in the dataset
+        is used.
 
     Args:
         dataset_name (str): Name of the dataset. DO NOT put `.csv` at the end.
@@ -36,7 +50,6 @@ def parse_biomed_data_to_ndarray(
         df is the concatenation of X and y.T (such that y is the first column).
         See also `return_X_y` for more information.
     """
-    DATA_DIR = "~/ST24/bachelor-thesis/qml-supervised/data/"
     df = pd.read_csv(DATA_DIR + dataset_name + ".csv")
     df = df.iloc[:, 1:]  # drop first column (contains only numbering of examples)
     if return_X_y:

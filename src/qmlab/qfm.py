@@ -1,4 +1,4 @@
-from typing import Optional, Sequence
+from typing import List, Sequence
 from qiskit import QuantumCircuit
 from qiskit.circuit import Parameter, ParameterVector
 
@@ -7,22 +7,23 @@ class QuantumFeatureMap(QuantumCircuit):
     def __init__(
         self,
         *,
-        num_features: int,
+        feature_dimension: int,
+        reps: int,
         num_qubits: int,
-        num_layers: int,
-        gates: Sequence[str],
-        entanglement: list | str = "linear",
+        gates: List[str],
+        entanglement: str | List[List[int]] = "linear",
         data_scaling: bool = False,
-        alpha: Optional[float] = None,
-        name: str = "Quantum Feature Map",
+        alpha: float | None = None,
         repeat: bool = True,
+        name: str = "Quantum Feature Map",
     ) -> None:
-        assert num_features >= 1, "no data sample given."
-        assert num_layers >= 1, "depth of feature map must be larger than 0!"
+        assert feature_dimension >= 1, "no data sample given."
+        assert reps >= 1, "depth of feature map must be larger than 0!"
 
-        self.num_features = num_features
-        self.num_layers = num_layers
+        self.feature_dimension = feature_dimension
+        self.num_layers = reps
         self._repeat = repeat
+        self._gates = gates
         super().__init__(num_qubits, name=name)
 
         self.data_scaling = data_scaling
@@ -45,29 +46,33 @@ class QuantumFeatureMap(QuantumCircuit):
             input_train = 0
 
         for _ in range(self.num_layers):
-            for g in gates:
+            for g in self._gates:
                 if g.isupper():
                     input_encoding = self.build_circuit(
-                        g.lower(), self.encoded_params, input_encoding
+                        g.lower(), self.encoding_params, input_encoding
                     )
-                    if self._repeat and input_encoding == self.num_features:
+                    if self._repeat and input_encoding == self.feature_dimension:
                         input_encoding = 0
                 if g.islower():
                     input_train = self.build_circuit(
-                        g.lower(), self.train_params, input_train
+                        g.lower(), self.training_params, input_train
                     )
             if not self._repeat:
-                if input_encoding == self.num_features:
+                if input_encoding == self.feature_dimension:
                     input_encoding = 0
 
         if not self.data_scaling:
             if alpha is not None:
                 try:
                     self.assign_parameters({self.alpha: alpha}, inplace=True)
-                except:
+                except ValueError:
                     pass
                 self.alpha = alpha
         return
+
+    @property
+    def gates(self) -> List[str]:
+        return self._gates
 
     def generate_fm(self, entanglement: str) -> None:
         self.entanglement = []
@@ -75,7 +80,7 @@ class QuantumFeatureMap(QuantumCircuit):
             for i in range(self.num_qubits - 1):
                 self.entanglement.append([i, i + 1])
         else:
-            raise ValueError("unknown type for creating entanglement!")
+            raise ValueError("unknown method of creating entanglement!")
 
     def initalize_params(self, gates: Sequence[str]) -> None:
         rotation_gates = ["rx", "ry", "rz"]
@@ -90,28 +95,23 @@ class QuantumFeatureMap(QuantumCircuit):
                     num_params += 2 * len(self.entanglement)
 
         num_params *= self.num_layers
-        self.train_params = ParameterVector("θ", num_params)
+        self.training_params = ParameterVector("θ", num_params)
 
         if self.data_scaling:
             num_params += 1
-            self.alpha = self.train_params[0]
+            self.alpha = self.training_params[0]
 
-        t_list = [
-            g.isupper() and (g.lower() in rotation_gates + controlled_gates)
-            for g in gates
-        ]
-
-        params = ParameterVector("x", self.num_features)
-        self.encoded_params = [self.alpha * p for p in params]
+        params = ParameterVector("x", self.feature_dimension)
+        self.encoding_params = [self.alpha * p for p in params]
         return
 
     def build_circuit(self, gate: str, params, j0: int = 0):
-        class AllDone(Exception):
+        class CircuitBuilt(Exception):
             pass
 
         def check(j):
             if j >= num_params:
-                raise AllDone
+                raise CircuitBuilt
 
         num_params = len(params)
         j = j0
@@ -136,7 +136,7 @@ class QuantumFeatureMap(QuantumCircuit):
             elif gate in ["cx", "cy", "cz", "ch", "swap", "iswap"]:
                 for pair in self.entanglement:
                     _gate(pair[0], pair[1])
-        except AllDone:
+        except CircuitBuilt:
             pass
 
         self.barrier()

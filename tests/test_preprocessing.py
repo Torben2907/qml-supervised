@@ -34,6 +34,7 @@ data_with_associated_attrs = [
     {"name": "nafld_new", "shape": (74, 9), "pos": 22, "neg": 52},
     {"name": "heroin_new", "shape": (942, 11), "pos": 97, "neg": 845},
     {"name": "ctg_new", "shape": (1831, 22), "pos": 176, "neg": 1655},
+    # {"name": "sobar_new", "shape": (72, 19), "pos": },
 ]
 
 

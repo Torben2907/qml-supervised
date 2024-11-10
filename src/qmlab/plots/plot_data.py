@@ -8,9 +8,10 @@ import pandas as pd
 from ..preprocessing import parse_biomed_data_to_ndarray
 import plotly.express as px
 
+plt.style.use("dark_background")
 os.makedirs("figures/", exist_ok=True)
 
-color_palette = sns.color_palette("dark")
+color_palette = sns.color_palette("bright")
 
 
 def plot_2d_data(
@@ -102,8 +103,8 @@ def plot_2d_data_with_train_test_split(
         label=r"$-1 \, Test$",
     )
 
-    plt.xlabel("Feature $x_1$", fontsize=20)
-    plt.ylabel("Feature $x_2$", fontsize=20, rotation=0)
+    plt.xlabel("$x_1$", fontsize=20)
+    plt.ylabel("$x_2$", fontsize=20, rotation=0)
 
     if save_plot:
         if data_name is None:
@@ -120,13 +121,6 @@ def plot_2d_data_with_train_test_split(
     plt.show()
 
 
-def plot_3d_data_interactive(dataset_name: str) -> None:
-    data = parse_biomed_data_to_ndarray(dataset_name, return_X_y=False)
-    df = pd.DataFrame(data, index=data[:, 0])
-    fig = px.scatter_3d(df, x=1, y=2, z=3, color=0)
-    fig.show()
-
-
 def plot_3d_data_with_train_test_split(
     X_train: np.ndarray,
     y_train: np.ndarray,
@@ -137,7 +131,7 @@ def plot_3d_data_with_train_test_split(
 ) -> None:
     assert (
         X_train.shape[1] == 3 and X_test.shape[1] == 3
-    ), f"{X_train} and {X_test} must have 3 features"
+    ), f"{X_train} and {X_test} must have exactly 3 features!"
     fig = plt.figure(figsize=(10, 7))
     ax = plt.axes(projection="3d")
 
@@ -179,9 +173,9 @@ def plot_3d_data_with_train_test_split(
         label=r"$-1 \, Test$",
     )
 
-    ax.set_xlabel("Feature $x_1$", fontsize=25)
-    ax.set_ylabel("Feature $x_2$", fontsize=25)
-    ax.set_zlabel("Feature $x_3$", fontsize=25)
+    ax.set_xlabel("$x_1$", fontsize=25)
+    ax.set_ylabel("$x_2$", fontsize=25)
+    ax.set_zlabel("$x_3$", fontsize=25)
     ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
     ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
     ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))

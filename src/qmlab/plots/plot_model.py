@@ -27,6 +27,8 @@ def plot_decision_boundaries(
     # visualize the decision function and boundary
     import matplotlib.pyplot as plt
 
+    plt.style.use("dark_background")
+
     set_figure_params()
     plt.figure(figsize=(7, 7))
     plt.contourf(
@@ -43,7 +45,7 @@ def plot_decision_boundaries(
     plt.scatter(
         X_test[:, 0],
         X_test[:, 1],
-        marker="v",
+        marker="X",
         s=200,
         c=plt.cm.coolwarm(np.array(y_test, dtype=np.float32)),
         edgecolor="k",

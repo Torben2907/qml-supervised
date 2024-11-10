@@ -86,7 +86,7 @@ class TrainableQuantumKernel(QuantumKernel, ABC):
         """
         self._check_trainable_parameters()
         full_array = np.zeros(
-            (x_vec.shape[0], self._num_features + self._num_training_params)
+            (x_vec.shape[0], self._feature_dimension + self._num_training_params)
         )
         for i, x in enumerate(x_vec):
             self._parameter_dict.update(
