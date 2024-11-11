@@ -40,7 +40,6 @@ class QSVC(SVC):
         self.quantum_kernel = (
             quantum_kernel if quantum_kernel else FidelityQuantumKernel()
         )
-        print(self.quantum_kernel)
 
         # if no quantum device is setup,
         # simulate quantum backend classically:
@@ -73,8 +72,6 @@ class QSVC(SVC):
                 "Feature Map must be either given as a list containing"
                 "names of the gates as strings or directly via a `QuantumCircuit`-object!"
             )
-
-        print(self.quantum_kernel)
 
         self.kernel = self.quantum_kernel.evaluate_kernel
 
