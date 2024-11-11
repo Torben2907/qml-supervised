@@ -6,7 +6,7 @@ This repository provides code for comparing classical machine learning models wi
 
 ## Welcome to QMLab! 🧪
 
-The package created is called `QMLab` - it's written entirely in Python, using [https://github.com/Qiskit/qiskit](Qiskit) for the quantum mechanical backend and [https://github.com/scikit-learn/scikit-learn](Scikit-Learn) for the classical backend. The main class used is `QSVC` - short for Quantum Support Vector Machine. It inherits from the SVC class of Scikit-Learn and extends its functionality by providing quantum kernel instead of classical ones.
+The package created is called `QMLab` - it's written entirely in Python, using [Qiskit](https://github.com/Qiskit/qiskit) for the quantum mechanical backend and [Sklearn](https://github.com/scikit-learn/scikit-learn) for the classical backend. The main class used is `QSVC` - short for Quantum Support Vector Machine. It inherits from the SVC class of Scikit-Learn and extends its functionality by providing quantum kernel instead of classical ones.
 
 [Get started with the Jupyter-Tutorial-Series here!](./tutorials/classical_learning.ipynb)
 
@@ -14,7 +14,7 @@ The package created is called `QMLab` - it's written entirely in Python, using [
 
 We're dealing with 9 different datasets in this thesis. The collection is coming from <cite>Jacqueline Beinecke & Dominik Heider[1]</cite>. All datasets contain an imbalance of class labels and cannot be seperated linearly.
 
-![Overview of the datasets](/figures/information_datasets.png)
+![Overview of the datasets]
 
 ## What is a Quantum Support Vector Machine? 🤔
 
