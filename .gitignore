@@ -7,7 +7,7 @@
 #ignore test coverage file
 .coverage
 
-# I won't add the figures explicitely 
-# however all of them are reproducable 
-# by the python scripts provided in here
-/figures/
+# nvm I added figures now so I can 
+# display the overview of datasets
+# leaving it like that until I find a better way
+# /figures/
