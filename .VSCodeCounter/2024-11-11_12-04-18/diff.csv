@@ -1,0 +1,10 @@
+"filename", "language", "Python", "JSON", "Markdown", "comment", "blank", "total"
+"/Users/torbenheckes/ST24/bachelor-thesis/qml-supervised/README.md", "Markdown", 0, 0, 7, 0, 5, 12
+"/Users/torbenheckes/ST24/bachelor-thesis/qml-supervised/main.py", "Python", -23, 0, 0, 19, 2, -2
+"/Users/torbenheckes/ST24/bachelor-thesis/qml-supervised/src/qmlab/kernel/quantum_kernel.py", "Python", 8, 0, 0, 0, 2, 10
+"/Users/torbenheckes/ST24/bachelor-thesis/qml-supervised/src/qmlab/plots/plot_data.py", "Python", 6, 0, 0, 0, 0, 6
+"/Users/torbenheckes/ST24/bachelor-thesis/qml-supervised/src/qmlab/qfm.py", "Python", 9, 0, 0, 0, 5, 14
+"/Users/torbenheckes/ST24/bachelor-thesis/qml-supervised/statevector.py", "Python", 12, 0, 0, 4, 8, 24
+"/Users/torbenheckes/ST24/bachelor-thesis/qml-supervised/tests/test_qsvc.py", "Python", 22, 0, 0, 0, 1, 23
+"/Users/torbenheckes/ST24/bachelor-thesis/qml-supervised/tutorials/classical_learning.ipynb", "JSON", 0, 2, 0, 0, 0, 2
+"Total", "-", 34, 2, 7, 23, 23, 89

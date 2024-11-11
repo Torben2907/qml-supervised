@@ -4,7 +4,6 @@ from qiskit_algorithms.utils import algorithm_globals
 from qmlab.kernel.fidelity_quantum_kernel import FidelityQuantumKernel
 from qiskit.circuit.library import PauliFeatureMap
 from sklearn.svm import SVC
-import pytest
 
 
 class TestFidelityQuantumKernel(QMLabTest):
@@ -34,7 +33,7 @@ class TestFidelityQuantumKernel(QMLabTest):
         assert score == 1.0
 
     def test_defaults(self):
-        features = algorithm_globals.random.random((10, 2)) - 0.5
+        features = np.random.randn(10, 2)
         labels = np.sign(features[:, 0])
 
         quantum_kernel = FidelityQuantumKernel()

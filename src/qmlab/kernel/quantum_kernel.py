@@ -35,6 +35,11 @@ class QuantumKernel(ABC):
         return self._feature_dimension
 
     def _validate_inputs(self, psi_vec: np.ndarray, phi_vec: np.ndarray | None = None):
+        if not isinstance(psi_vec, np.ndarray):
+            raise ValueError(
+                f"Data must be given as np.ndarray but has type {type(psi_vec)}!"
+            )
+
         if psi_vec.ndim > 2:
             raise ValueError(
                 f"{psi_vec} must be a one or two-dimensional array but has size {psi_vec.ndim}!"
@@ -54,6 +59,11 @@ class QuantumKernel(ABC):
                 ) from ae
 
         if phi_vec is not None:
+            if not isinstance(phi_vec, np.ndarray):
+                raise ValueError(
+                    f"Data must be given as np.ndarray but has type {type(phi_vec)}!"
+                )
+
             if phi_vec.ndim > 2:
                 raise ValueError(
                     f"{phi_vec} must be a one or two-dimensional array but has size {phi_vec.ndim}!"

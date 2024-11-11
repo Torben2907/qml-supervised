@@ -1,17 +1,16 @@
 import os
 from typing import Optional
 import numpy as np
-import matplotlib
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
-from ..preprocessing import parse_biomed_data_to_ndarray
-import plotly.express as px
+from .plot_utils import set_figure_params
 
 plt.style.use("dark_background")
 os.makedirs("figures/", exist_ok=True)
 
-color_palette = sns.color_palette("bright")
+cmap = sns.color_palette("Spectral")
 
 
 def plot_2d_data(
@@ -20,7 +19,7 @@ def plot_2d_data(
     data_name: Optional[str] = None,
     save_plot: bool = False,
 ):
-    assert X.shape[1] == 2
+    assert X.shape[1] == 2 and X.ndim == 2
     assert len(np.unique(y)) == 2
     assert +1 in y
     assert -1 in y
@@ -34,13 +33,15 @@ def plot_2d_data(
     plt.scatter(
         X_pos[:, 0],
         X_pos[:, 1],
-        c=np.array(color_palette[0]).reshape(1, -1),
+        c=np.array(cmap[0]).reshape(1, -1),
+        s=150,
         marker=".",
     )
     plt.scatter(
         X_neg[:, 0],
         X_neg[:, 1],
-        c=np.array(color_palette[1]).reshape(1, -1),
+        c=np.array(cmap[1]).reshape(1, -1),
+        s=150,
         marker="X",
     )
 
@@ -62,6 +63,7 @@ def plot_2d_data_with_train_test_split(
     X_test: np.ndarray,
     y_test: np.ndarray,
     data_name: Optional[str] = None,
+    separate_plots: bool = False,
     save_plot: bool = False,
 ):
     assert X_train.shape[1] == 2 and X_test.shape[1] == 2
@@ -69,42 +71,80 @@ def plot_2d_data_with_train_test_split(
     assert +1 in y_train and -1 in y_train
     assert +1 in y_test and -1 in y_test
 
-    X_train_pos = X_train[y_train == +1]
-    X_train_neg = X_train[y_train == -1]
-    X_test_pos = X_test[y_test == +1]
-    X_test_neg = X_test[y_test == -1]
+    if separate_plots:
+        set_figure_params()
+        _, ax = plt.subplots(1, 2, figsize=[11, 5])
+        ax[0].scatter(
+            X_train[:, 0],
+            X_train[:, 1],
+            marker="o",
+            c=np.array(y_train, dtype=np.float32),
+            s=150,
+            cmap="plasma",
+            edgecolors="k",
+        )
+        ax[0].set_title("Training Data")
+        ax[1].set_title("Test Data")
+        ax[1].scatter(
+            X_test[:, 0],
+            X_test[:, 1],
+            marker="X",
+            c=np.array(y_test, dtype=np.float32),
+            s=150,
+            cmap="plasma",
+            edgecolors="k",
+        )
+        for i in range(2):
+            ax[i].set_xlabel(r"$x_1$", fontsize=20)
+            ax[i].set_ylabel(r"$x_2$", fontsize=20, rotation=0)
+        plt.tight_layout()
 
-    plt.scatter(
-        X_train_pos[:, 0],
-        X_train_pos[:, 1],
-        c=np.array(color_palette[0]).reshape(1, -1),
-        marker=".",
-        label=r"$+1 \, Training$",
-    )
-    plt.scatter(
-        X_train_neg[:, 0],
-        X_train_neg[:, 1],
-        c=np.array(color_palette[1]).reshape(1, -1),
-        marker=".",
-        label=r"$-1 \, Training$",
-    )
-    plt.scatter(
-        X_test_pos[:, 0],
-        X_test_pos[:, 1],
-        c=np.array(color_palette[0]).reshape(1, -1),
-        marker="X",
-        label=r"$+1 \, Test$",
-    )
-    plt.scatter(
-        X_test_neg[:, 0],
-        X_test_neg[:, 1],
-        c=np.array(color_palette[1]).reshape(1, -1),
-        marker="X",
-        label=r"$-1 \, Test$",
-    )
+    else:
 
-    plt.xlabel("$x_1$", fontsize=20)
-    plt.ylabel("$x_2$", fontsize=20, rotation=0)
+        X_train_pos = X_train[y_train == +1]
+        X_train_neg = X_train[y_train == -1]
+        X_test_pos = X_test[y_test == +1]
+        X_test_neg = X_test[y_test == -1]
+
+        plt.scatter(
+            X_train_pos[:, 0],
+            X_train_pos[:, 1],
+            c=np.array(cmap[0]).reshape(1, -1),
+            s=150,
+            marker="o",
+            label=r"$+1 \, Training$",
+            edgecolors="k",
+        )
+        plt.scatter(
+            X_train_neg[:, 0],
+            X_train_neg[:, 1],
+            c=np.array(cmap[1]).reshape(1, -1),
+            s=150,
+            marker="o",
+            label=r"$-1 \, Training$",
+            edgecolors="k",
+        )
+        plt.scatter(
+            X_test_pos[:, 0],
+            X_test_pos[:, 1],
+            c=np.array(cmap[0]).reshape(1, -1),
+            s=150,
+            marker="X",
+            label=r"$+1 \, Test$",
+            edgecolors="k",
+        )
+        plt.scatter(
+            X_test_neg[:, 0],
+            X_test_neg[:, 1],
+            c=np.array(cmap[1]).reshape(1, -1),
+            s=200,
+            marker="X",
+            label=r"$-1 \, Test$",
+            edgecolors="k",
+        )
+
+        plt.xlabel(r"$x_1$", fontsize=20)
+        plt.ylabel(r"$x_2$", fontsize=20, rotation=0)
 
     if save_plot:
         if data_name is None:
@@ -145,7 +185,7 @@ def plot_3d_data_with_train_test_split(
         X_train_pos[:, 1],
         X_train_pos[:, 2],
         marker=".",
-        color=np.array(color_palette[0]).reshape(1, -1),
+        color=np.array(cmap[0]).reshape(1, -1),
         label=r"$+1 \, Training$",
     )
     ax.scatter3D(
@@ -153,7 +193,7 @@ def plot_3d_data_with_train_test_split(
         X_train_neg[:, 1],
         X_train_neg[:, 2],
         marker=".",
-        color=np.array(color_palette[1]).reshape(1, -1),
+        color=np.array(cmap[1]).reshape(1, -1),
         label=r"$-1 \, Training$",
     )
     ax.scatter3D(
@@ -161,7 +201,7 @@ def plot_3d_data_with_train_test_split(
         X_test_pos[:, 1],
         X_test_pos[:, 2],
         marker="x",
-        color=np.array(color_palette[0]).reshape(1, -1),
+        color=np.array(cmap[0]).reshape(1, -1),
         label=r"$+1 \, Test$",
     )
     ax.scatter3D(
@@ -169,7 +209,7 @@ def plot_3d_data_with_train_test_split(
         X_test_neg[:, 1],
         X_test_neg[:, 2],
         marker="x",
-        color=np.array(color_palette[1]).reshape(1, -1),
+        color=np.array(cmap[1]).reshape(1, -1),
         label=r"$-1 \, Test$",
     )
 

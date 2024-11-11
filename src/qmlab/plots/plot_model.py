@@ -1,5 +1,9 @@
 import numpy as np
 from sklearn.base import ClassifierMixin, BaseEstimator
+import seaborn as sns
+from .plot_utils import set_figure_params
+
+color_palette = sns.color_palette("bright")
 
 
 def plot_decision_boundaries(
@@ -11,7 +15,7 @@ def plot_decision_boundaries(
 ):
     """Visualize decision function, boundary, and margins of +- 0.2"""
 
-    # Create a 10x10 mesh in the data plan
+    # Create a 10x10 mesh in the data plane
     x_min, x_max = X_train[:, 0].min(), X_train[:, 0].max()
     y_min, y_max = X_train[:, 1].min(), X_train[:, 1].max()
     margin = 0.2
@@ -30,24 +34,23 @@ def plot_decision_boundaries(
     plt.style.use("dark_background")
 
     set_figure_params()
-    plt.figure(figsize=(7, 7))
-    plt.contourf(
-        XX, YY, Z_qke, vmin=-1.0, vmax=1.0, levels=20, cmap=plt.cm.coolwarm, alpha=1
-    )
+    plt.contourf(XX, YY, Z_qke, vmin=-1.0, vmax=1.0, levels=20, cmap="plasma", alpha=1)
     plt.scatter(
         X_train[:, 0],
         X_train[:, 1],
         marker="o",
-        s=200,
-        c=plt.cm.coolwarm(np.array(y_train, dtype=np.float32)),
+        s=150,
+        c=np.array(y_train, dtype=np.float32),
+        cmap="plasma",
         edgecolor="k",
     )
     plt.scatter(
         X_test[:, 0],
         X_test[:, 1],
         marker="X",
-        s=200,
-        c=plt.cm.coolwarm(np.array(y_test, dtype=np.float32)),
+        s=150,
+        c=np.array(y_test, dtype=np.float32),
+        cmap="plasma",
         edgecolor="k",
     )
     plt.contour(
@@ -62,20 +65,3 @@ def plot_decision_boundaries(
     plt.ylabel(r"$x_2$", fontsize=20, rotation=0)
     plt.tight_layout()
     plt.show()
-
-
-def set_figure_params():
-    """Set output figure parameters"""
-    import matplotlib.pyplot as plt
-
-    plt.rcParams.update(
-        {
-            "xtick.labelsize": 20,
-            "ytick.labelsize": 20,
-            "lines.linewidth": 2,
-            "axes.titlesize": 24,
-            "xtick.labelsize": 16,
-            "ytick.labelsize": 16,
-            "lines.markersize": 10,
-        }
-    )

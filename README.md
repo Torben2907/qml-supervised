@@ -8,9 +8,11 @@ The package created is called `QMLab` - it is completely written in Python using
 :code:`QSVC` - short for **Quantum Support Vector Machine**. It is inheriting from the :code:`SVC`-class of 
 from `Scikit-Learn`. 
 
+[Get started with the Jupyter-Tutorial-Series here!](./tutorials/classical_learning.ipynb)
+
 ## Information about the biomedical datasets 🧬
 
-We're dealing with 9 different datasets in this thesis. They're mostly coming from breast cancer patients
+We're dealing with 9 different datasets in this thesis. The collection is coming from <cite>Jacqueline Beinecke & Dominik Heider[1]</cite>
 
 ## What is a Quantum Support Vector Machine? 🤔
 
