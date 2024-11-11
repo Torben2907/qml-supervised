@@ -6,17 +6,26 @@ This repository provides code for comparing classical machine learning models wi
 
 ## Welcome to QMLab! 🧪
 
-The package created is called `QMLab` - it's written entirely in Python, using [Qiskit](https://github.com/Qiskit/qiskit) for the quantum mechanical backend and [Sklearn](https://github.com/scikit-learn/scikit-learn) for the classical backend. The main class used is `QSVC` - short for Quantum Support Vector Machine. It inherits from the SVC class of Scikit-Learn and extends its functionality by providing quantum kernel instead of classical ones.
+The package created is called `QMLab` - it's written entirely in Python, using [Qiskit](https://github.com/Qiskit/qiskit) for the quantum mechanical backend and [Sklearn](https://github.com/scikit-learn/scikit-learn) for the classical backend. The main class used is `QSVC` - short for Quantum Support Vector Machine. It inherits from the SVC class of Scikit-Learn and extends its functionality by allowing quantum kernel as well as classical ones.
 
 [Get started with the Jupyter-Tutorial-Series here!](./tutorials/classical_learning.ipynb)
 
 ## Information about the biomedical data 🧬
 
-We're dealing with 9 different datasets in this thesis. The collection is coming from <cite>Jacqueline Beinecke & Dominik Heider[1]</cite>. All datasets contain an imbalance of class labels and cannot be seperated linearly.
+We're dealing with 9 different biomedical datasets in this thesis. The collection is coming from <cite>Jacqueline Beinecke & Dominik Heider [[1]]</cite>. All datasets contain an imbalance of class labels and cannot be seperated linearly.
 
 ![Overview of the datasets]
 
 ## What is a Quantum Support Vector Machine? 🤔
+
+Since real quantum hardware is noisy and prone for errors a whole field submerged of quantum hybrid algorithms 
+which are based on classical learning algorithms but outsource suitable parts to a quantum computer.
+
+The basic support vector machine algorithm can only classify data that is linearly separable. 
+It becomes way more powerful when we introduce a class of functions called **kernels**. 
+Kernels allow us to map our data in a higher, perhaps infinite dimensional space where it is linearly separable. 
+
+
 
 ## Can we train a Quantum Kernel? 🤨
 
