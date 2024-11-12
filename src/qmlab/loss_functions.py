@@ -57,7 +57,7 @@ class SVCLoss(KernelLoss, LossPlot):
     def __init__(self, **kwargs):
         self.kwargs = kwargs
 
-    def evaluate(
+    def evaluate_kernel(
         self,
         parameter_values: Sequence[float],
         quantum_kernel: QuantumKernel,

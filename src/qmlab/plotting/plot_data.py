@@ -158,8 +158,6 @@ def plot_2d_data_with_train_test_split(
             bbox_inches="tight",
         )
 
-    plt.show()
-
 
 def plot_3d_data_with_train_test_split(
     X_train: np.ndarray,

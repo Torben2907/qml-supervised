@@ -66,7 +66,7 @@ class QSVC(SVC):
             )
         elif isinstance(self.feature_map, QuantumCircuit):
             self._qfm = self.feature_map
-            self._qfm.assign_parameters({self._qfm.alpha: self.alpha}, inplace=True)
+            # self._qfm.assign_parameters({self._qfm.alpha: self.alpha}, inplace=True)
         else:
             raise ValueError(
                 "Feature Map must be either given as a list containing"

@@ -37,7 +37,7 @@ class TestSwap(QMLabTest):
         )
         self._right_params = np.array([[0, 0], [0, 0], [np.pi / 2, 0], [0, 0]])
 
-    def test_param_pair(self):
+    def test_rotations_same_params(self):
         fidelity = SwapTest(sampler=self._sampler)
         job = fidelity.run(
             self._circuit[0],

@@ -6,12 +6,15 @@ from qiskit.circuit.library import ZZFeatureMap
 
 
 class QuantumKernel(ABC):
-    def __init__(self, *, feature_map: QuantumCircuit = None) -> None:
+    def __init__(
+        self, *, feature_map: QuantumCircuit = None, enforce_psd: bool = True
+    ) -> None:
         if feature_map is None:
             feature_map = ZZFeatureMap(2)
 
         self._feature_dimension = feature_map.feature_dimension
         self._feature_map = feature_map
+        self._enforce_psd = enforce_psd
 
     @abstractmethod
     def evaluate_kernel(
@@ -73,3 +76,19 @@ class QuantumKernel(ABC):
                 phi_vec = phi_vec.reshape(-1, len(phi_vec))
 
         return psi_vec, phi_vec
+
+    def _ensure_psd(self, kernel_matrix: np.ndarray) -> np.ndarray:
+        r"""
+        Find the closest positive semi-definite approximation to a symmetric kernel matrix.
+        The (symmetric) matrix should always be positive semi-definite by construction,
+        but this can be violated in case of noise, such as sampling noise.
+
+        Args:
+            kernel_matrix: Symmetric 2D array of the kernel entries.
+
+        Returns:
+            The closest positive semi-definite matrix.
+        """
+        w, v = np.linalg.eig(kernel_matrix)
+        m = v @ np.diag(np.maximum(0, w)) @ v.transpose()
+        return m.real

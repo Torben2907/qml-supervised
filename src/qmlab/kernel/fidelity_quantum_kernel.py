@@ -14,8 +14,9 @@ class FidelityQuantumKernel(QuantumKernel):
         fidelity: BaseStateFidelity | None = None,
         eval_duplicates: str = "off_diagonal",
         max_circuits_per_job: int | None = None,
+        enforce_psd: bool = True,
     ):
-        super().__init__(feature_map=feature_map)
+        super().__init__(feature_map=feature_map, enforce_psd=enforce_psd)
         if not fidelity:
             fidelity = ComputeUncompute(sampler=Sampler())
         self._fidelity = fidelity
@@ -52,6 +53,10 @@ class FidelityQuantumKernel(QuantumKernel):
             gram_matrix = self._get_kernel_matrix(
                 gram_matrix_shape, left_parameters, right_parameters, indices
             )
+
+        if is_symmetric and self._enforce_psd:
+            gram_matrix = self._ensure_psd(gram_matrix)
+
         return gram_matrix
 
     def _get_parameterization(

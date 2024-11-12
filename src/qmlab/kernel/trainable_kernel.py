@@ -1,20 +1,22 @@
 from typing import Mapping, Sequence
-from .quantum_kernel import QuantumKernel
+from .fidelity_quantum_kernel import FidelityQuantumKernel
 from qiskit.circuit import ParameterVector, Parameter, ParameterExpression
 from qiskit import QuantumCircuit
+from qiskit_algorithms.state_fidelities import BaseStateFidelity
 from abc import ABC
 import numpy as np
 
 
-class TrainableQuantumKernel(QuantumKernel, ABC):
+class TrainableQuantumKernel(FidelityQuantumKernel):
     def __init__(
         self,
         *,
         feature_map: QuantumCircuit = None,
+        fidelity: BaseStateFidelity | None = None,
         training_params: ParameterVector | Sequence[ParameterVector] = None,
         **kwargs,
     ):
-        super().__init__(feature_map=feature_map, **kwargs)
+        super().__init__(feature_map=feature_map, fidelity=fidelity)
 
         if not training_params:
             training_params = []

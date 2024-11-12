@@ -50,10 +50,10 @@ class SwapTest(BaseStateFidelity):
         self, circuit_1: QuantumCircuit, circuit_2: QuantumCircuit
     ) -> QuantumCircuit:
 
-        self.num_qubits = circuit_1.num_qubits + circuit_2.num_qubits
+        self.num_qubits = circuit_1.num_qubits + circuit_2.num_qubits + 1
 
         # first parameter qubits, second parameter classical bits
-        circuit = QuantumCircuit(2 * self.num_qubits + 1, 1)
+        circuit = QuantumCircuit(self.num_qubits, 1)
 
         ancilla_idx = 0
         psi_idcs = range(1, self.num_qubits + 1)

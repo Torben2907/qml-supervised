@@ -1,9 +1,6 @@
 import numpy as np
 from sklearn.base import ClassifierMixin, BaseEstimator
-import seaborn as sns
 from .plot_utils import set_figure_params
-
-color_palette = sns.color_palette("bright")
 
 
 def plot_decision_boundaries(

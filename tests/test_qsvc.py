@@ -8,7 +8,6 @@ from qiskit_algorithms.utils import algorithm_globals
 from qmlab_testcase import QMLabTest
 from qiskit.quantum_info import Statevector
 from qiskit.circuit.library import PauliFeatureMap
-from qmlab.kernel.fidelity_statevector_kernel import FidelityStatevectorKernel
 
 # fix seed so tests are deterministic
 random_state = 12345
@@ -33,32 +32,39 @@ class TestQSVC(QMLabTest):
             feature_dimension=self.num_features,
             num_qubits=self.num_qubits,
             reps=self.reps,
+            alpha=self.alpha,
             gates=["H", "RZ", "CZ"],
             entanglement="linear",
-            alpha=self.alpha,
         )
 
-        qsvc = QSVC(feature_map=qfm, C=self.C, random_state=random_state)
+        qsvc = QSVC(
+            feature_map=qfm, C=self.C, alpha=self.alpha, random_state=random_state
+        )
 
         assert isinstance(qfm, QuantumCircuit)
         assert qsvc.feature_map.feature_dimension == self.num_features
         assert qsvc.feature_map.num_qubits == self.num_qubits
+        assert qsvc.alpha == self.alpha
         assert qsvc.C == self.C
         assert qsvc.random_state == random_state
+        assert isinstance(qsvc.quantum_backend, Sampler)
 
     def test_init_creating_feature_map_internally(self):
         qsvc = QSVC(
             num_qubits=self.num_qubits,
             reps=self.reps,
             feature_map=["H", "RZ", "CZ"],
+            alpha=self.alpha,
             C=self.C,
             random_state=random_state,
         )
 
         assert qsvc.num_qubits == self.num_qubits
         assert qsvc.reps == self.reps
+        assert qsvc.alpha == self.alpha
         assert qsvc.C == self.C
         assert qsvc.random_state == random_state
+        assert isinstance(qsvc.quantum_backend, Sampler)
 
     def test_kernel_values(self):
         qsvc = QSVC(
@@ -72,6 +78,7 @@ class TestQSVC(QMLabTest):
             quantum_kernel=None,
         )
         qsvc.fit(self.X, self.y)
+        print(qsvc._qfm.name)
         print(qsvc._qfm.draw())
         assert np.testing.assert_allclose(
             qsvc.kernel(self.X),
@@ -83,7 +90,7 @@ class TestQSVC(QMLabTest):
     def test_predictions(self):
         qsvc = QSVC(
             num_qubits=self.num_qubits,
-            reps=self.reps,
+            reps=3,
             feature_map=["H", "RZ", "CZ"],
             alpha=self.alpha,
             C=self.C,
@@ -100,7 +107,7 @@ class TestQSVC(QMLabTest):
                 [1.0, 1.0],
             ]
         )
-        y_test = np.array([-1, -1, +1, +1, +1, +1])
+        y_test = np.array([-1, -1, -1, +1, +1, +1])
         for i, xi in enumerate(X_test):
             print(i, xi)
             assert qsvc.predict(xi) == y_test[i]

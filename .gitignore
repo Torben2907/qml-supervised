@@ -1,5 +1,11 @@
 # ignore vs code configs
 .vscode
+.VSCodeCounter
+
+# ignore python cache files 
+.pytest_cache
+.mypy_cache
+
 
 # ignore MAC os files
 .DS_Store*
