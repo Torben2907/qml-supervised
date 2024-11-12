@@ -6,6 +6,8 @@
 .pytest_cache
 .mypy_cache
 
+# data 
+.data
 
 # ignore MAC os files
 .DS_Store*

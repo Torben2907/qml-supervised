@@ -10,8 +10,6 @@ def plot_decision_boundaries(
     X_test: np.ndarray,
     y_test: np.ndarray,
 ):
-    """Visualize decision function, boundary, and margins of +- 0.2"""
-
     # Create a 10x10 mesh in the data plane
     x_min, x_max = X_train[:, 0].min(), X_train[:, 0].max()
     y_min, y_max = X_train[:, 1].min(), X_train[:, 1].max()
@@ -21,7 +19,6 @@ def plot_decision_boundaries(
         np.linspace(y_min - margin, y_max + margin, 10),
     )
 
-    # Calculate the decision function value on the 10x10 mesh
     Z = clf.decision_function(np.c_[XX.ravel(), YY.ravel()])
     Z_qke = Z.reshape(XX.shape)
 
