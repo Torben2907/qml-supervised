@@ -7,7 +7,7 @@ def set_figure_params():
             "xtick.labelsize": 20,
             "ytick.labelsize": 20,
             "lines.linewidth": 2,
-            "axes.titlesize": 24,
+            "axes.titlesize": 20,
             "lines.markersize": 10,
         }
     )

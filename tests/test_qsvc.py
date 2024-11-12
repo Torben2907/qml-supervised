@@ -61,7 +61,6 @@ class TestQSVC(QMLabTest):
         assert qsvc.random_state == random_state
 
     def test_kernel_values(self):
-        quantum_kernel = FidelityStatevectorKernel()
         qsvc = QSVC(
             num_qubits=2,
             reps=1,
@@ -70,16 +69,16 @@ class TestQSVC(QMLabTest):
             alpha=2.0,
             entanglement="linear",
             random_state=random_state,
-            quantum_kernel=quantum_kernel,
+            quantum_kernel=None,
         )
         qsvc.fit(self.X, self.y)
         print(qsvc._qfm.draw())
-        x1 = np.array([0.0, 0.0])
-        x2 = np.array([[0.0, 0.0], [np.pi, 0.0], [2 * np.pi, 0.0]])
-        desired_kernel_values = np.array([1.0, 0.0, 1.0])
-        for i, xi in enumerate(x2):
-            print(i, xi)
-            assert qsvc.kernel(x1, xi) == desired_kernel_values[i]
+        assert np.testing.assert_allclose(
+            qsvc.kernel(self.X),
+            compute_kernel_numerically(self.X),
+            rtol=1e-7,
+            atol=1e-8,
+        )
 
     def test_predictions(self):
         qsvc = QSVC(
@@ -101,7 +100,42 @@ class TestQSVC(QMLabTest):
                 [1.0, 1.0],
             ]
         )
-        y_test = np.array([-1, -1, -1, +1, +1, +1])
+        y_test = np.array([-1, -1, +1, +1, +1, +1])
         for i, xi in enumerate(X_test):
             print(i, xi)
             assert qsvc.predict(xi) == y_test[i]
+
+
+def compute_kernel_numerically(X: np.ndarray, alpha=2.0):
+    assert X.ndim == 2
+
+    num_samples = X.shape[0]
+    gram_matrix = np.zeros((num_samples, num_samples))
+
+    for i in range(num_samples):
+        x1 = X[i]
+
+        # Create quantum circuit for x1
+        qc1 = QuantumCircuit(2)
+        qc1.h(0)
+        qc1.h(1)
+        qc1.rz(alpha * x1[0], 0)
+        qc1.rz(alpha * x1[1], 1)
+        psi_1 = Statevector(qc1).data
+
+        for j in range(num_samples):
+            x2 = X[j]
+
+            # Create quantum circuit for x2
+            qc2 = QuantumCircuit(2)
+            qc2.h(0)
+            qc2.h(1)
+            qc2.rz(alpha * x2[0], 0)
+            qc2.rz(alpha * x2[1], 1)
+            psi_2 = Statevector(qc2).data
+
+            # Calculate fidelity between psi_1 and psi_2
+            fidelity = np.abs(np.vdot(psi_1, psi_2)) ** 2
+            gram_matrix[i, j] = fidelity
+
+    return gram_matrix
