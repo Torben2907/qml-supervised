@@ -46,7 +46,6 @@ def havlicek_data(
     # start in |+^n>, i.e. uniform superposition
     psi_init = np.ones(2**feature_dimension) / np.sqrt(2**feature_dimension)
 
-    # Generate Z matrices acting on each qubits
     z_rotations = np.array(
         [
             reduce(
@@ -62,6 +61,9 @@ def havlicek_data(
     state_labels = ["".join(b) for b in it.product("01", repeat=feature_dimension)]
     parity_diag = [b.count("1") % 2 for b in state_labels]
     par_op = np.diag((-1) ** np.array(parity_diag))
+    print(par_op)
+
+    # par_op = np.kron(single_z, single_z)
 
     # P |b> = (-1)^(parity(b)) |b>
     assert _is_hermitian(par_op) and _is_unitary(par_op) is True
@@ -111,19 +113,10 @@ def havlicek_data(
         for k, key in enumerate(class_labels)
     }
 
-    training_feature_array, training_label_array = _features_and_labels_transform(
-        training_input, class_labels
-    )
-    test_feature_array, test_label_array = _features_and_labels_transform(
-        test_input, class_labels
-    )
+    X_train, y_train = _features_and_labels_transform(training_input, class_labels)
+    X_test, y_test = _features_and_labels_transform(test_input, class_labels)
 
-    return (
-        training_feature_array,
-        training_label_array,
-        test_feature_array,
-        test_label_array,
-    )
+    return (X_train, y_train, X_test, y_test)
 
 
 def _hermitian_random(size: int) -> np.ndarray:
