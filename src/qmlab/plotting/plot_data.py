@@ -167,46 +167,49 @@ def plot_3d_data_with_train_test_split(
     data_name: Optional[str] = None,
     save_plot: bool = False,
 ) -> None:
-    assert (
-        X_train.shape[1] == 3 and X_test.shape[1] == 3
-    ), f"{X_train} and {X_test} must have exactly 3 features!"
+    assert X_train.shape[1] == 3, f"{X_train} must have exactly 3 features!"
+    assert X_test.shape[1] == 3, f"{X_test} must have exactly3 features!"
+
     fig = plt.figure(figsize=(10, 7))
-    ax = plt.axes(projection="3d")
+    ax = fig.add_subplot(projection="3d")
 
     X_train_pos = X_train[y_train == +1]
     X_train_neg = X_train[y_train == -1]
     X_test_pos = X_test[y_test == +1]
     X_test_neg = X_test[y_test == -1]
 
-    ax.scatter3D(
+    ax.scatter(
         X_train_pos[:, 0],
         X_train_pos[:, 1],
         X_train_pos[:, 2],
-        marker=".",
+        marker="o",
         color=np.array(cmap[0]).reshape(1, -1),
         label=r"$+1 \, Training$",
     )
-    ax.scatter3D(
+
+    ax.scatter(
         X_train_neg[:, 0],
         X_train_neg[:, 1],
         X_train_neg[:, 2],
-        marker=".",
+        marker="o",
         color=np.array(cmap[1]).reshape(1, -1),
         label=r"$-1 \, Training$",
     )
-    ax.scatter3D(
+
+    ax.scatter(
         X_test_pos[:, 0],
         X_test_pos[:, 1],
         X_test_pos[:, 2],
-        marker="x",
+        marker="X",
         color=np.array(cmap[0]).reshape(1, -1),
         label=r"$+1 \, Test$",
     )
-    ax.scatter3D(
+
+    ax.scatter(
         X_test_neg[:, 0],
         X_test_neg[:, 1],
         X_test_neg[:, 2],
-        marker="x",
+        marker="X",
         color=np.array(cmap[1]).reshape(1, -1),
         label=r"$-1 \, Test$",
     )
@@ -214,17 +217,19 @@ def plot_3d_data_with_train_test_split(
     ax.set_xlabel("$x_1$", fontsize=25)
     ax.set_ylabel("$x_2$", fontsize=25)
     ax.set_zlabel("$x_3$", fontsize=25)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_zticks([])
     ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
     ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
     ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
     ax.xaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)
     ax.yaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)
     ax.zaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)
-    ax.xaxis.labelpad = -20
-    ax.yaxis.labelpad = -20
-    ax.zaxis.labelpad = -20
+    ax.zaxis.labelpad = -10
 
     plt.legend()
+
     if save_plot:
         if data_name is None:
             raise ValueError("cannot write file when data_name isn't provided.")

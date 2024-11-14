@@ -50,7 +50,10 @@ def parse_biomed_data_to_ndarray(
         df is the concatenation of X and y.T (such that y is the first column).
         See also `return_X_y` for more information.
     """
-    df = pd.read_csv(DATA_DIR + dataset_name + ".csv")
+    try:
+        df = pd.read_csv(DATA_DIR + dataset_name + ".csv")
+    except FileNotFoundError:
+        raise ValueError("dataset {name} not found! did you spell it correctly?")
     df = df.iloc[:, 1:]  # drop first column (contains only numbering of examples)
     if return_X_y:
         # "V1" is the column of labels
@@ -69,7 +72,7 @@ def parse_biomed_data_to_ndarray(
 
 
 def reduce_feature_dim(
-    X: np.ndarray, num_features: int = 2, method: str = "PCA"
+    X: np.ndarray, output_dimension: int = 2, method: str = "PCA"
 ) -> np.ndarray:
     """Reduces the dimension of the input feature matrix X which is
         assummed to have shape (m, d), where
@@ -91,10 +94,10 @@ def reduce_feature_dim(
     """
     assert X.ndim == 2, "X must be a 2D-array, i.e. matrix"
     if method == "PCA":
-        pca = PCA(n_components=num_features)
+        pca = PCA(n_components=output_dimension)
         X_reduced = pca.fit_transform(X)
     elif method == "kPCA":
-        kpca = KernelPCA(n_components=num_features)
+        kpca = KernelPCA(n_components=output_dimension)
         X_reduced = kpca.fit_transform(X)
     else:
         raise ValueError("provide either PCA or kPCA as reduction method")

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import Any, Sequence
+from typing import Sequence
 import numpy as np
 from .trainable_kernel import TrainableQuantumKernel
 import matplotlib.pyplot as plt
@@ -12,35 +12,36 @@ class KernelLoss(ABC):
         self,
         parameter_values: Sequence[float],
         quantum_kernel: TrainableQuantumKernel,
-        data: np.ndarray,
-        labels: np.ndarray,
+        X: np.ndarray,
+        y: np.ndarray,
     ) -> float:
-        return self.evaluate_kernel(parameter_values, quantum_kernel, data, labels)
+        return self.evaluate_kernel(parameter_values, quantum_kernel, X, y)
 
     @abstractmethod
     def evaluate_kernel(
         self,
         parameter_values: Sequence[float],
         quantum_kernel: TrainableQuantumKernel,
-        data: np.ndarray,
-        labels: np.ndarray,
+        X: np.ndarray,
+        y: np.ndarray,
     ) -> float:
         raise NotImplementedError
 
-    def plot(
+    def plot_loss(
         self,
         quantum_kernel: TrainableQuantumKernel,
         X_train: np.ndarray,
         y_train: np.ndarray,
-        parameter: np.ndarray,
+        parameter: Sequence[float],
         grid: list = [0.1, 8, 50],
         show: bool = True,
     ) -> np.ndarray:
+
         kernel_loss = partial(
             self.evaluate_kernel,
             quantum_kernel=quantum_kernel,
-            data=X_train,
-            labels=y_train,
+            X=X_train,
+            y=y_train,
         )
 
         theta = np.linspace(grid[0], grid[1], int(grid[2]))
@@ -57,6 +58,7 @@ class KernelLoss(ABC):
             plt.xlabel("θ[0]")
             plt.ylabel("Kernel Loss")
             plt.show()
+
         return loss_values
 
 
@@ -67,21 +69,21 @@ class SVCLoss(KernelLoss):
 
     def evaluate_kernel(
         self,
-        parameter_values: Sequence[float],
+        parameter_values: np.ndarray,
         quantum_kernel: TrainableQuantumKernel,
-        data: np.ndarray,
-        labels: np.ndarray,
+        X: np.ndarray,
+        y: np.ndarray,
     ):
         """
         Evaluate the SVC loss of a trainable quantum kernel.
         """
         # Bind the user parameter values
         quantum_kernel.assign_training_parameters(parameter_values)
-        kmatrix = quantum_kernel.evaluate_kernel(data)
+        kernel_matrix = quantum_kernel.evaluate_kernel(X)
 
         # Train a quantum support vector classifier
         svc = SVC(kernel="precomputed", **self.kwargs)
-        svc.fit(kmatrix, labels)
+        svc.fit(kernel_matrix, y)
 
         # Get dual coefficients
         dual_coefs = svc.dual_coef_[0]
@@ -90,11 +92,11 @@ class SVCLoss(KernelLoss):
         support_vecs = svc.support_
 
         # Prune kernel matrix of non-support-vector entries
-        kmatrix = kmatrix[support_vecs, :][:, support_vecs]
+        kernel_matrix = kernel_matrix[support_vecs, :][:, support_vecs]
 
         # Calculate loss
         loss = np.sum(np.abs(dual_coefs)) - (
-            0.5 * (dual_coefs.T @ kmatrix @ dual_coefs)
+            0.5 * (dual_coefs.T @ kernel_matrix @ dual_coefs)
         )
 
         return loss
@@ -108,22 +110,18 @@ class KTALoss(KernelLoss):
         self,
         parameter_values: Sequence[float],
         quantum_kernel: TrainableQuantumKernel,
-        data: np.ndarray,
-        labels: np.ndarray,
+        X: np.ndarray,
+        y: np.ndarray,
     ):
-        """
-        Evaluate the KTA loss of a trainable quantum kernel.
-        """
-        # Bind the user parameter values
         quantum_kernel.assign_training_parameters(parameter_values)
-        K = quantum_kernel.evaluate_kernel(data)
+        K = quantum_kernel.evaluate_kernel(X)
 
         if self.rescale:
-            nplus = np.count_nonzero(np.array(labels) == 1)
-            nminus = len(labels) - nplus
-            _Y = np.array([y / nplus if y == 1 else y / nminus for y in labels])
+            nplus = np.count_nonzero(np.array(y) == 1)
+            nminus = len(y) - nplus
+            _Y = np.array([y_i / nplus if y_i == 1 else y_i / nminus for y_i in y])
         else:
-            _Y = np.array(labels)
+            _Y = np.array(y)
 
         T = np.outer(_Y, _Y)
         inner_product = np.sum(K * T)

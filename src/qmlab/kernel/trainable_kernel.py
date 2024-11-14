@@ -3,7 +3,6 @@ from .fidelity_quantum_kernel import FidelityQuantumKernel
 from qiskit.circuit import ParameterVector, Parameter, ParameterExpression
 from qiskit import QuantumCircuit
 from qiskit_algorithms.state_fidelities import BaseStateFidelity
-from abc import ABC
 import numpy as np
 
 
