@@ -8,12 +8,12 @@ from qmlab.models.quantum_kernel import FidelityQuantumKernel
 from qmlab.models.qsvc import QSVC
 from qmlab.preprocessing import (
     parse_biomed_data_to_ndarray,
-    scale_data_to_specified_range,
+    scale_to_specified_range,
 )
 
 X, y = parse_biomed_data_to_ndarray("haberman_new")
 _, num_features = X.shape
-X = scale_data_to_specified_range(X, range=(-np.pi / 2, np.pi / 2))
+X = scale_to_specified_range(X, range=(-np.pi / 2, np.pi / 2))
 
 
 quantum_kernel = FidelityQuantumKernel(

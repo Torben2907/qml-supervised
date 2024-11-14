@@ -8,9 +8,8 @@ def havlicek_data(
     feature_dimension: int,
     training_examples_per_class: int,
     test_examples_per_class: int,
-    gap: float = 0.3,
+    delta: float = 0.3,
     random_state: int = 12345,
-    balanced: bool = True,
     interval: Tuple[float, float] = (0.0, 2 * np.pi),
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
@@ -48,7 +47,7 @@ def havlicek_data(
     psi_init = np.ones(2**feature_dimension) / np.sqrt(2**feature_dimension)
 
     # Generate Z matrices acting on each qubits
-    Z_matrices = np.array(
+    z_rotations = np.array(
         [
             reduce(
                 np.kron,
@@ -60,36 +59,37 @@ def havlicek_data(
         ]
     )
 
-    bitstrings = ["".join(b) for b in it.product("01", repeat=feature_dimension)]
-    parity_diag = [b.count("1") % 2 for b in bitstrings]
+    state_labels = ["".join(b) for b in it.product("01", repeat=feature_dimension)]
+    parity_diag = [b.count("1") % 2 for b in state_labels]
     par_op = np.diag((-1) ** np.array(parity_diag))
-    assert _is_hermitian(par_op) is True
+
+    # P |b> = (-1)^(parity(b)) |b>
+    assert _is_hermitian(par_op) and _is_unitary(par_op) is True
 
     random_hermitian = _hermitian_random(size=2**feature_dimension)
     assert _is_hermitian(random_hermitian) is True
     eigvals, eigvecs = np.linalg.eig(random_hermitian)
-    # sort descending
     idx = eigvals.argsort()[::-1]
     eigvecs = eigvecs[:, idx]
-    assert _is_unitary(eigvecs) is True and _is_unitary(par_op) is True
-    random_unitary = eigvecs.conj().T @ par_op @ eigvecs
-    assert _is_unitary(random_unitary) is True
+    assert _is_unitary(eigvecs) is True
+    rand_unitary = eigvecs.conj().T @ par_op @ eigvecs
+    assert _is_unitary(rand_unitary) is True
 
     samples = []
     for x in it.product(*[xvals] * feature_dimension):
-        fm = sum(x[i] * Z_matrices[i] for i in range(feature_dimension))
+        fm = sum(x[i] * z_rotations[i] for i in range(feature_dimension))
         fm += sum(
             (
-                (np.pi - x[i]) * (np.pi - x[j]) * Z_matrices[i] @ Z_matrices[j]
+                (np.pi - x[i]) * (np.pi - x[j]) * z_rotations[i] @ z_rotations[j]
                 for i, j in it.combinations(range(feature_dimension), 2)
             )
         )
-        U_fm = np.diag(np.exp(1j * np.diag(fm)))
-        psi = U_fm @ H_wall @ U_fm @ psi_init
-        exp_val = np.real(psi.conj().T @ random_unitary @ psi)
-        samples.append(np.sign(exp_val) if np.abs(exp_val) > gap else 0)
+        unitary_fm = np.diag(np.exp(1j * np.diag(fm)))
+        psi = unitary_fm @ H_wall @ unitary_fm @ psi_init
+        exp_val = np.real(psi.conj().T @ rand_unitary @ psi)
+        samples.append(np.sign(exp_val) if np.abs(exp_val) > delta else 0)
 
-    sample_grid = np.array(samples).reshape([num_points] * feature_dimension)
+    sample_grid = np.array(samples).reshape(tuple([num_points] * feature_dimension))
 
     x_sample, y_sample = _sample_havlicek_data(
         sample_grid,
@@ -139,13 +139,13 @@ def _sample_havlicek_data(
     sample_grid, X_vals, num_examples_per_class, feature_dimension
 ):
     count = sample_grid.shape[0]
-    sample_a, sample_b = [], []
-    for label, sample_list in [(1, sample_a), (-1, sample_b)]:
+    plus_class, minus_class = [], []
+    for label, sample_list in [(1, plus_class), (-1, minus_class)]:
         while len(sample_list) < num_examples_per_class:
             idx = tuple(np.random.choice(count) for _ in range(feature_dimension))
             if sample_grid[idx] == label:
                 sample_list.append([X_vals[i] for i in idx])
-    samples = np.vstack([sample_a, sample_b])
+    samples = np.vstack([plus_class, minus_class])
     labels = np.array([0] * num_examples_per_class + [1] * num_examples_per_class)
     return samples, labels
 
@@ -192,5 +192,8 @@ def _is_hermitian(h: np.ndarray) -> bool:
 
 def _is_unitary(u: np.ndarray) -> bool:
     u_dagger = np.conjugate(u.T)
-    unitary_rel = u_dagger @ u
-    return np.allclose(np.eye(u.shape[0]), unitary_rel, atol=1e-7, rtol=1e-7)
+    unitary_rel_1 = u_dagger @ u
+    unitary_rel_2 = u @ u_dagger
+    return np.allclose(
+        np.eye(u.shape[0]), unitary_rel_1, atol=1e-7, rtol=1e-7
+    ) and np.allclose(np.eye(u.shape[0]), unitary_rel_2, atol=1e-7, rtol=1e-7)

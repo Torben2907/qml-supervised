@@ -3,7 +3,7 @@ import pytest
 
 from qmlab.preprocessing import (
     parse_biomed_data_to_ndarray,
-    scale_data_to_specified_range,
+    scale_to_specified_range,
     pad_and_normalize_data,
 )
 
@@ -68,7 +68,7 @@ def test_shape_datasets(data):
 @pytest.mark.parametrize("data", data_with_associated_attrs)
 def test_scale_data_to_range(range, data):
     X, _ = parse_biomed_data_to_ndarray(data["name"])
-    X_scaled = scale_data_to_specified_range(X, range)
+    X_scaled = scale_to_specified_range(X, range)
     assert np.any((X_scaled <= range[0]) | (X_scaled >= range[1]))
 
 

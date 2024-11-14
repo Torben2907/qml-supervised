@@ -1,20 +1,20 @@
 import os
 from typing import List
 import yaml
+import time
 import pandas as pd
 from sklearn import metrics
 from qmlab.preprocessing import parse_biomed_data_to_ndarray, reduce_feature_dim
 from sklearn.model_selection import train_test_split, StratifiedKFold, GridSearchCV
 from sklearn.svm import SVC
 
-dir_out = os.path.join(os.path.dirname(__file__), "../res/")
 random_state = 12345
 feature_dimension = 2
 train_size = 0.7
 scoring = "balanced_accuracy"
 
 hyper_parameter_settings = {
-    "SVM-RBF": {
+    "SVC-RBF": {
         "gamma": [
             0.001,
             0.005,
@@ -34,12 +34,13 @@ hyper_parameter_settings = {
         ],
         "C": [1, 2, 4, 6, 8, 10, 100],
     },
-    "SVM-Poly": {
+    "SVC-Poly": {
         "degree": [1, 2, 3, 5, 10, 20, 50, 100],
         "C": [1, 2, 4, 6, 8, 10, 100],
     },
 }
 
+dir_out = os.path.join(os.path.dirname(__file__), "../res/")
 file_path = os.path.join(os.path.dirname(__file__), "../data_names.yaml")
 with open(file_path) as file:
     data_names: list[str] = yaml.safe_load(file)
@@ -58,6 +59,8 @@ if __name__ == "__main__":
                 X, y, train_size=train_size, random_state=random_state
             )
 
+            start_time = time.time()
+
             grid_search = GridSearchCV(
                 estimator=SVC(random_state=random_state),
                 param_grid=hyper_parameter_settings[model],
@@ -75,6 +78,9 @@ if __name__ == "__main__":
             }
 
             train_pred = grid_search.predict(X_train)
+
+            time_elapsed = time.time() - start_time
+
             train_acc = metrics.balanced_accuracy_score(y_train, train_pred)
 
             results_with_best_params["train_acc"].append(train_acc)
@@ -84,7 +90,7 @@ if __name__ == "__main__":
 
             results_with_best_params["test_acc"].append(test_acc)
 
-            results_filename = " ".join([model + "_" + data.upper() + "_GridSearchCV"])
+            results_filename = " ".join([model + "_" + data.upper()])
             path_out = os.path.join(
                 dir_out, results_filename + "_best_hypers_results.csv"
             )

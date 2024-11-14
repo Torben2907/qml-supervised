@@ -104,7 +104,7 @@ def reduce_feature_dim(
     return X_reduced
 
 
-def scale_data_to_specified_range(
+def scale_to_specified_range(
     X: np.ndarray,
     range: tuple[float, float] = (-np.pi / 2, np.pi / 2),
     scaling: float = 1.0,
