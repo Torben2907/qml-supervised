@@ -17,11 +17,6 @@ def havlicek_data(
 
     class_labels = [r"+1", r"-1"]
 
-    if feature_dimension not in [2, 3]:
-        raise ValueError(
-            f"Supported values of `feature_dimension` are 2 and 3 - you provided {feature_dimension}."
-        )
-
     if not isinstance(interval, tuple):
         raise ValueError(
             f"You must specify `interval` as a Tuple - you provided {type(interval)}!"
@@ -42,6 +37,7 @@ def havlicek_data(
     H = np.array([[1, 1], [1, -1]]) / np.sqrt(2)
     H_wall = reduce(np.kron, [H] * feature_dimension)
     single_z = np.diag([1, -1])
+    par_op = reduce(np.kron, [single_z] * feature_dimension)
 
     # start in |+^n>, i.e. uniform superposition
     psi_init = np.ones(2**feature_dimension) / np.sqrt(2**feature_dimension)
@@ -58,10 +54,10 @@ def havlicek_data(
         ]
     )
 
-    state_labels = ["".join(b) for b in it.product("01", repeat=feature_dimension)]
-    parity_diag = [b.count("1") % 2 for b in state_labels]
-    par_op = np.diag((-1) ** np.array(parity_diag))
-    print(par_op)
+    # state_labels = ["".join(b) for b in it.product("01", repeat=feature_dimension)]
+    # parity_diag = [b.count("1") % 2 for b in state_labels]
+    # par_op = np.diag((-1) ** np.array(parity_diag))
+    # print(par_op)
 
     # par_op = np.kron(single_z, single_z)
 
@@ -70,12 +66,14 @@ def havlicek_data(
 
     random_hermitian = _hermitian_random(size=2**feature_dimension)
     assert _is_hermitian(random_hermitian) is True
+
     eigvals, eigvecs = np.linalg.eig(random_hermitian)
     idx = eigvals.argsort()[::-1]
     eigvecs = eigvecs[:, idx]
     assert _is_unitary(eigvecs) is True
-    rand_unitary = eigvecs.conj().T @ par_op @ eigvecs
-    assert _is_unitary(rand_unitary) is True
+
+    random_unitary = eigvecs.conj().T @ par_op @ eigvecs
+    assert _is_unitary(random_unitary) is True
 
     samples = []
     for x in it.product(*[xvals] * feature_dimension):
@@ -88,7 +86,7 @@ def havlicek_data(
         )
         unitary_fm = np.diag(np.exp(1j * np.diag(fm)))
         psi = unitary_fm @ H_wall @ unitary_fm @ psi_init
-        exp_val = np.real(psi.conj().T @ rand_unitary @ psi)
+        exp_val = np.real(psi.conj().T @ random_unitary @ psi)
         samples.append(np.sign(exp_val) if np.abs(exp_val) > delta else 0)
 
     sample_grid = np.array(samples).reshape(tuple([num_points] * feature_dimension))
@@ -143,12 +141,6 @@ def _sample_havlicek_data(
     return samples, labels
 
 
-def _prepare_datasets(samples, labels, num_train, num_test):
-    x_train, x_test = samples[:num_train], samples[num_train : num_train + num_test]
-    y_train, y_test = labels[:num_train], labels[num_train : num_train + num_test]
-    return x_train, y_train, x_test, y_test
-
-
 def _features_and_labels_transform(
     dataset: Dict[str, np.ndarray], class_labels: List[str]
 ) -> Tuple[np.ndarray, np.ndarray]:
@@ -172,21 +164,23 @@ def _features_and_labels_transform(
     return features, labels
 
 
-def _rand(*shape, low=0.0, high=1.0, dtype="float32"):
+def _rand(
+    *shape, low: float = 0.0, high: float = 1.0, dtype: str = "float32"
+) -> np.ndarray:
     """Generate random numbers uniform between low and high"""
     array = np.random.rand(*shape) * (high - low) + low
     return np.array(array, dtype=dtype)
 
 
-def _is_hermitian(h: np.ndarray) -> bool:
-    h_dagger = np.conjugate(h.T)
-    return np.allclose(h, h_dagger, atol=1e-8, rtol=1e-8)
+def _is_hermitian(H: np.ndarray) -> bool:
+    H_dagger = np.conjugate(H.T)
+    return np.allclose(H, H_dagger, atol=1e-8, rtol=1e-8)
 
 
-def _is_unitary(u: np.ndarray) -> bool:
-    u_dagger = np.conjugate(u.T)
-    unitary_rel_1 = u_dagger @ u
-    unitary_rel_2 = u @ u_dagger
+def _is_unitary(U: np.ndarray) -> bool:
+    U_dagger = np.conjugate(U.T)
+    unitary_rel_1 = U_dagger @ U
+    unitary_rel_2 = U @ U_dagger
     return np.allclose(
-        np.eye(u.shape[0]), unitary_rel_1, atol=1e-7, rtol=1e-7
-    ) and np.allclose(np.eye(u.shape[0]), unitary_rel_2, atol=1e-7, rtol=1e-7)
+        np.eye(U.shape[0]), unitary_rel_1, atol=1e-7, rtol=1e-7
+    ) and np.allclose(np.eye(U.shape[0]), unitary_rel_2, atol=1e-7, rtol=1e-7)

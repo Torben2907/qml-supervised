@@ -11,7 +11,7 @@ feature_map = ZZFeatureMap(feature_dimension=2, reps=2)
 quantum_kernel = FidelityQuantumKernel(
     feature_map=feature_map,
     fidelity=ComputeUncompute(sampler=Sampler()),
-    eval_duplicates="off_diagonal",
+    evaluate_duplicates="off_diagonal",
     max_circuits_per_job=100,
 )
 

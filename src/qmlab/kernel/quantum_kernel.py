@@ -78,17 +78,6 @@ class QuantumKernel(ABC):
         return psi_vec, phi_vec
 
     def _ensure_psd(self, kernel_matrix: np.ndarray) -> np.ndarray:
-        r"""
-        Find the closest positive semi-definite approximation to a symmetric kernel matrix.
-        The (symmetric) matrix should always be positive semi-definite by construction,
-        but this can be violated in case of noise, such as sampling noise.
-
-        Args:
-            kernel_matrix: Symmetric 2D array of the kernel entries.
-
-        Returns:
-            The closest positive semi-definite matrix.
-        """
         w, v = np.linalg.eig(kernel_matrix)
         m = v @ np.diag(np.maximum(0, w)) @ v.transpose()
         return m.real

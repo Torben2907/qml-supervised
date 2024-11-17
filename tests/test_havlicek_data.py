@@ -2,8 +2,6 @@ import numpy as np
 from qmlab_testcase import QMLabTest
 from qmlab.data_generation import havlicek_data
 
-random_state = 12345
-
 
 class TestHavlicekData(QMLabTest):
     def setUp(self):
@@ -16,7 +14,7 @@ class TestHavlicekData(QMLabTest):
             feature_dimension=self.num_features,
             training_examples_per_class=self.num_training_examples,
             test_examples_per_class=self.num_test_examples,
-            random_state=random_state,
+            random_state=self.random_state,
         )
 
     def test_shapes(self):
@@ -26,10 +24,7 @@ class TestHavlicekData(QMLabTest):
         np.testing.assert_array_equal(self.y_test.shape, (10,))
 
     def test_label_values(self):
-        np.testing.assert_almost_equal(self.y_train, np.hstack(([-1] * 20, [+1] * 20)))
-        np.testing.assert_almost_equal(
+        np.testing.assert_array_equal(self.y_train, np.hstack(([-1] * 20, [+1] * 20)))
+        np.testing.assert_array_equal(
             self.y_test, [-1, -1, -1, -1, -1, +1, +1, +1, +1, +1]
         )
-
-    def test_randomness(self):
-        pass

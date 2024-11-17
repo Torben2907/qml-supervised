@@ -2,9 +2,9 @@ from qiskit import QuantumCircuit
 from qiskit.circuit import ParameterVector
 
 
-def IQPEmbedding(num_features: int, num_qubits: int, num_layers: int):
+def IQPEmbedding(feature_dimension: int, num_qubits: int, reps: int):
     feature_map = QuantumCircuit(num_qubits, name="IQPEmbedding")
 
-    x = ParameterVector("x", length=num_features)
-    theta = ParameterVector("θ")
-    feature_map.theta = theta
+    x = ParameterVector("x", length=feature_dimension)
+    alpha = ParameterVector("⍺")
+    feature_map.alpha = alpha

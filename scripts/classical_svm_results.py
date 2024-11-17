@@ -8,6 +8,7 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.svm import SVC
 
 random_state = 42
+kernels = ("rbf", "poly", "linear", "sigmoid")
 
 out_dir = os.path.join(os.path.dirname(__file__), "../res/")
 
@@ -15,20 +16,22 @@ path_to_data = os.path.join(os.path.dirname(__file__), "../data_names.yaml")
 with open(path_to_data) as file:
     datasets: list[str] = yaml.safe_load(file)
 
-kernel_vals = ("rbf", "poly", "linear")
 
-
-def run_svc_cross_validation(
-    datasets: List[str], kernels: Tuple[str, ...]
+def run_svm_cross_validation(
+    datasets: List[str],
+    kernels: Tuple[str, ...],
+    num_splits: int = 5,
 ) -> Dict[str, Dict[str, Dict[str, List[float]]]]:
     result: Dict[str, Dict[str, Dict[str, List[float]]]] = {}
     for data in datasets:
         result[data] = {}
         result_data: Dict[str, List[float]] = {"train_acc": [], "test_acc": []}
-        for kernel in kernel_vals:
-            X, y = parse_biomed_data_to_ndarray(data)
+        for kernel in kernels:
+            X, y = parse_biomed_data_to_ndarray(data, return_X_y=True)
 
-            skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=random_state)
+            skf = StratifiedKFold(
+                n_splits=num_splits, shuffle=True, random_state=random_state
+            )
             clf = SVC(kernel=kernel, random_state=random_state)
 
             for train_idx, test_idx in skf.split(X, y):
@@ -48,10 +51,6 @@ def run_svc_cross_validation(
                 result_data["train_acc"].append(train_acc)
                 result_data["test_acc"].append(test_acc)
 
-            avg_train_acc = sum(result_data["train_acc"]) / len(
-                result_data["train_acc"]
-            )
-            avg_test_acc = sum(result_data["test_acc"]) / len(result_data["test_acc"])
             result[data][kernel] = result_data
 
     return result
@@ -64,15 +63,15 @@ def create_dataframe_from_results(
 
     for dataset_name, kernels_data in results.items():
         for kernel, acc_data in kernels_data.items():
-            # Average accuracy values across the 5 folds
+            # Average accuracy values across the num of folds
             avg_train_acc = sum(acc_data["train_acc"]) / len(acc_data["train_acc"])
             avg_test_acc = sum(acc_data["test_acc"]) / len(acc_data["test_acc"])
 
             # Append a row to table_data
             tabular_data.append(
                 {
-                    "Datasets": dataset_name,
-                    "Kernel": kernel,
+                    "dataset": dataset_name,
+                    "kernel": kernel,
                     "train_acc": avg_train_acc,
                     "test_acc": avg_test_acc,
                 }
@@ -83,13 +82,10 @@ def create_dataframe_from_results(
 
 
 if __name__ == "__main__":
-    results = run_svc_cross_validation(datasets, kernel_vals)
+    results = run_svm_cross_validation(datasets, kernels, num_splits=5)
     data = create_dataframe_from_results(results)
-    print(data)
 
-
-# results_filename = "Classical_SVC_results.csv"
-# path_out = os.path.join(out_dir, results_filename)
-
-# df = pd.DataFrame.from_dict(result)
-# df.to_csv(path_out)
+    results_filename = "Classical_SVC_results.csv"
+    path_out = os.path.join(out_dir, results_filename)
+    df = pd.DataFrame.from_dict(data)
+    df.to_csv(path_out)
