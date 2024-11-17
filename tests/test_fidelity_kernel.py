@@ -26,6 +26,23 @@ class TestFidelityQuantumKernel(QMLabTest):
         self.y_test = np.asarray([-1, +1])
         self.qfm = PauliFeatureMap(2)
 
+    def test_gram_matrix_is_symmetric(self):
+        quantum_kernel = FidelityQuantumKernel(feature_map=self.qfm)
+        kernel = quantum_kernel.evaluate_kernel(self.X_train)
+        np.testing.assert_array_almost_equal(kernel, kernel.T)
+
+    def test_gram_matrix_correct_shapes(self):
+        quantum_kernel = FidelityQuantumKernel(feature_map=self.qfm)
+        kernel1 = quantum_kernel.evaluate_kernel(self.X_train)
+        kernel2 = quantum_kernel.evaluate_kernel(self.X_test, self.X_train)
+        assert kernel1.shape == (len(self.X_train), len(self.X_train))
+        assert kernel2.shape == (len(self.X_test), len(self.X_train))
+
+    def test_gram_matrix_ones_across_diagonal(self):
+        quantum_kernel = FidelityQuantumKernel(feature_map=self.qfm)
+        kernel = quantum_kernel.evaluate_kernel(self.X_train)
+        assert round(np.trace(kernel)) == len(self.X_train)
+
     def test_kernel_callable_from_svc(self):
         quantum_kernel = FidelityQuantumKernel(feature_map=self.qfm)
         svc = SVC(kernel=quantum_kernel.evaluate_kernel)
@@ -34,9 +51,9 @@ class TestFidelityQuantumKernel(QMLabTest):
         assert score == 1.0
 
     def test_kernel_precomputed_for_svc(self):
-        kernel = FidelityQuantumKernel(feature_map=self.qfm)
-        kernel_train = kernel.evaluate_kernel(self.X_train)
-        kernel_test = kernel.evaluate_kernel(self.X_test, self.X_train)
+        quantum_kernel = FidelityQuantumKernel(feature_map=self.qfm)
+        kernel_train = quantum_kernel.evaluate_kernel(self.X_train)
+        kernel_test = quantum_kernel.evaluate_kernel(self.X_test, self.X_train)
 
         svc = SVC(kernel="precomputed")
         svc.fit(kernel_train, self.y_train)

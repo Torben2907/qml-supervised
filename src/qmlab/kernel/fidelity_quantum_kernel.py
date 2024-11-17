@@ -53,9 +53,6 @@ class FidelityQuantumKernel(QuantumKernel):
     def _get_parameterization(
         self, psi_vec: np.ndarray, phi_vec: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
-        """
-        Combines x_vec and y_vec to get all the combinations needed to evaluate the kernel entries.
-        """
         indices = [
             (i, j)
             for i, x_i in enumerate(psi_vec)
@@ -72,7 +69,6 @@ class FidelityQuantumKernel(QuantumKernel):
     def _get_symmetric_parameterization(
         self, psi_vec: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
-
         indices = [
             (i, i + j)
             for i, x_i in enumerate(psi_vec)
@@ -106,9 +102,6 @@ class FidelityQuantumKernel(QuantumKernel):
         right_parameters: np.ndarray,
         indices: List[Tuple[int, int]],
     ) -> np.ndarray:
-        """
-        Given a set of parameterization, this computes the kernel matrix.
-        """
         entries = self._compute_gram_entries(left_parameters, right_parameters)
         kernel_matrix = np.ones(gram_matrix_shape)
         for i, (col, row) in enumerate(indices):
@@ -159,11 +152,8 @@ class FidelityQuantumKernel(QuantumKernel):
 
     @property
     def fidelity(self):
-        """Returns the fidelity primitive used by this kernel."""
         return self._fidelity
 
     @property
     def evaluate_duplicates(self):
-        """Returns the strategy used by this kernel to evaluate kernel matrix elements if duplicate
-        samples are found."""
         return self._evaluate_duplicates
