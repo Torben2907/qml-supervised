@@ -1,5 +1,5 @@
 import os
-from typing import Tuple
+from typing import List, Tuple
 import pandas as pd
 import numpy as np
 from sklearn.decomposition import PCA, KernelPCA
@@ -20,14 +20,14 @@ def parse_biomed_data_to_df(dataset_name: str) -> pd.DataFrame:
 
 def parse_biomed_data_to_ndarray(
     dataset_name: str, return_X_y=True
-) -> Tuple[np.ndarray, np.ndarray] | np.ndarray:
+) -> Tuple[np.ndarray, np.ndarray, List[str]] | np.ndarray:
     """Function to read in the biomedical datasets as .csv-files
        and output as `numpy.ndarrays`.
 
        Consistent with the the thesis the notation
-        - m for the number of examples in the dataset,
-        - d for the number of features in the dataset,
-        - k for the number of classes in the dataset
+        - :math:`m` for the number of examples in the dataset,
+        - :math:`d` for the number of features in the dataset,
+        - :math:`k` for the number of classes in the dataset
         is used.
 
     Args:
@@ -41,20 +41,25 @@ def parse_biomed_data_to_ndarray(
         Defaults to True.
 
     Returns:
-        tuple[np.ndarray, np.ndarray] | np.ndarray:
+        tuple[np.ndarray, np.ndarray, List[str]] | np.ndarray:
         Two arrays of shapes :math:`(m, d)` and :math:`(d,)`
         (in the following refered to as :math:`X` and :math:`y`)
         or a single array of shape :math:`(m, d+1)` (in the following refered to as df).
         X is the feature matrix of shape (m, d).
         y is the label vector of shape (d,) with labels in {-1, +1}.
+        feature_names a list containing the names of the features as srings.
         df is the concatenation of X and y.T (such that y is the first column).
         See also `return_X_y` for more information.
     """
     try:
         df = pd.read_csv(DATA_DIR + dataset_name + ".csv")
     except FileNotFoundError:
-        raise ValueError("dataset {name} not found! did you spell it correctly?")
-    df = df.iloc[:, 1:]  # drop first column (contains only numbering of examples)
+        raise FileNotFoundError(
+            f"Dataset {dataset_name} not found! Did you spell it correctly?"
+        )
+    df = df.iloc[:, 1:]  # drop first column (contains numbering of examples)
+    feature_names = list(df.columns)
+    feature_names.remove("V1")
     if return_X_y:
         # "V1" is the column of labels
         X: np.ndarray = df.iloc[:, df.columns != "V1"].to_numpy(dtype=np.float32)
@@ -66,7 +71,7 @@ def parse_biomed_data_to_ndarray(
             )
         )  # y as row vector (n,)
         y = (2 * y) - 1
-        return (X, y)
+        return (X, y, feature_names)
     else:
         return df.to_numpy(dtype=np.float32)
 
@@ -102,6 +107,25 @@ def reduce_feature_dim(
     else:
         raise ValueError("provide either PCA or kPCA as reduction method")
     return X_reduced
+
+
+def subsample_features(
+    X: np.ndarray,
+    feature_names: List[str],
+    num_features_to_subsample: int = 3,
+) -> np.ndarray:
+    assert X.shape[1] == len(
+        feature_names
+    ), "You must pass the feature names of the dataset"
+
+    if len(feature_names) // num_features_to_subsample:
+        pass
+    else:
+        raise ValueError(
+            "please provide a dimension that works with the number of total samples of the dataset"
+        )
+
+    return X_subsampled
 
 
 def scale_to_specified_range(

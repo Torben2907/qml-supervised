@@ -5,10 +5,13 @@ import pandas as pd
 from sklearn import metrics
 from qmlab.preprocessing import parse_biomed_data_to_ndarray
 from sklearn.model_selection import StratifiedKFold
+from qmlab.kernel import FidelityQuantumKernel
+from qiskit.circuit.library import ZZFeatureMap
 from sklearn.svm import SVC
 
 random_state = 42
-kernels = ("rbf", "poly", "linear", "sigmoid")
+
+kernels = ("rbf", "poly", "linear", "sigmoid", "quantum_kernel")
 
 out_dir = os.path.join(os.path.dirname(__file__), "../res/")
 
@@ -22,17 +25,26 @@ def run_svm_cross_validation(
     kernels: Tuple[str, ...],
     num_splits: int = 5,
 ) -> Dict[str, Dict[str, Dict[str, List[float]]]]:
-    result: Dict[str, Dict[str, Dict[str, List[float]]]] = {}
+    results: Dict[str, Dict[str, Dict[str, List[float]]]] = {}
     for data in datasets:
-        result[data] = {}
+        results[data] = {}
         result_data: Dict[str, List[float]] = {"train_acc": [], "test_acc": []}
         for kernel in kernels:
-            X, y = parse_biomed_data_to_ndarray(data, return_X_y=True)
+            X, y, _ = parse_biomed_data_to_ndarray(data, return_X_y=True)
+            _, num_features = X.shape
 
             skf = StratifiedKFold(
                 n_splits=num_splits, shuffle=True, random_state=random_state
             )
-            clf = SVC(kernel=kernel, random_state=random_state)
+
+            if kernel == "quantum_kernel":
+                qfm = ZZFeatureMap(feature_dimension=num_features, reps=2)
+                quantum_kernel = FidelityQuantumKernel(feature_map=qfm)
+                clf = SVC(
+                    kernel=quantum_kernel.evaluate_kernel, random_state=random_state
+                )
+            else:
+                clf = SVC(kernel=kernel, random_state=random_state)
 
             for train_idx, test_idx in skf.split(X, y):
                 X_train = X[train_idx, :]
@@ -51,9 +63,9 @@ def run_svm_cross_validation(
                 result_data["train_acc"].append(train_acc)
                 result_data["test_acc"].append(test_acc)
 
-            result[data][kernel] = result_data
+            results[data][kernel] = result_data
 
-    return result
+    return results
 
 
 def create_dataframe_from_results(

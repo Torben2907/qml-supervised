@@ -105,8 +105,9 @@ class FidelityQuantumKernel(QuantumKernel):
         entries = self._compute_gram_entries(left_parameters, right_parameters)
         kernel_matrix = np.ones(gram_matrix_shape)
         for i, (col, row) in enumerate(indices):
-            kernel_matrix[col, row] = entries[i]
             kernel_matrix[row, col] = entries[i]
+            if row != col:
+                kernel_matrix[col, row] = entries[i]
         return kernel_matrix
 
     def _compute_gram_entries(

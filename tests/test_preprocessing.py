@@ -67,7 +67,7 @@ def test_shape_datasets(data):
 )
 @pytest.mark.parametrize("data", data_with_associated_attrs)
 def test_scale_data_to_range(range, data):
-    X, _ = parse_biomed_data_to_ndarray(data["name"])
+    X, _, _ = parsing_helper(data["name"])
     X_scaled = scale_to_specified_range(X, range)
     assert np.any((X_scaled <= range[0]) | (X_scaled >= range[1]))
 
@@ -95,6 +95,6 @@ def parsing_helper(dataset_name: str):
     Args:
         dataset_name (str): Name of dataset. DO NOT use .csv at the end!
     """
-    X, y = parse_biomed_data_to_ndarray(dataset_name, return_X_y=True)
+    X, y, feature_names = parse_biomed_data_to_ndarray(dataset_name, return_X_y=True)
     df = parse_biomed_data_to_ndarray(dataset_name, return_X_y=False)
     return X, y, df

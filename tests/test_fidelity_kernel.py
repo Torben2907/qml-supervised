@@ -79,7 +79,6 @@ class TestFidelityQuantumKernel(QMLabTest):
 
 
 class MockFidelity(BaseStateFidelity):
-    """Custom fidelity that returns -0.5 for any input."""
 
     def create_fidelity_circuit(
         self, circuit_1: QuantumCircuit, circuit_2: QuantumCircuit
