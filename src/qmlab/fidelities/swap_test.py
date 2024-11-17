@@ -23,7 +23,6 @@ class SwapTest(BaseStateFidelity):
         values_1: Sequence[float] | Sequence[Sequence[float]],
         values_2: Sequence[float] | Sequence[Sequence[float]],
     ) -> StateFidelityResult:
-
         swap_test = self.create_fidelity_circuit(circuit_1, circuit_2)
 
         if len(swap_test) == 0:
@@ -49,7 +48,6 @@ class SwapTest(BaseStateFidelity):
     def create_fidelity_circuit(
         self, circuit_1: QuantumCircuit, circuit_2: QuantumCircuit
     ) -> QuantumCircuit:
-
         self.num_qubits = circuit_1.num_qubits + circuit_2.num_qubits + 1
 
         # first parameter qubits, second parameter classical bits

@@ -45,8 +45,8 @@ def run_svm_cross_validation(
                 train_pred = clf.predict(X_train)
                 test_pred = clf.predict(X_test)
 
-                train_acc = metrics.balanced_accuracy_score(y_train, train_pred)
-                test_acc = metrics.balanced_accuracy_score(y_test, test_pred)
+                train_acc = metrics.accuracy_score(y_train, train_pred)
+                test_acc = metrics.accuracy_score(y_test, test_pred)
 
                 result_data["train_acc"].append(train_acc)
                 result_data["test_acc"].append(test_acc)
@@ -72,8 +72,8 @@ def create_dataframe_from_results(
                 {
                     "dataset": dataset_name,
                     "kernel": kernel,
-                    "train_acc": avg_train_acc,
-                    "test_acc": avg_test_acc,
+                    "avg_train_acc": avg_train_acc,
+                    "avg_test_acc": avg_test_acc,
                 }
             )
 
