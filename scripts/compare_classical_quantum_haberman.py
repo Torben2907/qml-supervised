@@ -40,8 +40,7 @@ if __name__ == "__main__":
             y_train, y_test = y[train_idx], y[test_idx]
 
             svc.fit(X_train, y_train)
-            # kernel_train = qkernel.evaluate_kernel(X_train)
-            # qsvc.fit(kernel_train, y_train)
+            qsvc.fit(X_train, y_train)
 
             y_pred = svc.predict(X_test)
             classical_scores.append(metrics.accuracy_score(y_test, y_pred))
