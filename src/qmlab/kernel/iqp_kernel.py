@@ -1,17 +1,18 @@
 import time
+from typing import Callable, List
 import pennylane as qml
 import numpy as np
 import jax
 import jax.numpy as jnp
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.svm import SVC
-from sklearn.preprocessing import MinMaxScaler
 from sklearn.utils import gen_batches
+from pennylane.measurements import ProbabilityMP
 
 jax.config.update("jax_enable_x64", True)
 
 
-def chunk_vmapped_fn(vmapped_fn, start, max_vmap):
+def chunk_vmapped_fn(vmapped_fn, start: int, max_vmap: int):
     """
     Convert a vmapped function to an equivalent function that evaluates in chunks of size
     max_vmap. The behaviour of chunked_fn should be the same as vmapped_fn, but with a
@@ -52,14 +53,16 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
     def __init__(
         self,
         svm=SVC(kernel="precomputed", probability=True),
-        repeats=2,
-        C=1.0,
-        jit=False,
-        random_state=42,
-        scaling=1.0,
-        max_vmap=250,
-        dev_type="default.qubit",
-        qnode_kwargs={"interface": "jax-jit", "diff_method": None},
+        reps: int = 2,
+        C: float = 1.0,
+        jit: bool = False,
+        random_state: int = 42,
+        max_vmap: int = 250,
+        dev_type: str = "default.qubit",
+        qnode_kwargs: dict[str, str | None] = {
+            "interface": "jax-jit",
+            "diff_method": None,
+        },
     ):
         r"""
         Kernel version of the classifier from https://arxiv.org/pdf/1804.11326v2.pdf.
@@ -90,32 +93,31 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
             random_state (int): seed used for reproducibility.
         """
         # attributes that do not depend on data
-        self.repeats = repeats
+        self.repeats = reps
         self.C = C
         self.jit = jit
         self.max_vmap = max_vmap
         self.svm = svm
         self.dev_type = dev_type
         self.qnode_kwargs = qnode_kwargs
-        self.scaling = scaling
         self.random_state = random_state
         self.rng = np.random.default_rng(random_state)
 
         # data-dependant attributes
-        # which will be initialised by calling "fit"
-        self.params_ = None
-        self.n_qubits_ = None
-        self.scaler = None  # data scaler will be fitted on training data
+        # that will be initialised by calling "fit"
+        self.parameters = None
+        # self.num_qubits = None
         self.circuit = None
+        self.training_time = None
 
-    def generate_key(self):
+    def create_random_key(self):
         return jax.random.PRNGKey(self.rng.integers(1000000))
 
     def build_circuit(self):
-        dev = qml.device(self.dev_type, wires=self.n_qubits_)
+        dev = qml.device(self.dev_type, wires=self.num_qubits)
 
         @qml.qnode(dev, **self.qnode_kwargs)
-        def circuit(x):
+        def circuit(x_vec: np.ndarray) -> ProbabilityMP:
             """
             circuit used to precomute the kernel matrix K(x_1,x_2).
             Args:
@@ -125,12 +127,14 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
                 (float) the value of the kernel fucntion K(x_1,x_2)
             """
             qml.IQPEmbedding(
-                x[: self.n_qubits_], wires=range(self.n_qubits_), n_repeats=self.repeats
+                x_vec[: self.num_qubits],
+                wires=range(self.num_qubits),
+                n_repeats=self.repeats,
             )
             qml.adjoint(
                 qml.IQPEmbedding(
-                    x[self.n_qubits_ :],
-                    wires=range(self.n_qubits_),
+                    x_vec[self.num_qubits :],
+                    wires=range(self.num_qubits),
                     n_repeats=self.repeats,
                 )
             )
@@ -142,7 +146,7 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
             circuit = jax.jit(circuit)
         return circuit
 
-    def precompute_kernel(self, X1, X2):
+    def precompute_kernel(self, x_vec: np.ndarray, y_vec: np.ndarray) -> np.ndarray:
         """
         compute the kernel matrix relative to data sets X1 and X2
         Args:
@@ -151,12 +155,16 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
         Returns:
             kernel_matrix (np.array): matrix of size (len(X1),len(X2)) with elements K(x_1,x_2)
         """
-        dim1 = len(X1)
-        dim2 = len(X2)
+        left_parameters = len(x_vec)
+        right_parameters = len(y_vec)
 
         # concatenate all pairs of vectors
         Z = jnp.array(
-            [np.concatenate((X1[i], X2[j])) for i in range(dim1) for j in range(dim2)]
+            [
+                np.concatenate((x_vec[i], y_vec[j]))
+                for i in range(left_parameters)
+                for j in range(right_parameters)
+            ]
         )
 
         circuit = self.build_circuit()
@@ -165,27 +173,27 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
         )
         kernel_values = self.batched_circuit(Z)[:, 0]
 
-        # reshape the values into the kernel matrix
-        kernel_matrix = np.reshape(kernel_values, (dim1, dim2))
-
+        kernel_matrix_shape = (left_parameters, right_parameters)
+        kernel_matrix = np.reshape(kernel_values, kernel_matrix_shape)
         return kernel_matrix
 
-    def initialize(self, n_features, classes=None):
+    def initialize(
+        self, feature_dimension: int, class_labels: List[int] | None = None
+    ) -> None:
         """Initialize attributes that depend on the number of features and the class labels.
 
         Args:
             n_features (int): Number of features that the classifier expects
             classes (array-like): class labels that the classifier expects
         """
-        if classes is None:
-            classes = [-1, 1]
+        if class_labels is None:
+            class_labels = [-1, 1]
 
-        self.classes_ = classes
+        self.classes_ = class_labels
         self.n_classes_ = len(self.classes_)
         assert self.n_classes_ == 2
         assert 1 in self.classes_ and -1 in self.classes_
-
-        self.n_qubits_ = n_features
+        self.num_qubits = feature_dimension
 
         self.build_circuit()
 
@@ -200,12 +208,7 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
         self.svm.random_state = self.rng.integers(100000)
 
         self.initialize(X.shape[1], np.unique(y))
-
-        self.scaler = MinMaxScaler(feature_range=(-np.pi / 2, np.pi / 2))
-        self.scaler.fit(X)
-        X = self.transform(X)
-
-        self.params_ = {"x_train": X}
+        self.parameters = {"x_train": X}
         kernel_matrix = self.precompute_kernel(X, X)
 
         start = time.time()
@@ -214,7 +217,7 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
         self.svm.C = self.C
         self.svm.fit(kernel_matrix, y)
         end = time.time()
-        self.training_time_ = end - start
+        self.training_time = end - start
 
         return self
 
@@ -227,8 +230,7 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
         Returns:
             y_pred (np.ndarray): Predicted labels of shape (n_samples,)
         """
-        X = self.transform(X)
-        kernel_matrix = self.precompute_kernel(X, self.params_["x_train"])
+        kernel_matrix = self.precompute_kernel(X, self.parameters["x_train"])
         return self.svm.predict(kernel_matrix)
 
     def predict_proba(self, X):
@@ -243,23 +245,8 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
             (n_samples, n_classes)
         """
 
-        if "x_train" not in self.params_:
+        if "x_train" not in self.parameters:
             raise ValueError("Model cannot predict without fitting to data first.")
 
-        X = self.transform(X)
-        kernel_matrix = self.precompute_kernel(X, self.params_["x_train"])
+        kernel_matrix = self.precompute_kernel(X, self.parameters["x_train"])
         return self.svm.predict_proba(kernel_matrix)
-
-    def transform(self, X, preprocess=True):
-        """
-        Args:
-            X (np.ndarray): Data of shape (n_samples, n_features)
-        """
-        if preprocess:
-            if self.scaler is None:
-                # if the model is unfitted, initialise the scaler here
-                self.scaler = MinMaxScaler(feature_range=(-np.pi / 2, np.pi / 2))
-                self.scaler.fit(X)
-            X = self.scaler.transform(X)
-
-        return X * self.scaling

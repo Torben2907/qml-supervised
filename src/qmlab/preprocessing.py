@@ -169,27 +169,27 @@ def reduce_feature_dim(
     return X_reduced
 
 
-def scale_to_specified_range(
+def scale_to_specified_interval(
     X: np.ndarray,
-    range: tuple[float, float] = (-np.pi / 2, np.pi / 2),
+    interval: tuple[float, float] = (-np.pi / 2, np.pi / 2),
     scaling: float = 1.0,
 ) -> np.ndarray:
     """Scales all values of the feature matrix X to the interval specified
-    in `range`.
+    in `interval`.
 
     Args:
         X (np.ndarray): 2D-feature matrix of dimension m x d.
-        range (tuple, optional): scaling interval of floating point values. Defaults to (-np.pi / 2, np.pi / 2).
+        interval (tuple, optional): scaling interval of floating point values. Defaults to (-np.pi / 2, np.pi / 2).
         scaling (float, optional): Extra scaling of all values of X. Defaults to 1.0 (i.e. no extra scaling).
 
     Returns:
         np.ndarray: Scaled feature matrix of size :math:`m x d`.
     """
     assert X.ndim == 2, "X must be a 2D-feature array"
-    assert len(range) == 2, "range must be a tuple of size 2"
-    for vals in range:
-        assert isinstance(vals, float), "vals in range must be of type float"
-    scaler = MinMaxScaler(range)
+    assert len(interval) == 2, "interval must be a tuple of size 2"
+    for vals in interval:
+        assert isinstance(vals, float), "vals in interval must be of type float!"
+    scaler = MinMaxScaler(interval)
     scaler.fit(X)
     X = scaler.transform(X)
     return X * scaling
