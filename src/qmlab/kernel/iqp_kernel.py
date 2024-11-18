@@ -12,7 +12,9 @@ from pennylane.measurements import ProbabilityMP
 jax.config.update("jax_enable_x64", True)
 
 
-def chunk_vmapped_fn(vmapped_fn, start: int, max_vmap: int):
+def chunk_vmapped_fn(
+    vmapped_fn: Callable[..., jnp.ndarray], start: int, max_vmap: int
+) -> Callable[..., jnp.ndarray]:
     """
     Convert a vmapped function to an equivalent function that evaluates in chunks of size
     max_vmap. The behaviour of chunked_fn should be the same as vmapped_fn, but with a
