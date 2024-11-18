@@ -1,25 +1,55 @@
+from typing import Tuple, List
 import numpy as np
 import pytest
+import scipy
+import scipy.special
 
 from qmlab.preprocessing import (
     parse_biomed_data_to_ndarray,
     scale_to_specified_range,
     pad_and_normalize_data,
+    subsample_features,
 )
 
 
+def test_incorrect_file_name():
+    with pytest.raises(FileNotFoundError):
+        parse_biomed_data_to_ndarray(
+            "my_data_that_will_never_exist_cause_who_would_name_it_like_this_fr"
+        )
+
+
+def test_return_X_y():
+    res = parse_biomed_data_to_ndarray("haberman_new", return_X_y=True)
+    assert len(res) == 3
+
+
+def test_return_dataframe():
+    res = parse_biomed_data_to_ndarray("haberman_new", return_X_y=False)
+    assert len(res) == 2
+
+
 def test_correct_parsing_of_start_and_end_of_file():
-    X, y, df = parsing_helper("cervical_new")
+    X, y, _ = parse_biomed_data_to_ndarray("cervical_new")
     np.testing.assert_allclose(X[0], np.array([52, 5, 16, 4, 1, 37, 37]))
     np.testing.assert_equal(y[0], 1)
     np.testing.assert_allclose(X[-1], np.array([29, 2, 20, 1, 0, 0, 0]))
     np.testing.assert_allclose(y[-1], -1)
 
 
-def test_datatypes():
-    X, y, df = parsing_helper("cervical_new")
+def test_correct_feature_names():
+    _, _, feature_names = parse_biomed_data_to_ndarray("haberman_new")
+    assert feature_names == ["V2", "V3", "V4"]
+
+
+def test_datatypes_1():
+    X, y, _ = parse_biomed_data_to_ndarray("cervical_new")
     assert X.dtype == np.float32
     assert y.dtype == np.int8
+
+
+def test_datatypes_2():
+    df, _ = parse_biomed_data_to_ndarray("cervical_new", return_X_y=False)
     assert df.dtype == np.float32
 
 
@@ -39,19 +69,29 @@ data_with_associated_attrs = [
 
 
 @pytest.mark.parametrize("data", data_with_associated_attrs)
-def test_shape_datasets(data):
+def test_shape_datasets_X_y(data):
     name = data["name"]
     shape = data["shape"]
     pos = data["pos"]
     neg = data["neg"]
-    X, y, df = parsing_helper(name)
+    X, y, _ = parse_biomed_data_to_ndarray(name)
     assert X.shape == shape
     assert y.shape == (shape[0],)
-    assert df.shape == (shape[0], shape[1] + 1)
     assert (pos + neg) == shape[0]
 
     assert np.count_nonzero(y == -1) == neg
     assert np.count_nonzero(y == +1) == pos
+
+
+@pytest.mark.parametrize("data", data_with_associated_attrs)
+def test_shape_datasets_dataframe(data):
+    name = data["name"]
+    shape = data["shape"]
+    pos = data["pos"]
+    neg = data["neg"]
+    df, _ = parse_biomed_data_to_ndarray(name, return_X_y=False)
+    assert df.shape == (shape[0], shape[1] + 1)
+    assert (pos + neg) == shape[0]
 
 
 # we specify a variety of ranges to test the scaling
@@ -67,7 +107,7 @@ def test_shape_datasets(data):
 )
 @pytest.mark.parametrize("data", data_with_associated_attrs)
 def test_scale_data_to_range(range, data):
-    X, _, _ = parsing_helper(data["name"])
+    (X, _, _) = parse_biomed_data_to_ndarray(data["name"])
     X_scaled = scale_to_specified_range(X, range)
     assert np.any((X_scaled <= range[0]) | (X_scaled >= range[1]))
 
@@ -86,15 +126,32 @@ def test_pad_and_normalize_data_with_ones():
     np.testing.assert_allclose(x_norm, desired, rtol=1e-7, atol=1e-9)
 
 
-def parsing_helper(dataset_name: str):
-    """helper for getting both the (X, y)
-       and the data - arrays. For more details
-       see the documentation of
-       parse_biomed_data_to_ndarray.
+def test_subsample_features_no_wrap_around():
+    """no rotation simply means that total number of features // number of features to subsample!"""
+    X, _, feature_names = parse_biomed_data_to_ndarray("haberman_new")
+    results = subsample_features(
+        X, feature_names, num_features_to_subsample=1, all_possible_combinations=False
+    )
+    assert len(results) == 3
+    first_feature_vector, first_feature_name = results[0]
+    # subsample_features didn't change num of examples:
+    assert len(first_feature_vector) == 306
+    assert first_feature_vector[0] == 34
+    assert first_feature_vector[-1] == 77
+    assert first_feature_name == ["V2"]
 
-    Args:
-        dataset_name (str): Name of dataset. DO NOT use .csv at the end!
-    """
-    X, y, feature_names = parse_biomed_data_to_ndarray(dataset_name, return_X_y=True)
-    df = parse_biomed_data_to_ndarray(dataset_name, return_X_y=False)
-    return X, y, df
+
+def test_subsample_features_wrap_around():
+    X, _, feature_names = parse_biomed_data_to_ndarray("haberman_new")
+    results = subsample_features(
+        X, feature_names, num_features_to_subsample=2, all_possible_combinations=False
+    )
+    assert len(results) == 2
+
+
+def test_subsample_features_all_possible_combinations():
+    X, _, feature_names = parse_biomed_data_to_ndarray("ctg_new")
+    results = subsample_features(
+        X, feature_names, num_features_to_subsample=2, all_possible_combinations=True
+    )
+    assert len(results) == scipy.special.binom(X.shape[1], 2)

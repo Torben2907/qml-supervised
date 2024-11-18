@@ -1,12 +1,12 @@
 import os
-from typing import List, Tuple
+from typing import List, Literal, Tuple, overload
 import pandas as pd
 import numpy as np
 from sklearn.decomposition import PCA, KernelPCA
 from sklearn.preprocessing import MinMaxScaler
+import itertools as it
 
-
-DATA_DIR = "~/ST24/bachelor-thesis/qml-supervised/data/"
+DATA_DIR = os.path.join(os.path.dirname(__file__), "../../data/")
 
 
 def parse_biomed_data_to_df(dataset_name: str) -> pd.DataFrame:
@@ -18,9 +18,21 @@ def parse_biomed_data_to_df(dataset_name: str) -> pd.DataFrame:
     return df
 
 
+@overload
 def parse_biomed_data_to_ndarray(
-    dataset_name: str, return_X_y=True
-) -> Tuple[np.ndarray, np.ndarray, List[str]] | np.ndarray:
+    dataset_name: str, return_X_y: Literal[True]
+) -> Tuple[np.ndarray, np.ndarray, List[str]]: ...
+
+
+@overload
+def parse_biomed_data_to_ndarray(
+    dataset_name: str, return_X_y: Literal[False]
+) -> Tuple[np.ndarray, List[str]]: ...
+
+
+def parse_biomed_data_to_ndarray(
+    dataset_name: str, return_X_y: bool = True
+) -> Tuple[np.ndarray, np.ndarray, List[str]] | Tuple[np.ndarray, List[str]]:
     """Function to read in the biomedical datasets as .csv-files
        and output as `numpy.ndarrays`.
 
@@ -39,6 +51,8 @@ def parse_biomed_data_to_ndarray(
         :math:`(m, d+1)` where the one extra dimension is coming from the concatenation
         of X and y (IMPORTANT: In this case y is the first column).
         Defaults to True.
+        It will ALWAYS return a list of strings which are the features of the
+        data as the third or second return type.
 
     Returns:
         tuple[np.ndarray, np.ndarray, List[str]] | np.ndarray:
@@ -53,11 +67,16 @@ def parse_biomed_data_to_ndarray(
     """
     try:
         df = pd.read_csv(DATA_DIR + dataset_name + ".csv")
-    except FileNotFoundError:
+    except FileNotFoundError as fnf:
         raise FileNotFoundError(
-            f"Dataset {dataset_name} not found! Did you spell it correctly?"
-        )
-    df = df.iloc[:, 1:]  # drop first column (contains numbering of examples)
+            f"Dataset {dataset_name} not found! Did you spell it correctly?\n"
+            "Remember do not add .csv at the end! See docstring for more."
+        ) from fnf
+    except Exception as e:
+        raise Exception(f"An error occured while parsing the dataset: {e}") from e
+    df = df.iloc[
+        :, 1:
+    ]  # drop first column (assuming it contains numbering of examples)
     feature_names = list(df.columns)
     feature_names.remove("V1")
     if return_X_y:
@@ -73,7 +92,48 @@ def parse_biomed_data_to_ndarray(
         y = (2 * y) - 1
         return (X, y, feature_names)
     else:
-        return df.to_numpy(dtype=np.float32)
+        return (df.to_numpy(dtype=np.float32), feature_names)
+
+
+def subsample_features(
+    X: np.ndarray,
+    feature_names: List[str],
+    num_features_to_subsample: int,
+    all_possible_combinations: bool = False,
+) -> List[Tuple[np.ndarray, List[str]]]:
+    feature_dimension = X.shape[1]
+    if feature_dimension != len(feature_names):
+        raise ValueError(
+            "The length of `feature_names` must match the number of columns in `X`."
+        )
+    if num_features_to_subsample > feature_dimension:
+        raise ValueError(
+            "`num_features_to_subsample` cannot be greater than the total number of features."
+        )
+    subsampled_results: List[Tuple[np.ndarray, List[str]]] = []
+
+    if all_possible_combinations is True:
+        all_combs = list(
+            it.combinations(range(feature_dimension), num_features_to_subsample)
+        )
+        for combination in all_combs:
+            subsampled_X = X[:, combination]
+            subsampled_feature_names = [feature_names[i] for i in combination]
+            subsampled_results.append((subsampled_X, subsampled_feature_names))
+    else:
+        for start_idx in range(0, feature_dimension, num_features_to_subsample):
+            end_idx = start_idx + num_features_to_subsample
+            subsampled_indices = list(range(start_idx, min(end_idx, feature_dimension)))
+            # If end_idx exceeds the number of features, wrap around to the start
+            if end_idx > feature_dimension:
+                subsampled_indices += list(range(end_idx - feature_dimension))
+
+            subsampled_X = X[:, subsampled_indices]
+            subsampled_feature_names = [feature_names[i] for i in subsampled_indices]
+
+            subsampled_results.append((subsampled_X, subsampled_feature_names))
+
+    return subsampled_results
 
 
 def reduce_feature_dim(
@@ -107,25 +167,6 @@ def reduce_feature_dim(
     else:
         raise ValueError("provide either PCA or kPCA as reduction method")
     return X_reduced
-
-
-def subsample_features(
-    X: np.ndarray,
-    feature_names: List[str],
-    num_features_to_subsample: int = 3,
-) -> np.ndarray:
-    assert X.shape[1] == len(
-        feature_names
-    ), "You must pass the feature names of the dataset"
-
-    if len(feature_names) // num_features_to_subsample:
-        pass
-    else:
-        raise ValueError(
-            "please provide a dimension that works with the number of total samples of the dataset"
-        )
-
-    return X_subsampled
 
 
 def scale_to_specified_range(
