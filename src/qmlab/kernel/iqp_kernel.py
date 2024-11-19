@@ -107,10 +107,7 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
 
         # data-dependant attributes
         # that will be initialised by calling "fit"
-        self.parameters = None
-        # self.num_qubits = None
         self.circuit = None
-        self.training_time = None
 
     def create_random_key(self):
         return jax.random.PRNGKey(self.rng.integers(1000000))
@@ -180,7 +177,7 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
         return kernel_matrix
 
     def initialize(
-        self, feature_dimension: int, class_labels: List[int] | None = None
+        self, feature_dimension: int, class_labels: np.ndarray | None = None
     ) -> None:
         """Initialize attributes that depend on the number of features and the class labels.
 
@@ -189,7 +186,7 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
             classes (array-like): class labels that the classifier expects
         """
         if class_labels is None:
-            class_labels = [-1, 1]
+            class_labels = np.asarray([-1, 1])
 
         self.classes_ = class_labels
         self.n_classes_ = len(self.classes_)
@@ -199,7 +196,7 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
 
         self.build_circuit()
 
-    def fit(self, X, y):
+    def fit(self, X: np.ndarray, y: np.ndarray) -> "IQPKernelClassifier":
         """Fit the model to data X and labels y. Uses sklearn's SVM classifier
 
         Args:
@@ -220,7 +217,6 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
         self.svm.fit(kernel_matrix, y)
         end = time.time()
         self.training_time = end - start
-
         return self
 
     def predict(self, X):
