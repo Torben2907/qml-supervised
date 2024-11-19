@@ -1,3 +1,4 @@
+import os
 import time
 from typing import Callable
 import pennylane as qml
@@ -5,6 +6,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 from sklearn.base import BaseEstimator, ClassifierMixin
+import sklearn.datasets
 from sklearn.svm import SVC
 from sklearn.utils import gen_batches
 from pennylane.measurements import ProbabilityMP
@@ -14,6 +16,8 @@ from qmlab.preprocessing import (
     scale_to_specified_interval,
 )
 from qmlab.utils import run_shuffle_split
+from sklearn import metrics
+from sklearn.kernel_approximation import Nystroem
 
 jax.config.update("jax_enable_x64", True)
 
@@ -71,6 +75,7 @@ class FidelityIQPKernel(BaseEstimator, ClassifierMixin):
             "interface": "jax-jit",
             "diff_method": None,
         },
+        nystroem: bool = False,
     ) -> None:
         r"""
         Kernel version of the classifier from https://arxiv.org/pdf/1804.11326v2.pdf.
@@ -110,7 +115,7 @@ class FidelityIQPKernel(BaseEstimator, ClassifierMixin):
         self.qnode_kwargs = qnode_kwargs
         self.random_state = random_state
         self.rng = np.random.default_rng(random_state)
-
+        self.nystroem = nystroem
         # data-dependant attributes
         # that will be initialised by calling "fit"
         self.circuit = None
@@ -160,6 +165,7 @@ class FidelityIQPKernel(BaseEstimator, ClassifierMixin):
         Returns:
             kernel_matrix (np.array): matrix of size (len(X1),len(X2)) with elements K(x_1,x_2)
         """
+        # these are both data-dependent
         left_parameters = len(x_vec)
         right_parameters = len(y_vec)
 
@@ -176,10 +182,14 @@ class FidelityIQPKernel(BaseEstimator, ClassifierMixin):
         self.batched_circuit = chunk_vmapped_fn(
             jax.vmap(circuit, 0), start=0, max_vmap=self.max_vmap
         )
+
+        # remember from the derivation in the thesis,
+        # we are only interested in measuring |0>
         kernel_values = self.batched_circuit(Z)[:, 0]
 
         kernel_matrix_shape = (left_parameters, right_parameters)
         kernel_matrix = np.reshape(kernel_values, kernel_matrix_shape)
+
         return kernel_matrix
 
     def initialize_params(
@@ -194,10 +204,10 @@ class FidelityIQPKernel(BaseEstimator, ClassifierMixin):
         if class_labels is None:
             class_labels = np.asarray([-1, 1])
 
-        self.class_labels = class_labels
-        self.num_classes = len(self.class_labels)
+        self.classes_ = class_labels
+        self.num_classes = len(self.classes_)
         assert self.num_classes == 2
-        assert 1 in self.class_labels and -1 in self.class_labels
+        assert -1 in self.classes_ and +1 in self.classes_
         self.num_qubits = feature_dimension
 
         self.build_circuit()
@@ -211,18 +221,25 @@ class FidelityIQPKernel(BaseEstimator, ClassifierMixin):
         """
 
         self.svm.random_state = self.rng.integers(100000)
+        self.svm.C = self.C
 
         self.initialize_params(X.shape[1], np.unique(y))
-        self.parameters = {"x_train": X}
+        self.parameters = {"X_train": X}
         gram_matrix = self.evaluate(X, X)
 
         start = time.time()
-        # we are updating this value here, in case it was
-        # changed after initialising the model
-        self.svm.C = self.C
-        self.svm.fit(gram_matrix, y)
+
+        if self.nystroem is True:
+            nyst = Nystroem(kernel="precomputed", n_components=500)
+            reduced_gram_matrix = nyst.fit_transform(gram_matrix)
+            self.svm.fit(reduced_gram_matrix, y)
+        else:
+            self.svm.fit(gram_matrix, y)
+
         end = time.time()
+
         self.training_time = end - start
+
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
@@ -234,7 +251,7 @@ class FidelityIQPKernel(BaseEstimator, ClassifierMixin):
         Returns:
             y_pred (np.ndarray): Predicted labels of shape (n_samples,)
         """
-        kernel_matrix = self.evaluate(X, self.parameters["x_train"])
+        kernel_matrix = self.evaluate(X, self.parameters["X_train"])
         return self.svm.predict(kernel_matrix)
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
@@ -248,18 +265,22 @@ class FidelityIQPKernel(BaseEstimator, ClassifierMixin):
             y_pred_proba (np.ndarray): Predicted label probabilities of shape
             (n_samples, n_classes)
         """
-
-        if "x_train" not in self.parameters:
+        if "X_train" not in self.parameters:
             raise ValueError("Model cannot predict without fitting to data first.")
-
         kernel_matrix = self.evaluate(X, self.parameters["x_train"])
         return self.svm.predict_proba(kernel_matrix)
 
 
 if __name__ == "__main__":
-    X, y, _ = parse_biomed_data_to_ndarray("haberman_new", return_X_y=True)
+
+    X, y, _ = parse_biomed_data_to_ndarray("sobar_new", return_X_y=True)
     X = scale_to_specified_interval(X)
-    num_qubits = X.shape[1]
-    dev_kernel = qml.device("default.qubit", wires=num_qubits)
-    qsvm = FidelityIQPKernel(jit=True)
+    svm = SVC(kernel="rbf", random_state=42, probability=True).fit(X, y)
+    qsvm = FidelityIQPKernel(jit=True, nystroem=True).fit(X, y)
+    print(svm.classes_)
+    print(qsvm.classes_)
+    y_score = svm.predict_proba(X)[:, 1]
+    print(metrics.roc_auc_score(y, y_score))
+    y_score = qsvm.predict_proba(X)[:, 1]
+    print(metrics.roc_auc_score(y, y_score))
     print(run_shuffle_split(qsvm, X, y))

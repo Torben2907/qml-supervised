@@ -64,7 +64,7 @@ class QSVC(ABC, BaseEstimator, ClassifierMixin):
         raise NotImplementedError()
 
 
-class AngleEmbeddingKernel(QSVC):
+class AngleEmbeddedKernel(QSVC):
     def __init__(
         self,
         svm=SVC(kernel="precomputed", probability=True),
@@ -104,10 +104,10 @@ class AngleEmbeddingKernel(QSVC):
         if class_labels is None:
             class_labels = np.asarray([-1, 1])
 
-        self.class_labels = class_labels
-        self.num_classes = len(self.class_labels)
+        self.classes_ = class_labels
+        self.num_classes = len(self.classes_)
         assert self.num_classes == 2
-        assert 1 in self.class_labels and -1 in self.class_labels
+        assert -1 in self.classes_ and +1 in self.classes_
         self.num_qubits = feature_dimension
 
         self.build_circuit()
@@ -122,7 +122,7 @@ class AngleEmbeddingKernel(QSVC):
         )
         return kernel_matrix
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> "AngleEmbeddingKernel":
+    def fit(self, X: np.ndarray, y: np.ndarray) -> "AngleEmbeddedKernel":
         self.initialize_params(X.shape[1], np.unique(y))
         self.parameters = {"X_train": X}
         gram_matrix = self.evaluate(X, X)
