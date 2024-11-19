@@ -10,7 +10,7 @@ from qmlab.preprocessing import (
 from sklearn.model_selection import ShuffleSplit
 from sklearn import metrics
 from sklearn.svm import SVC
-from qmlab.kernel.iqp_kernel import IQPKernelClassifier
+from qmlab.kernel.iqp_kernel import FidelityIQPKernel
 
 
 out_dir = os.path.join(os.path.dirname(__file__), "../res/")
@@ -30,7 +30,7 @@ if __name__ == "__main__":
         classical_scores = []
         quantum_scores = []
         rs = ShuffleSplit(n_splits=5, test_size=0.3, random_state=42)
-        qsvc = IQPKernelClassifier(jit=True)
+        qsvc = FidelityIQPKernel(jit=True)
         svc = SVC(kernel="linear", random_state=42)
 
         for train_idx, test_idx in rs.split(X, y):

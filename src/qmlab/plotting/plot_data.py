@@ -1,10 +1,8 @@
 import os
 from typing import List, Optional
 import numpy as np
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
-import pandas as pd
 from .plot_utils import set_figure_params
 from matplotlib.cm import plasma
 
@@ -44,8 +42,7 @@ def plot_2d_data(
     assert +1 in y
     assert -1 in y
 
-    fig = plt.figure()
-    ax = plt.gca()
+    fig, ax = plt.figure(), plt.gca()
 
     X_pos = X[y == +1]
     X_neg = X[y == -1]

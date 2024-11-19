@@ -8,6 +8,11 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.svm import SVC
 from sklearn.utils import gen_batches
 from pennylane.measurements import ProbabilityMP
+from qmlab.preprocessing import (
+    parse_biomed_data_to_ndarray,
+    scale_to_specified_interval,
+)
+from qmlab.utils import run_shuffle_split
 
 jax.config.update("jax_enable_x64", True)
 
@@ -51,7 +56,7 @@ def chunk_vmapped_fn(
     return chunked_fn
 
 
-class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
+class FidelityIQPKernel(BaseEstimator, ClassifierMixin):
     def __init__(
         self,
         svm=SVC(kernel="precomputed", probability=True),
@@ -95,7 +100,7 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
             random_state (int): seed used for reproducibility.
         """
         # attributes that do not depend on data
-        self.repeats = reps
+        self.reps = reps
         self.C = C
         self.jit = jit
         self.max_vmap = max_vmap
@@ -128,13 +133,13 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
             qml.IQPEmbedding(
                 x_vec[: self.num_qubits],
                 wires=range(self.num_qubits),
-                n_repeats=self.repeats,
+                n_repeats=self.reps,
             )
             qml.adjoint(
                 qml.IQPEmbedding(
                     x_vec[self.num_qubits :],
                     wires=range(self.num_qubits),
-                    n_repeats=self.repeats,
+                    n_repeats=self.reps,
                 )
             )
             return qml.probs()
@@ -196,7 +201,7 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
 
         self.build_circuit()
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> "IQPKernelClassifier":
+    def fit(self, X: np.ndarray, y: np.ndarray) -> "FidelityIQPKernel":
         """Fit the model to data X and labels y. Uses sklearn's SVM classifier
 
         Args:
@@ -248,3 +253,12 @@ class IQPKernelClassifier(BaseEstimator, ClassifierMixin):
 
         kernel_matrix = self.precompute_kernel(X, self.parameters["x_train"])
         return self.svm.predict_proba(kernel_matrix)
+
+
+if __name__ == "__main__":
+    X, y, _ = parse_biomed_data_to_ndarray("haberman_new", return_X_y=True)
+    X = scale_to_specified_interval(X)
+    num_qubits = X.shape[1]
+    dev_kernel = qml.device("default.qubit", wires=num_qubits)
+    qsvm = FidelityIQPKernel(jit=True)
+    print(run_shuffle_split(qsvm, X, y))
