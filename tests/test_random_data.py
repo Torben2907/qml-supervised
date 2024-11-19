@@ -15,7 +15,6 @@ class TestGenerateData(QMLabTest):
             training_examples_per_class=self.num_training_examples,
             test_examples_per_class=self.num_test_examples,
             random_state=self.random_state,
-            device="cpu",
         )
 
     def test_shapes(self):

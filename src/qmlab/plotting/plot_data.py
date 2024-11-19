@@ -1,16 +1,36 @@
 import os
-from typing import Optional
+from typing import List, Optional
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 from .plot_utils import set_figure_params
+from matplotlib.cm import plasma
 
 plt.style.use("dark_background")
 os.makedirs("figures/", exist_ok=True)
 
 cmap = sns.color_palette("Spectral")
+
+
+def labels_pie_chart(
+    y: np.ndarray, title: str, colors: List[str] | None = None
+) -> plt.Figure:
+    unique_labels, label_counts = np.unique(y, return_counts=True)
+    fig, ax = plt.subplots(figsize=(6, 6))
+    if colors is None:
+        num_labels = len(unique_labels)
+        colors = [plasma(i / num_labels) for i in range(num_labels)]
+    ax.pie(
+        label_counts,
+        labels=unique_labels,
+        autopct="%1.2f%%",
+        startangle=90,
+        colors=colors,
+    )
+    ax.set_title(title)
+    return fig
 
 
 def plot_2d_data(

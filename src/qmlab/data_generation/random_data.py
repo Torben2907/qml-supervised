@@ -111,16 +111,11 @@ def _generate_sample_grid(
 ) -> jnp.ndarray:
     mesh_axes = jnp.meshgrid(*[xvals] * feature_dimension, indexing="ij")
     grid_points = jnp.stack([axis.flatten() for axis in mesh_axes], axis=-1)
-
     compute_expval_vmap = jax.vmap(compute_expval)
-
     exp_vals = compute_expval_vmap(grid_points)
-
     labels = jnp.where(jnp.abs(exp_vals) > delta, jnp.sign(exp_vals), 0)
-
     grid_shape = [num_points] * feature_dimension
     labeled_grid = labels.reshape(*grid_shape)
-
     return labeled_grid
 
 
@@ -132,8 +127,8 @@ def _hermitian_random(size: int, key: jnp.ndarray) -> jnp.ndarray:
 
 def _sample_data(sample_total, xvals, total_num_examples, feature_dimension):
     count = sample_total.shape[0]
-    sample_a, sample_b = [], []
-    for i, sample_list in enumerate([sample_a, sample_b]):
+    sample_pos, sample_neg = [], []
+    for i, sample_list in enumerate([sample_pos, sample_neg]):
         label = 1 if i == 0 else -1
         while len(sample_list) < total_num_examples:
             draws = tuple(
@@ -143,7 +138,7 @@ def _sample_data(sample_total, xvals, total_num_examples, feature_dimension):
                 sample_list.append([xvals[d] for d in draws])
 
     labels = jnp.array([0] * total_num_examples + [1] * total_num_examples)
-    samples = jnp.array([sample_a, sample_b])
+    samples = jnp.array([sample_pos, sample_neg])
     samples = jnp.reshape(samples, (2 * total_num_examples, feature_dimension))
     return samples, labels
 

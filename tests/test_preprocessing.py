@@ -1,4 +1,3 @@
-from typing import Tuple, List
 import numpy as np
 import pytest
 import scipy
@@ -6,6 +5,7 @@ import scipy.special
 
 from qmlab.preprocessing import (
     parse_biomed_data_to_ndarray,
+    downsample_biomed_data,
     scale_to_specified_interval,
     pad_and_normalize_data,
     subsample_features,
@@ -55,7 +55,7 @@ def test_datatypes_2():
 
 # Using the information about the datasets from
 # https://biodatamining.biomedcentral.com/articles/10.1186/s13040-021-00283-6
-data_with_associated_attrs = [
+datasets_with_associated_attrs = [
     {"name": "wdbc_new", "shape": (569, 30), "pos": 212, "neg": 357},
     {"name": "fertility_new", "shape": (100, 9), "pos": 12, "neg": 88},
     {"name": "haberman_new", "shape": (306, 3), "pos": 81, "neg": 225},
@@ -68,7 +68,7 @@ data_with_associated_attrs = [
 ]
 
 
-@pytest.mark.parametrize("data", data_with_associated_attrs)
+@pytest.mark.parametrize("data", datasets_with_associated_attrs)
 def test_shape_datasets_X_y(data):
     name = data["name"]
     shape = data["shape"]
@@ -83,7 +83,7 @@ def test_shape_datasets_X_y(data):
     assert np.count_nonzero(y == +1) == pos
 
 
-@pytest.mark.parametrize("data", data_with_associated_attrs)
+@pytest.mark.parametrize("data", datasets_with_associated_attrs)
 def test_shape_datasets_dataframe(data):
     name = data["name"]
     shape = data["shape"]
@@ -92,6 +92,19 @@ def test_shape_datasets_dataframe(data):
     df, _ = parse_biomed_data_to_ndarray(name, return_X_y=False)
     assert df.shape == (shape[0], shape[1] + 1)
     assert (pos + neg) == shape[0]
+
+
+@pytest.mark.parametrize("data", datasets_with_associated_attrs)
+def test_downsampling(data):
+    name = data["name"]
+    X, y, _ = parse_biomed_data_to_ndarray(name, return_X_y=True)
+    X, y = downsample_biomed_data(X, y)
+    X_pos, X_neg = X[y == +1], X[y == -1]
+    assert X_pos.shape == X_neg.shape
+    assert len(np.unique(y)) == 2
+    assert np.count_nonzero(y == +1) == np.count_nonzero(y == -1)
+
+    assert len(X[y == +1]) == len(X[y == -1])
 
 
 # we specify a variety of ranges to test the scaling
@@ -105,7 +118,7 @@ def test_shape_datasets_dataframe(data):
         (0.0, np.pi / 2),
     ],
 )
-@pytest.mark.parametrize("data", data_with_associated_attrs)
+@pytest.mark.parametrize("data", datasets_with_associated_attrs)
 def test_scale_data_to_range(range, data):
     (X, _, _) = parse_biomed_data_to_ndarray(data["name"])
     X_scaled = scale_to_specified_interval(X, range)

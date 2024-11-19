@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.decomposition import PCA, KernelPCA
 from sklearn.preprocessing import MinMaxScaler
 import itertools as it
+from sklearn.utils import resample
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "../../data/")
 
@@ -93,6 +94,22 @@ def parse_biomed_data_to_ndarray(
         return (X, y, feature_names)
     else:
         return (df.to_numpy(dtype=np.float32), feature_names)
+
+
+def downsample_biomed_data(
+    X: np.ndarray, y: np.ndarray, replace: bool = True, random_state: int = 42
+) -> Tuple[np.ndarray, np.ndarray]:
+    X_pos, X_neg = X[y == +1], X[y == -1]
+    y_pos, y_neg = y[y == +1], y[y == -1]
+
+    X_neg_downsample, y_neg_downsample = resample(
+        X_neg, y_neg, replace=replace, n_samples=len(X_pos), random_state=random_state
+    )
+
+    X = np.vstack((X_pos, X_neg_downsample))
+    y = np.hstack((y_pos, y_neg_downsample))
+
+    return X, y
 
 
 def subsample_features(
