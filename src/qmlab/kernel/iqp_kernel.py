@@ -1,4 +1,3 @@
-import os
 import time
 from typing import Callable
 import pennylane as qml
@@ -6,17 +5,10 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 from sklearn.base import BaseEstimator, ClassifierMixin
-import sklearn.datasets
 from sklearn.svm import SVC
 from sklearn.utils import gen_batches
 from pennylane.measurements import ProbabilityMP
 from pennylane import QNode
-from qmlab.preprocessing import (
-    parse_biomed_data_to_ndarray,
-    scale_to_specified_interval,
-)
-from qmlab.utils import run_shuffle_split
-from sklearn import metrics
 from sklearn.kernel_approximation import Nystroem
 
 jax.config.update("jax_enable_x64", True)
@@ -267,20 +259,5 @@ class FidelityIQPKernel(BaseEstimator, ClassifierMixin):
         """
         if "X_train" not in self.parameters:
             raise ValueError("Model cannot predict without fitting to data first.")
-        kernel_matrix = self.evaluate(X, self.parameters["x_train"])
+        kernel_matrix = self.evaluate(X, self.parameters["X_train"])
         return self.svm.predict_proba(kernel_matrix)
-
-
-if __name__ == "__main__":
-
-    X, y, _ = parse_biomed_data_to_ndarray("sobar_new", return_X_y=True)
-    X = scale_to_specified_interval(X)
-    svm = SVC(kernel="rbf", random_state=42, probability=True).fit(X, y)
-    qsvm = FidelityIQPKernel(jit=True, nystroem=True).fit(X, y)
-    print(svm.classes_)
-    print(qsvm.classes_)
-    y_score = svm.predict_proba(X)[:, 1]
-    print(metrics.roc_auc_score(y, y_score))
-    y_score = qsvm.predict_proba(X)[:, 1]
-    print(metrics.roc_auc_score(y, y_score))
-    print(run_shuffle_split(qsvm, X, y))

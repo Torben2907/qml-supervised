@@ -65,30 +65,17 @@ class QSVC(ABC, BaseEstimator, ClassifierMixin):
 
 
 class AngleEmbeddedKernel(QSVC):
-    def __init__(
-        self,
-        svm=SVC(kernel="precomputed", probability=True),
-        reps=2,
-        C=1,
-        jit=False,
-        random_state=42,
-        max_vmap=250,
-        dev_type="default.qubit",
-        qnode_kwargs={"interface": "jax-jit", "diff_method": None},
-    ):
-        super().__init__(
-            svm, reps, C, jit, random_state, max_vmap, dev_type, qnode_kwargs
-        )
 
     def build_circuit(self) -> QNode:
         dev = qml.device(self.dev_type, wires=self.num_qubits)
+
         projector = np.zeros((2**self.num_qubits, 2**self.num_qubits))
         projector[0, 0] = 1.0
 
         @qml.qnode(dev)
-        def circuit(x_vec: np.ndarray, y_vec: np.ndarray) -> ProbabilityMP:
-            qml.AngleEmbedding(x_vec, wires=range(self.num_qubits))
-            qml.adjoing(qml.AngleEmbedding)(y_vec, wires=range(self.num_qubits))
+        def circuit(x1: np.ndarray, x2: np.ndarray) -> ProbabilityMP:
+            qml.AngleEmbedding(x1, wires=range(self.num_qubits))
+            qml.adjoint(qml.AngleEmbedding)(x2, wires=range(self.num_qubits))
             return qml.expval(qml.Hermitian(projector, wires=range(self.num_qubits)))
 
         self.circuit = circuit

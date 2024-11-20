@@ -1,3 +1,3 @@
-from .model_utils import run_shuffle_split
+from .model_utils import run_cross_validation
 
-__all__ = ["run_shuffle_split"]
+__all__ = ["run_cross_validation"]
