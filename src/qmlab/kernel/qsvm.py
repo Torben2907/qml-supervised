@@ -44,7 +44,7 @@ class QSVC(ABC, BaseEstimator, ClassifierMixin):
 
     @abstractmethod
     def initialize_params(
-        self, feature_dimension: int, class_labels: np.ndarray
+        self, feature_dimension: int, class_labels: np.ndarray | None
     ) -> None:
         raise NotImplementedError()
 
@@ -60,6 +60,6 @@ class QSVC(ABC, BaseEstimator, ClassifierMixin):
     def predict(self, X: np.ndarray) -> np.ndarray:
         raise NotImplementedError()
 
-    # @abstractmethod
+    @abstractmethod
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
         raise NotImplementedError()

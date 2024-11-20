@@ -64,3 +64,7 @@ class AngleEmbeddedKernel(QSVC):
     def predict(self, X: np.ndarray) -> np.ndarray:
         test_train_kernel_matrix = self.evaluate(X, self.parameters["X_train"])
         return self.svm.predict(test_train_kernel_matrix)
+
+    def predict_proba(self, X):
+        # TODO: implement this for this kerne
+        pass
