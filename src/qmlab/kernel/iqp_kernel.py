@@ -1,56 +1,16 @@
 import time
-from typing import Callable
 import pennylane as qml
 import numpy as np
 import jax
 import jax.numpy as jnp
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.svm import SVC
-from sklearn.utils import gen_batches
+from qmlab.utils import chunk_vmapped_fn
 from pennylane.measurements import ProbabilityMP
 from pennylane import QNode
 from sklearn.kernel_approximation import Nystroem
 
 jax.config.update("jax_enable_x64", True)
-
-
-def chunk_vmapped_fn(
-    vmapped_fn: Callable[..., jnp.ndarray], start: int, max_vmap: int
-) -> Callable[..., jnp.ndarray]:
-    """
-    Convert a vmapped function to an equivalent function that evaluates in chunks of size
-    max_vmap. The behaviour of chunked_fn should be the same as vmapped_fn, but with a
-    lower memory cost.
-
-    The input vmapped_fn should have in_axes = (None, None, ..., 0,0,...,0)
-
-    Args:
-        vmapped (func): vmapped function with in_axes = (None, None, ..., 0,0,...,0)
-        start (int): The index where the first 0 appears in in_axes
-        max_vmap (int) The max chunk size with which to evaluate the function
-
-    Returns:
-        chunked version of the function
-    """
-
-    def chunked_fn(*args):
-        batch_len = len(args[start])
-        batch_slices = list(gen_batches(batch_len, max_vmap))
-        res = [
-            vmapped_fn(*args[:start], *[arg[slice] for arg in args[start:]])
-            for slice in batch_slices
-        ]
-        # jnp.concatenate needs to act on arrays with the same shape, so pad the last array if necessary
-        if batch_len / max_vmap % 1 != 0.0:
-            diff = max_vmap - len(res[-1])
-            res[-1] = jnp.pad(
-                res[-1], [(0, diff), *[(0, 0)] * (len(res[-1].shape) - 1)]
-            )
-            return jnp.concatenate(res)[:-diff]
-        else:
-            return jnp.concatenate(res)
-
-    return chunked_fn
 
 
 class FidelityIQPKernel(BaseEstimator, ClassifierMixin):
