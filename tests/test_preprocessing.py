@@ -6,10 +6,26 @@ import scipy.special
 from qmlab.preprocessing import (
     parse_biomed_data_to_ndarray,
     downsample_biomed_data,
+    upsample_biomed_data,
     scale_to_specified_interval,
     pad_and_normalize_data,
     subsample_features,
 )
+
+"""Using the information about the datasets from
+https://biodatamining.biomedcentral.com/articles/10.1186/s13040-021-00283-6
+"""
+datasets_with_associated_attrs = [
+    {"name": "wdbc_new", "shape": (569, 30), "pos": 212, "neg": 357},
+    {"name": "fertility_new", "shape": (100, 9), "pos": 12, "neg": 88},
+    {"name": "haberman_new", "shape": (306, 3), "pos": 81, "neg": 225},
+    {"name": "cervical_new", "shape": (761, 7), "pos": 17, "neg": 744},
+    {"name": "hcv_new", "shape": (546, 12), "pos": 20, "neg": 526},
+    {"name": "nafld_new", "shape": (74, 9), "pos": 22, "neg": 52},
+    {"name": "heroin_new", "shape": (942, 11), "pos": 97, "neg": 845},
+    {"name": "ctg_new", "shape": (1831, 22), "pos": 176, "neg": 1655},
+    {"name": "sobar_new", "shape": (72, 19), "pos": 21, "neg": 51},
+]
 
 
 def test_incorrect_file_name():
@@ -53,21 +69,6 @@ def test_datatypes_2():
     assert df.dtype == np.float32
 
 
-# Using the information about the datasets from
-# https://biodatamining.biomedcentral.com/articles/10.1186/s13040-021-00283-6
-datasets_with_associated_attrs = [
-    {"name": "wdbc_new", "shape": (569, 30), "pos": 212, "neg": 357},
-    {"name": "fertility_new", "shape": (100, 9), "pos": 12, "neg": 88},
-    {"name": "haberman_new", "shape": (306, 3), "pos": 81, "neg": 225},
-    {"name": "cervical_new", "shape": (761, 7), "pos": 17, "neg": 744},
-    {"name": "hcv_new", "shape": (546, 12), "pos": 20, "neg": 526},
-    {"name": "nafld_new", "shape": (74, 9), "pos": 22, "neg": 52},
-    {"name": "heroin_new", "shape": (942, 11), "pos": 97, "neg": 845},
-    {"name": "ctg_new", "shape": (1831, 22), "pos": 176, "neg": 1655},
-    {"name": "sobar_new", "shape": (72, 19), "pos": 21, "neg": 51},
-]
-
-
 @pytest.mark.parametrize("data", datasets_with_associated_attrs)
 def test_shape_datasets_X_y(data):
     name = data["name"]
@@ -98,12 +99,27 @@ def test_shape_datasets_dataframe(data):
 def test_downsampling(data):
     name = data["name"]
     X, y, _ = parse_biomed_data_to_ndarray(name, return_X_y=True)
+
     X, y = downsample_biomed_data(X, y)
     X_pos, X_neg = X[y == +1], X[y == -1]
-    assert X_pos.shape == X_neg.shape
-    assert len(np.unique(y)) == 2
-    assert np.count_nonzero(y == +1) == np.count_nonzero(y == -1)
 
+    assert X_pos.shape == X_neg.shape
+    np.testing.assert_array_equal(np.unique(y), [-1, +1])
+    assert np.count_nonzero(y == +1) == np.count_nonzero(y == -1)
+    assert len(X[y == +1]) == len(X[y == -1])
+
+
+@pytest.mark.parametrize("data", datasets_with_associated_attrs)
+def test_upsampling(data):
+    name = data["name"]
+    X, y, _ = parse_biomed_data_to_ndarray(name, return_X_y=True)
+
+    X, y = upsample_biomed_data(X, y)
+    X_pos, X_neg = X[y == +1], X[y == -1]
+
+    assert X_pos.shape == X_neg.shape
+    np.testing.assert_array_equal(np.unique(y), [-1, +1])
+    assert np.count_nonzero(y == +1) == np.count_nonzero(y == -1)
     assert len(X[y == +1]) == len(X[y == -1])
 
 
