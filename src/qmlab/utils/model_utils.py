@@ -18,8 +18,8 @@ def run_cross_validation(
     accuracies = []
     # precisions = []
     # recalls = []
-    # f1_scores = []
-    # auc_scores = []
+    f1_scores = []
+    auc_scores = []
     mccs = []
     for train_idx, test_idx in skf.split(X, y):
         X_train, X_test = X[train_idx], X[test_idx]
@@ -28,27 +28,27 @@ def run_cross_validation(
         clf.fit(X_train, y_train)
 
         y_pred = clf.predict(X_test)
-        # y_pred_proba = clf.predict_proba(X_test)[:, 1]
+        y_pred_proba = clf.predict_proba(X_test)[:, 1]
 
         accuracy = metrics.accuracy_score(y_test, y_pred)
         # precision = metrics.precision_score(y_test, y_pred)
         # recall = metrics.recall_score(y_test, y_pred)
-        # f1 = metrics.f1_score(y_test, y_pred)
+        f1 = metrics.f1_score(y_test, y_pred)
         mcc = metrics.matthews_corrcoef(y_test, y_pred)
-        # auc = metrics.roc_auc_score(y_test, y_pred_proba)
+        auc = metrics.roc_auc_score(y_test, y_pred_proba)
 
         accuracies.append(accuracy)
         # precisions.append(precision)
         # recalls.append(recall)
-        # f1_scores.append(f1)
+        f1_scores.append(f1)
         mccs.append(mcc)
-        # auc_scores.append(auc)
+        auc_scores.append(auc)
 
     results = {
         "accuracy": np.mean(accuracies).item(),
         # "recall": np.mean(recalls).item(),
-        # "f1": np.mean(f1_scores).item(),
-        # "auc": np.mean(auc_scores).item(),
+        "f1": np.mean(f1_scores).item(),
+        "auc": np.mean(auc_scores).item(),
         "mcc": np.mean(mccs).item(),
     }
 

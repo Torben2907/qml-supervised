@@ -6,7 +6,8 @@ import seaborn as sns
 from .plot_utils import set_figure_params
 from matplotlib.cm import plasma
 
-plt.style.use("dark_background")
+
+# plt.style.use("dark_background")
 os.makedirs("figures/", exist_ok=True)
 
 cmap = sns.color_palette("Spectral")

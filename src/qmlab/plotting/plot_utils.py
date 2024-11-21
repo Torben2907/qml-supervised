@@ -1,3 +1,6 @@
+import matplotlib.pyplot as plt
+
+
 def set_figure_params():
     """Set output figure parameters"""
     import matplotlib.pyplot as plt
@@ -11,3 +14,7 @@ def set_figure_params():
             "lines.markersize": 10,
         }
     )
+
+
+def set_plot_style(style: str = "dark_background"):
+    plt.style.use(style)

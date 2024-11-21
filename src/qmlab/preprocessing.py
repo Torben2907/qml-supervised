@@ -13,9 +13,9 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "../../data/")
 def parse_biomed_data_to_df(dataset_name: str) -> pd.DataFrame:
     df = pd.read_csv(DATA_DIR + dataset_name + ".csv")
     df = df.iloc[:, 1:]
-    # TODO: Need to scale the values in y to [-1, +1]
-    # also need to put the label column at the end not at the beginning
-    # of the dataframe
+    df["V1"] = (2 * df["V1"]) - 1
+    label_column = df.pop("V1")
+    df["V1"] = label_column
     return df
 
 
@@ -106,10 +106,26 @@ def downsample_biomed_data(
         X_neg, y_neg, replace=replace, n_samples=len(X_pos), random_state=random_state
     )
 
-    X = np.vstack((X_pos, X_neg_downsample))
-    y = np.hstack((y_pos, y_neg_downsample))
+    X_down = np.vstack((X_pos, X_neg_downsample))
+    y_down = np.hstack((y_pos, y_neg_downsample))
 
-    return X, y
+    return X_down, y_down
+
+
+def upsample_biomed_data(
+    X: np.ndarray, y: np.ndarray, replace: bool = True, random_state: int = 42
+):
+    X_pos, X_neg = X[y == +1], X[y == -1]
+    y_pos, y_neg = y[y == +1], y[y == -1]
+
+    X_pos_upsampled, y_pos_upsampled = resample(
+        X_pos, y_pos, replace=replace, n_samples=len(X_neg), random_state=random_state
+    )
+
+    X_up = np.vstack((X_pos_upsampled, X_neg))
+    y_up = np.hstack((y_pos_upsampled, y_neg))
+
+    return X_up, y_up
 
 
 def subsample_features(

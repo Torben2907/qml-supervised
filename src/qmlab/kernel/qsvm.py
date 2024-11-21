@@ -1,3 +1,4 @@
+from typing import Dict
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -35,6 +36,8 @@ class QSVC(ABC, BaseEstimator, ClassifierMixin):
         self.qnode_kwargs = qnode_kwargs
         self.circuit = None
 
+        self.parameters: Dict[str, np.ndarray] = {}
+
     def create_random_key(self) -> jnp.ndarray:
         return jax.random.key(np.random.default_rng().integers(self.random_state))
 
@@ -42,11 +45,21 @@ class QSVC(ABC, BaseEstimator, ClassifierMixin):
     def build_circuit(self) -> QNode:
         raise NotImplementedError()
 
-    @abstractmethod
     def initialize_params(
         self, feature_dimension: int, class_labels: np.ndarray | None
     ) -> None:
-        raise NotImplementedError()
+        if class_labels is None:
+            class_labels = np.asarray([-1, 1])
+
+        self.classes_ = class_labels
+        self.num_classes = len(self.classes_)
+        assert self.num_classes == 2, "Only binary classification supported."
+        assert (
+            -1 in self.classes_ and +1 in self.classes_
+        ), "labels must be in {-1, +1}!"
+        self.num_qubits = feature_dimension
+
+        self.build_circuit()
 
     @abstractmethod
     def evaluate(self, x_vec: np.ndarray, y_vec: np.ndarray) -> np.ndarray:
@@ -55,6 +68,12 @@ class QSVC(ABC, BaseEstimator, ClassifierMixin):
     @abstractmethod
     def fit(self, X: np.ndarray, y: np.ndarray) -> "QSVC":
         raise NotImplementedError()
+
+    def _check_fitted(self) -> None:
+        if "X_train" not in self.parameters:
+            raise ValueError(
+                "Model cannot predict without being fitted on the data beforehand."
+            )
 
     @abstractmethod
     def predict(self, X: np.ndarray) -> np.ndarray:

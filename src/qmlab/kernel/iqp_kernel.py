@@ -3,17 +3,17 @@ import pennylane as qml
 import numpy as np
 import jax
 import jax.numpy as jnp
-from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.svm import SVC
 from qmlab.utils import chunk_vmapped_fn
 from pennylane.measurements import ProbabilityMP
 from pennylane import QNode
 from sklearn.kernel_approximation import Nystroem
+from .qsvm import QSVC
 
 jax.config.update("jax_enable_x64", True)
 
 
-class FidelityIQPKernel(BaseEstimator, ClassifierMixin):
+class FidelityIQPKernel(QSVC):
     def __init__(
         self,
         svm=SVC(kernel="precomputed", probability=True),
@@ -79,7 +79,7 @@ class FidelityIQPKernel(BaseEstimator, ClassifierMixin):
         dev = qml.device(self.dev_type, wires=self.num_qubits)
 
         @qml.qnode(dev, **self.qnode_kwargs)
-        def circuit(x_vec: np.ndarray) -> ProbabilityMP:
+        def circuit(combined_inputs: np.ndarray) -> ProbabilityMP:
             """
             circuit used to precomute the kernel matrix K(x_1,x_2).
             Args:
@@ -89,13 +89,13 @@ class FidelityIQPKernel(BaseEstimator, ClassifierMixin):
                 (float) the value of the kernel fucntion K(x_1,x_2)
             """
             qml.IQPEmbedding(
-                x_vec[: self.num_qubits],
+                combined_inputs[: self.num_qubits],
                 wires=range(self.num_qubits),
                 n_repeats=self.reps,
             )
             qml.adjoint(
                 qml.IQPEmbedding(
-                    x_vec[self.num_qubits :],
+                    combined_inputs[self.num_qubits :],
                     wires=range(self.num_qubits),
                     n_repeats=self.reps,
                 )
@@ -118,15 +118,15 @@ class FidelityIQPKernel(BaseEstimator, ClassifierMixin):
             kernel_matrix (np.array): matrix of size (len(X1),len(X2)) with elements K(x_1,x_2)
         """
         # these are both data-dependent
-        left_parameters = len(x_vec)
-        right_parameters = len(y_vec)
+        left_inputs = len(x_vec)
+        right_inputs = len(y_vec)
 
         # concatenate all pairs of vectors
         Z = jnp.array(
             [
                 np.concatenate((x_vec[i], y_vec[j]))
-                for i in range(left_parameters)
-                for j in range(right_parameters)
+                for i in range(left_inputs)
+                for j in range(right_inputs)
             ]
         )
 
@@ -139,30 +139,10 @@ class FidelityIQPKernel(BaseEstimator, ClassifierMixin):
         # we are only interested in measuring |0>
         kernel_values = self.batched_circuit(Z)[:, 0]
 
-        kernel_matrix_shape = (left_parameters, right_parameters)
+        kernel_matrix_shape = (left_inputs, right_inputs)
         kernel_matrix = np.reshape(kernel_values, kernel_matrix_shape)
 
         return kernel_matrix
-
-    def initialize_params(
-        self, feature_dimension: int, class_labels: np.ndarray | None = None
-    ) -> None:
-        """Initialize attributes that depend on the number of features and the class labels.
-
-        Args:
-            n_features (int): Number of features that the classifier expects
-            classes (array-like): class labels that the classifier expects
-        """
-        if class_labels is None:
-            class_labels = np.asarray([-1, 1])
-
-        self.classes_ = class_labels
-        self.num_classes = len(self.classes_)
-        assert self.num_classes == 2
-        assert -1 in self.classes_ and +1 in self.classes_
-        self.num_qubits = feature_dimension
-
-        self.build_circuit()
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> "FidelityIQPKernel":
         """Fit the model to data X and labels y. Uses sklearn's SVM classifier
@@ -203,6 +183,7 @@ class FidelityIQPKernel(BaseEstimator, ClassifierMixin):
         Returns:
             y_pred (np.ndarray): Predicted labels of shape (n_samples,)
         """
+        self._check_fitted()
         kernel_matrix = self.evaluate(X, self.parameters["X_train"])
         return self.svm.predict(kernel_matrix)
 
@@ -217,7 +198,6 @@ class FidelityIQPKernel(BaseEstimator, ClassifierMixin):
             y_pred_proba (np.ndarray): Predicted label probabilities of shape
             (n_samples, n_classes)
         """
-        if "X_train" not in self.parameters:
-            raise ValueError("Model cannot predict without fitting to data first.")
+        self._check_fitted()
         kernel_matrix = self.evaluate(X, self.parameters["X_train"])
         return self.svm.predict_proba(kernel_matrix)
