@@ -16,9 +16,8 @@ All of the datasets don't consist of a large number of examples $m$, but have a 
 a large number of features $d$. 
 In the original paper different algorithms for data augmentation have been compared.
 
-| {\sf Name}      | $m$  | Cases $(+1)$ | Controls $(-1)$ |
-|-----------------|------|--------------|-----------------|
-|                 | $d$  |
+| {\sf Name}      | $m$  | Cases $(+1)$ | Controls $(-1)$ | $d$|
+|-----------------|------|--------------|-----------------|----|                 
 | {\sf SOBAR}     | 72   | 21           | 51              | 19 |
 | {\sf NAFLD}     | 74   | 22           | 52              | 9  |
 | {\sf Fertility} | 100  | 12           | 88              | 9  |
