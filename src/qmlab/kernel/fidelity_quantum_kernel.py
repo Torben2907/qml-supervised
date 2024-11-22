@@ -11,15 +11,15 @@ from ..utils import vmap_batch
 
 class FidelityQuantumKernel(QuantumKernel):
     def __init__(
-            self,
-            *,
-            embedding: Operation,
-            device: str = "default.qubit",
-            enforce_psd: bool = False,
-            jit: bool = True,
-            max_vmap: int = 250,
-            evaluate_duplicates: str = "off_diagonal",
-            interface: str = "jax-jit",
+        self,
+        *,
+        embedding: Operation,
+        device: str = "default.qubit",
+        enforce_psd: bool = False,
+        jit: bool = True,
+        max_vmap: int = 250,
+        evaluate_duplicates: str = "off_diagonal",
+        interface: str = "jax-jit",
     ):
         super().__init__(
             embedding=embedding,
@@ -27,7 +27,7 @@ class FidelityQuantumKernel(QuantumKernel):
             enforce_psd=enforce_psd,
             jit=jit,
             max_vmap=max_vmap,
-            interface=interface
+            interface=interface,
         )
         evaluate_duplicates = evaluate_duplicates.lower()
         if evaluate_duplicates not in ("all", "off_diagonal", "none"):
@@ -35,8 +35,6 @@ class FidelityQuantumKernel(QuantumKernel):
                 f"Value {evaluate_duplicates} isn't supported for attribute `eval_duplicates`!"
             )
         self._evaluate_duplicates = evaluate_duplicates
-        self.circuit = None
-        self.batched_circuit = None
 
     def build_circuit(self) -> QNode:
 
@@ -47,7 +45,7 @@ class FidelityQuantumKernel(QuantumKernel):
             # noinspection PyCallingNonCallable
             qml.adjoint(
                 self._embedding(
-                    features=z[self.num_qubits:], wires=range(self.num_qubits)
+                    features=z[self.num_qubits :], wires=range(self.num_qubits)
                 )
             )
             return qml.probs()
@@ -67,11 +65,7 @@ class FidelityQuantumKernel(QuantumKernel):
         )
 
         Z = jnp.array(
-            [
-                np.concatenate((x[i], y[j]))
-                for i in range(len(x))
-                for j in range(len(y))
-            ]
+            [np.concatenate((x[i], y[j])) for i in range(len(x)) for j in range(len(y))]
         )
 
         circuit = self.build_circuit()
@@ -89,7 +83,7 @@ class FidelityQuantumKernel(QuantumKernel):
         return kernel_matrix
 
     def _is_trivial(
-            self, i: int, j: int, psi_i: np.ndarray, phi_j: np.ndarray, symmetric: bool
+        self, i: int, j: int, psi_i: np.ndarray, phi_j: np.ndarray, symmetric: bool
     ) -> bool:
         if self._evaluate_duplicates == "all":
             return False
@@ -100,5 +94,9 @@ class FidelityQuantumKernel(QuantumKernel):
         return False
 
     @property
-    def evaluate_duplicates(self):
+    def evaluate_duplicates(self) -> str:
         return self._evaluate_duplicates
+
+    @evaluate_duplicates.setter
+    def evaluate_duplicates(self, evaluate_duplicates: str) -> None:
+        self._evaluate_duplicates = evaluate_duplicates

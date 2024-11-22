@@ -11,14 +11,14 @@ from pennylane.operation import Operation
 
 class QuantumKernel(ABC):
     def __init__(
-            self,
-            *,
-            embedding: Operation = None,
-            device: str = "default.qubit",
-            enforce_psd: bool = False,
-            jit: bool = True,
-            max_vmap: int = 250,
-            interface: str = "jax-jit",
+        self,
+        *,
+        embedding: Operation = None,
+        device: str = "default.qubit",
+        enforce_psd: bool = False,
+        jit: bool = True,
+        max_vmap: int = 250,
+        interface: str = "jax-jit",
     ) -> None:
         self._embedding = embedding
         self._num_wires = self._embedding.num_wires
@@ -28,16 +28,15 @@ class QuantumKernel(ABC):
         self._max_vmap = max_vmap
         self.interface = interface
 
-        self.classes_ = None
-        self.n_classes_ = None
-        self.num_qubits = None
+        self.classes_: List[int] | None = None
+        self.n_classes_: int | None = None
 
     @abstractmethod
     def build_circuit(self) -> QNode:
         raise NotImplementedError()
 
     def initialize(
-            self, feature_dimension: int, class_labels: List[int] | np.ndarray | None = None
+        self, feature_dimension: int, class_labels: List[int] | np.ndarray | None = None
     ) -> None:
         if class_labels is None:
             class_labels = [-1, 1]
@@ -96,10 +95,10 @@ class QuantumKernel(ABC):
         self._max_vmap = max_vmap
 
     def _validate_inputs(
-            self,
-            x: np.ndarray | List[List[float]],
-            y: np.ndarray | List[List[float]] | None = None,
-    ) -> Tuple[np.ndarray, np.ndarray | None]:
+        self,
+        x: np.ndarray | List[List[float]],
+        y: np.ndarray | List[List[float]],
+    ) -> Tuple[np.ndarray, np.ndarray]:
         x = self.check_type_and_dimension(x)
         if x.shape[1] != self._num_wires:
             try:
@@ -112,11 +111,11 @@ class QuantumKernel(ABC):
                 ) from ae
 
         if y is not None:
-            x = self.check_type_and_dimension(x)
+            y = self.check_type_and_dimension(y)
         return x, y
 
     @staticmethod
-    def check_type_and_dimension(data: np.ndarray) -> np.ndarray:
+    def check_type_and_dimension(data: np.ndarray | List[List[float]]) -> np.ndarray:
         if not isinstance(data, np.ndarray):
             data = np.asarray(data)
         if data.ndim > 2:

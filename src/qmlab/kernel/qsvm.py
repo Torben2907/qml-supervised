@@ -12,8 +12,8 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
         svm: Any,
         quantum_kernel: QuantumKernel,
         random_state: int = 42,
-        **kwargs,
-    ):
+        **svm_kwargs,
+    ) -> None:
         if quantum_kernel is None:
             raise ValueError("Parameter `quantum_kernel` must be provided.")
         elif not isinstance(quantum_kernel, QuantumKernel):
@@ -23,7 +23,7 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
         self._quantum_kernel = quantum_kernel
         self._random_state = random_state
         self._svm = svm(
-            kernel=self._quantum_kernel.evaluate, probability=True, **kwargs
+            kernel=self._quantum_kernel.evaluate, probability=True, **svm_kwargs
         )
         self.params_: Dict[str, np.ndarray] = {}
 
@@ -50,13 +50,14 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
 
     def fit(
         self, X: np.ndarray, y: np.ndarray, sample_weight: np.ndarray | None = None
-    ):
+    ) -> "BaseQSVM":
         self._svm.random_state = self._random_state
         self.params_ = {"X_train": X}
         self._quantum_kernel.initialize(
             feature_dimension=X.shape[1], class_labels=np.unique(y).tolist()
         )
         self._svm.fit(X, y, sample_weight)
+        return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         self._check_fitted()
@@ -73,5 +74,5 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
 
 
 class QSVC(BaseQSVM):
-    def __init__(self, quantum_kernel: QuantumKernel, random_state: int = 42, **kwargs):
-        super().__init__(SVC, quantum_kernel, random_state, **kwargs)
+    def __init__(self, quantum_kernel: QuantumKernel, random_state: int = 42, **svm_kwargs):
+        super().__init__(SVC, quantum_kernel, random_state, **svm_kwargs)
