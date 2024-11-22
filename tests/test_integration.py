@@ -1,3 +1,4 @@
+import numpy as np
 from sklearn.datasets import load_iris
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
@@ -10,7 +11,7 @@ from qmlab.data_generation import generate_random_data
 
 class TestQSVCIntegration(QMLabTest):
 
-    def test_classification_with_iris_data(self):
+    def test_classification_with_iris_data(self) -> None:
         qkernel = FidelityQuantumKernel(embedding=qml.IQPEmbedding)
         qsvm = QSVC(quantum_kernel=qkernel, random_state=self.random_state)
 
@@ -33,7 +34,7 @@ class TestQSVCIntegration(QMLabTest):
 
         assert score == 1.0
 
-    def test_classification_with_random_data(self):
+    def test_classification_with_random_data(self) -> None:
         qkernel = FidelityQuantumKernel(embedding=qml.IQPEmbedding)
         qsvm = QSVC(quantum_kernel=qkernel, random_state=self.random_state)
 
@@ -45,8 +46,8 @@ class TestQSVCIntegration(QMLabTest):
             random_state=12345,
         )
 
-        qsvm.fit(X_train, y_train)
+        qsvm.fit(np.array(X_train), np.array(y_train))
 
-        score = qsvm.score(X_test, y_test)
+        score = qsvm.score(np.array(X_test), np.array(y_test))
 
         assert score > 0.5

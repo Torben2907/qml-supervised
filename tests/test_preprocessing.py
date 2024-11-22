@@ -28,53 +28,54 @@ datasets_with_associated_attrs = [
 ]
 
 
-def test_incorrect_file_name():
+def test_incorrect_file_name() -> None:
     with pytest.raises(FileNotFoundError):
         parse_biomed_data_to_ndarray(
-            "my_data_that_will_never_exist_cause_who_would_name_it_like_this_fr"
+            "my_data_that_will_never_exist_cause_who_would_name_it_like_this_fr",
+            return_X_y=True,
         )
 
 
-def test_return_X_y():
+def test_return_X_y() -> None:
     res = parse_biomed_data_to_ndarray("haberman_new", return_X_y=True)
     assert len(res) == 3
 
 
-def test_return_dataframe():
+def test_return_dataframe() -> None:
     res = parse_biomed_data_to_ndarray("haberman_new", return_X_y=False)
     assert len(res) == 2
 
 
-def test_correct_parsing_of_start_and_end_of_file():
-    X, y, _ = parse_biomed_data_to_ndarray("cervical_new")
+def test_correct_parsing_of_start_and_end_of_file() -> None:
+    X, y, _ = parse_biomed_data_to_ndarray("cervical_new", return_X_y=True)
     np.testing.assert_allclose(X[0], np.array([52, 5, 16, 4, 1, 37, 37]))
     np.testing.assert_equal(y[0], 1)
     np.testing.assert_allclose(X[-1], np.array([29, 2, 20, 1, 0, 0, 0]))
     np.testing.assert_allclose(y[-1], -1)
 
 
-def test_correct_feature_names():
-    _, _, feature_names = parse_biomed_data_to_ndarray("haberman_new")
+def test_correct_feature_names() -> None:
+    _, _, feature_names = parse_biomed_data_to_ndarray("haberman_new", return_X_y=True)
     assert feature_names == ["V2", "V3", "V4"]
 
 
-def test_datatypes_1():
-    X, y, _ = parse_biomed_data_to_ndarray("cervical_new")
+def test_datatypes_1() -> None:
+    X, y, _ = parse_biomed_data_to_ndarray("cervical_new", return_X_y=True)
     assert X.dtype == np.float32
     assert y.dtype == np.int8
 
 
-def test_datatypes_2():
+def test_datatypes_2() -> None:
     df, _ = parse_biomed_data_to_ndarray("cervical_new", return_X_y=False)
     assert df.dtype == np.float32
 
 
 @pytest.mark.parametrize("data", datasets_with_associated_attrs)
-def test_shape_datasets_X_y(data):
+def test_shape_datasets_X_y(data) -> None:
     name, shape = data["name"], data["shape"]
     pos, neg = data["pos"], data["neg"]
 
-    X, y, _ = parse_biomed_data_to_ndarray(name)
+    X, y, _ = parse_biomed_data_to_ndarray(name, return_X_y=True)
     assert X.shape == shape
     assert y.shape == (shape[0],)
     assert (pos + neg) == shape[0]
@@ -84,7 +85,7 @@ def test_shape_datasets_X_y(data):
 
 
 @pytest.mark.parametrize("data", datasets_with_associated_attrs)
-def test_shape_datasets_dataframe(data):
+def test_shape_datasets_dataframe(data) -> None:
     name, shape = data["name"], data["shape"]
     pos, neg = data["pos"], data["neg"]
 
@@ -94,7 +95,7 @@ def test_shape_datasets_dataframe(data):
 
 
 @pytest.mark.parametrize("data", datasets_with_associated_attrs)
-def test_downsampling(data):
+def test_downsampling(data) -> None:
     name = data["name"]
     X, y, _ = parse_biomed_data_to_ndarray(name, return_X_y=True)
 
@@ -108,7 +109,7 @@ def test_downsampling(data):
 
 
 @pytest.mark.parametrize("data", datasets_with_associated_attrs)
-def test_upsampling(data):
+def test_upsampling(data) -> None:
     name = data["name"]
     X, y, _ = parse_biomed_data_to_ndarray(name, return_X_y=True)
 
@@ -133,29 +134,29 @@ def test_upsampling(data):
     ],
 )
 @pytest.mark.parametrize("data", datasets_with_associated_attrs)
-def test_scale_data_to_range(range, data):
-    (X, _, _) = parse_biomed_data_to_ndarray(data["name"])
+def test_scale_data_to_range(range, data) -> None:
+    (X, _, _) = parse_biomed_data_to_ndarray(data["name"], return_X_y=True)
     X_scaled = scale_to_specified_interval(X, range)
     assert np.any((X_scaled <= range[0]) | (X_scaled >= range[1]))
 
 
-def test_pad_and_normalize_data_with_zeros():
+def test_pad_and_normalize_data_with_zeros() -> None:
     x = np.array([[1 / 2, 1 / 2, 1 / 2]])
     x_norm = pad_and_normalize_data(x, pad_with=0.0)
     desired = (1 / np.sqrt(3)) * np.array([[1, 1, 1, 0]])
     np.testing.assert_allclose(x_norm, desired, rtol=1e-7, atol=1e-9)
 
 
-def test_pad_and_normalize_data_with_ones():
+def test_pad_and_normalize_data_with_ones() -> None:
     x = np.array([[1 / 2, 1 / 2, 1 / 2]])
     x_norm = pad_and_normalize_data(x, pad_with=1.0)
     desired = 4 / (2 * np.sqrt(13)) * np.array([[1.0, 1.0, 1.0, 1 / 2]])
     np.testing.assert_allclose(x_norm, desired, rtol=1e-7, atol=1e-9)
 
 
-def test_subsample_features_no_wrap_around():
+def test_subsample_features_no_wrap_around() -> None:
     """no rotation simply means that total number of features // number of features to subsample!"""
-    X, _, feature_names = parse_biomed_data_to_ndarray("haberman_new")
+    X, _, feature_names = parse_biomed_data_to_ndarray("haberman_new", return_X_y=True)
     results = subsample_features(
         X, feature_names, num_features_to_subsample=1, all_possible_combinations=False
     )
@@ -168,16 +169,16 @@ def test_subsample_features_no_wrap_around():
     assert first_feature_name == ["V2"]
 
 
-def test_subsample_features_wrap_around():
-    X, _, feature_names = parse_biomed_data_to_ndarray("haberman_new")
+def test_subsample_features_wrap_around() -> None:
+    X, _, feature_names = parse_biomed_data_to_ndarray("haberman_new", return_X_y=True)
     results = subsample_features(
         X, feature_names, num_features_to_subsample=2, all_possible_combinations=False
     )
     assert len(results) == 2
 
 
-def test_subsample_features_all_possible_combinations():
-    X, _, feature_names = parse_biomed_data_to_ndarray("ctg_new")
+def test_subsample_features_all_possible_combinations() -> None:
+    X, _, feature_names = parse_biomed_data_to_ndarray("ctg_new", return_X_y=True)
     results = subsample_features(
         X, feature_names, num_features_to_subsample=2, all_possible_combinations=True
     )
