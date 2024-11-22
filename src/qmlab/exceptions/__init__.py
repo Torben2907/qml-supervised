@@ -1,3 +1,3 @@
-from .exceptions import QMLabWarning, NotFittedError
+from .exceptions import QMLabError, QMLabWarning, NotFittedError, InvalidEmbeddingError
 
-__all__ = ["QMLabWarning", "NotFittedError"]
+__all__ = ["QMLabError", "QMLabWarning", "NotFittedError", "InvalidEmbeddingError"]

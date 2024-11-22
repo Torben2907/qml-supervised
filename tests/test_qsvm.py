@@ -6,7 +6,7 @@ import sklearn.model_selection
 from qmlab_testcase import QMLabTest
 from qmlab.kernel import QSVC
 from qmlab.kernel import FidelityQuantumKernel
-from qmlab.exceptions import NotFittedError
+from qmlab.exceptions import NotFittedError, QMLabError
 
 
 class TestQSVC(QMLabTest):
@@ -18,11 +18,11 @@ class TestQSVC(QMLabTest):
         self.y = np.array([-1, -1, 1, 1])
 
     def test_no_kernel_provided(self) -> None:
-        with pytest.raises(ValueError):
+        with pytest.raises(QMLabError):
             QSVC(quantum_kernel=None)  # type: ignore[arg-type]
 
     def test_no_valid_kernel_provided(self) -> None:
-        with pytest.raises(ValueError):
+        with pytest.raises(QMLabError):
             QSVC(quantum_kernel="rbf")  # type: ignore[arg-type]
 
     def test_default_initialization(self) -> None:

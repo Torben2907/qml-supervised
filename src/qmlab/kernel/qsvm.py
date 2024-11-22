@@ -3,7 +3,7 @@ from sklearn.svm import SVC
 from .quantum_kernel import QuantumKernel
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
-from ..exceptions import NotFittedError
+from ..exceptions import NotFittedError, QMLabError
 
 
 class BaseQSVM(BaseEstimator, ClassifierMixin):
@@ -15,9 +15,9 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
         **svm_kwargs,
     ) -> None:
         if quantum_kernel is None:
-            raise ValueError("Parameter `quantum_kernel` must be provided.")
+            raise QMLabError("Parameter `quantum_kernel` must be provided.")
         elif not isinstance(quantum_kernel, QuantumKernel):
-            raise ValueError(
+            raise QMLabError(
                 "Parameter `quantum_kernel` must be of type QuantumKernel."
             )
         self._quantum_kernel = quantum_kernel
@@ -74,5 +74,7 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
 
 
 class QSVC(BaseQSVM):
-    def __init__(self, quantum_kernel: QuantumKernel, random_state: int = 42, **svm_kwargs):
+    def __init__(
+        self, quantum_kernel: QuantumKernel, random_state: int = 42, **svm_kwargs
+    ):
         super().__init__(SVC, quantum_kernel, random_state, **svm_kwargs)

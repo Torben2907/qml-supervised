@@ -7,6 +7,8 @@ import numpy as np
 import pennylane as qml
 from pennylane import QNode
 from pennylane.operation import Operation
+from pennylane.capture import ABCCaptureMeta
+from ..exceptions import InvalidEmbeddingError
 
 
 class QuantumKernel(ABC):
@@ -20,7 +22,8 @@ class QuantumKernel(ABC):
         max_vmap: int = 250,
         interface: str = "jax-jit",
     ) -> None:
-        self._embedding = embedding
+        self._available_embeddings = ("Amplitude", "Angle", "IQP")
+        self._embedding = self.initialize_embedding(embedding)
         self._num_wires = self._embedding.num_wires
         self._device = qml.device(device, wires=self._num_wires)
         self._enforce_psd = enforce_psd
@@ -31,25 +34,38 @@ class QuantumKernel(ABC):
         self.classes_: List[int] | None = None
         self.n_classes_: int | None = None
 
+    def initialize_embedding(self, embedding: str | Operation) -> Operation:
+        if isinstance(embedding, str):
+            if embedding not in self._available_embeddings:
+                raise InvalidEmbeddingError(
+                    f"{embedding} embedding isn't available. Choose from {self._available_embeddings}."
+                )
+            match embedding:
+                case "Amplitude":
+                    return qml.AmplitudeEmbedding
+                case "Angle":
+                    return qml.AngleEmbedding
+                case "IQP":
+                    return qml.IQPEmbedding
+        elif isinstance(embedding, ABCCaptureMeta):
+            """actually passing in `qml.operation.Operation` should work here, but when passing
+            in the argument without brackets it creates this abstract
+            class from the capture module. might have to investigate this further."""
+            return embedding
+        else:
+            raise InvalidEmbeddingError(f"{embedding} is an invalid embedding type.")
+
     @abstractmethod
     def build_circuit(self) -> QNode:
         raise NotImplementedError()
 
+    @abstractmethod
     def initialize(
-        self, feature_dimension: int, class_labels: List[int] | np.ndarray | None = None
+        self,
+        feature_dimension: int,
+        class_labels: List[int] | None = None,
     ) -> None:
-        if class_labels is None:
-            class_labels = [-1, 1]
-
-        self.classes_ = (
-            class_labels.tolist()
-            if isinstance(class_labels, np.ndarray)
-            else class_labels
-        )
-        self.n_classes_ = len(self.classes_)
-        assert +1 and -1 in self.classes_
-        assert self.n_classes_ == 2
-        self.num_qubits = feature_dimension
+        raise NotImplementedError()
 
     @abstractmethod
     def evaluate(self, x: np.ndarray, y: np.ndarray) -> None:
@@ -93,6 +109,10 @@ class QuantumKernel(ABC):
     @max_vmap.setter
     def max_vmap(self, max_vmap: int) -> None:
         self._max_vmap = max_vmap
+
+    @property
+    def available_embeddings(self) -> Tuple[str, ...]:
+        return self._available_embeddings
 
     def _validate_inputs(
         self,

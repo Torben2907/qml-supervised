@@ -1,3 +1,4 @@
+from typing import List
 import jax
 import numpy as np
 from .quantum_kernel import QuantumKernel
@@ -7,6 +8,7 @@ from pennylane.measurements import ProbabilityMP
 import pennylane as qml
 import jax.numpy as jnp
 from ..utils import vmap_batch
+from ..exceptions import QMLabError
 
 
 class FidelityQuantumKernel(QuantumKernel):
@@ -35,6 +37,26 @@ class FidelityQuantumKernel(QuantumKernel):
                 f"Value {evaluate_duplicates} isn't supported for attribute `eval_duplicates`!"
             )
         self._evaluate_duplicates = evaluate_duplicates
+
+    def initialize(
+        self,
+        feature_dimension: int,
+        class_labels: List[int] | None = None,
+    ) -> None:
+        if class_labels is None:
+            class_labels = [-1, 1]
+
+        self.classes_ = class_labels
+        self.n_classes_ = len(self.classes_)
+        assert +1 and -1 in self.classes_
+        assert self.n_classes_ == 2
+
+        if self._embedding == qml.IQPEmbedding or self._embedding == qml.AngleEmbedding:
+            self.num_qubits = feature_dimension
+        elif self._embedding == qml.AmplitudeEmbedding:
+            self.num_qubits = int(np.ceil(np.log2(feature_dimension)))
+        else:
+            raise QMLabError()
 
     def build_circuit(self) -> QNode:
 

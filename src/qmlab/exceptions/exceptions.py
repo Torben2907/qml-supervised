@@ -1,3 +1,11 @@
+class QMLabError(Exception):
+    pass
+
+
+class InvalidEmbeddingError(ValueError, AttributeError):
+    pass
+
+
 class NotFittedError(ValueError, AttributeError):
     pass
 
