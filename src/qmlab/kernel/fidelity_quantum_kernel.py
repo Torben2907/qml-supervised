@@ -56,7 +56,7 @@ class FidelityQuantumKernel(QuantumKernel):
         elif self._embedding == qml.AmplitudeEmbedding:
             self.num_qubits = int(np.ceil(np.log2(feature_dimension)))
         else:
-            raise QMLabError()
+            raise QMLabError("Invalid embedding. Stop.")
 
     def build_circuit(self) -> QNode:
 

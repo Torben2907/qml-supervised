@@ -7,6 +7,7 @@ import yaml
 import pytest
 import numpy as np
 from qiskit_algorithms.utils import algorithm_globals
+from qmlab.exceptions import PerformanceWarning
 
 
 file_name = os.path.join(os.path.dirname(__file__), "config_test.yaml")
@@ -25,10 +26,10 @@ class QMLabTest(unittest.TestCase, ABC):
         np.random.seed(self.random_state)
         algorithm_globals.seed = random_state
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         test_runtime = time.time() - self._start
         if test_runtime > 5.0:
-            print(f"Test took {round(test_runtime):.2f}", flush=True)
+            raise PerformanceWarning(f"Test took {round(test_runtime):.2f}!")
 
     @pytest.fixture(autouse=True)
     def __inject_fixtures(self, mocker):

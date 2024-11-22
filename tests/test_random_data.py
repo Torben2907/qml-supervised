@@ -4,7 +4,7 @@ from qmlab.data_generation import generate_random_data
 
 
 class TestGenerateData(QMLabTest):
-    def setUp(self, num_features: int = 2):
+    def setUp(self, num_features: int = 2) -> None:
         super().setUp()
         self.num_features = num_features
         self.num_training_examples = 20
@@ -17,13 +17,13 @@ class TestGenerateData(QMLabTest):
             random_state=self.random_state,
         )
 
-    def test_shapes(self):
+    def test_shapes(self) -> None:
         np.testing.assert_array_equal(self.X_train.shape, (40, self.num_features))
         np.testing.assert_array_equal(self.X_test.shape, (10, self.num_features))
         np.testing.assert_array_equal(self.y_train.shape, (40,))
         np.testing.assert_array_equal(self.y_test.shape, (10,))
 
-    def test_label_values(self):
+    def test_label_values(self) -> None:
         np.testing.assert_array_equal(self.y_train, np.hstack(([-1] * 20, [+1] * 20)))
         np.testing.assert_array_equal(
             self.y_test, [-1, -1, -1, -1, -1, +1, +1, +1, +1, +1]

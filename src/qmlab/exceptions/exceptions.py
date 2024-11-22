@@ -17,3 +17,7 @@ class QMLabWarning(UserWarning):
 
     def __str__(self):
         return repr(self.msg)
+
+
+class PerformanceWarning(Warning):
+    pass

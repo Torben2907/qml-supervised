@@ -10,7 +10,7 @@ random_state = 12345
 
 
 @pytest.fixture
-def mock_matplotlib(mocker):
+def mock_matplotlib(mocker) -> SimpleNamespace:
     fig = mocker.Mock(spec=matplotlib.pyplot.Figure)
     ax = mocker.Mock(spec=matplotlib.pyplot.Axes)
     line2d = mocker.Mock(name="step", spec=matplotlib.lines.Line2D)
@@ -23,7 +23,7 @@ def mock_matplotlib(mocker):
     return SimpleNamespace(fig=fig, ax=ax, mpl=mpl, clf=clf)
 
 
-def test_plot_decision_boundaries(mock_matplotlib):
+def test_plot_decision_boundaries(mock_matplotlib) -> None:
     mpl = mock_matplotlib.mpl
     clf = mock_matplotlib.clf
 

@@ -46,7 +46,9 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
 
     def _check_fitted(self) -> None:
         if "X_train" not in self.params_:
-            raise NotFittedError("The model needs to be fitted before evaluating it.")
+            raise NotFittedError(
+                "Model needs to be fitted on the data before evaluating it."
+            )
 
     def fit(
         self, X: np.ndarray, y: np.ndarray, sample_weight: np.ndarray | None = None
