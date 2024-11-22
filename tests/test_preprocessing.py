@@ -71,10 +71,9 @@ def test_datatypes_2():
 
 @pytest.mark.parametrize("data", datasets_with_associated_attrs)
 def test_shape_datasets_X_y(data):
-    name = data["name"]
-    shape = data["shape"]
-    pos = data["pos"]
-    neg = data["neg"]
+    name, shape = data["name"], data["shape"]
+    pos, neg = data["pos"], data["neg"]
+
     X, y, _ = parse_biomed_data_to_ndarray(name)
     assert X.shape == shape
     assert y.shape == (shape[0],)
@@ -86,10 +85,9 @@ def test_shape_datasets_X_y(data):
 
 @pytest.mark.parametrize("data", datasets_with_associated_attrs)
 def test_shape_datasets_dataframe(data):
-    name = data["name"]
-    shape = data["shape"]
-    pos = data["pos"]
-    neg = data["neg"]
+    name, shape = data["name"], data["shape"]
+    pos, neg = data["pos"], data["neg"]
+
     df, _ = parse_biomed_data_to_ndarray(name, return_X_y=False)
     assert df.shape == (shape[0], shape[1] + 1)
     assert (pos + neg) == shape[0]

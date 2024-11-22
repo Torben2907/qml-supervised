@@ -1,81 +1,129 @@
+from typing import Any, Tuple
 import numpy as np
 import logging
 from abc import abstractmethod, ABC
-from qiskit import QuantumCircuit
-from qiskit.circuit.library import ZZFeatureMap
+from pennylane import QNode
+from pennylane.operation import Operation
+import pennylane as qml
+import jax
 
 
 class QuantumKernel(ABC):
     def __init__(
-        self, *, feature_map: QuantumCircuit = None, enforce_psd: bool = True
+        self,
+        *,
+        embedding: Operation = None,
+        device: str = "default.qubit",
+        enforce_psd: bool = True,
+        jit: bool = True,
+        max_vmap: int = 250,
+        qnode_kwargs: dict[str, str | None] = {
+            "interface": "jax-jit",
+            "diff_method": None,
+        },
     ) -> None:
-        if feature_map is None:
-            feature_map = ZZFeatureMap(2)
-
-        self._feature_dimension = feature_map.feature_dimension
-        self._feature_map = feature_map
+        self._embedding = embedding
+        self._num_wires = self._embedding.num_wires
+        self._device = qml.device(device, wires=self._num_wires)
         self._enforce_psd = enforce_psd
+        self._jit = jit
+        self._max_vmap = max_vmap
+        self._qnode_kwargs = qnode_kwargs
 
     @abstractmethod
-    def evaluate_kernel(
-        self, psi_vec: np.ndarray, phi_vec: np.ndarray | None = None
-    ) -> np.ndarray:
-        if phi_vec is None:
+    def build_circuit(self) -> QNode:
+        raise NotImplementedError()
+
+    def initialize(
+        self, feature_dimension: int, class_labels: np.ndarray | None = None
+    ) -> None:
+        if class_labels is None:
+            class_labels = np.asarray([-1, 1])
+
+        self.classes_ = class_labels
+        self.n_classes_ = self.classes_.size
+        assert self.n_classes_ == 2
+        self.num_qubits = feature_dimension
+
+    @abstractmethod
+    def evaluate(self, x: np.ndarray, y: np.ndarray | None = None) -> np.ndarray:
+        if y is None:
             logging.warning(
                 "You've passed one state vector to the"
-                + f"kernel computation, i. e. evaluating self inner product of {psi_vec} with itself."
+                + f"kernel computation, i. e. evaluating self inner product of {x}."
             )
         raise NotImplementedError(
             "You're trying to call an abstract method of the base quantum kernel class."
         )
 
-    @property
-    def feature_map(self) -> QuantumCircuit:
-        return self._feature_map
+    def create_random_key(self):
+        return jax.random.PRNGKey(self.rng.integers(1000000))
 
     @property
-    def feature_dimension(self) -> int:
-        return self._feature_dimension
+    def embedding(self) -> Operation:
+        return self._embedding
 
-    def _validate_inputs(self, psi_vec: np.ndarray, phi_vec: np.ndarray | None = None):
-        if not isinstance(psi_vec, np.ndarray):
+    @embedding.setter
+    def embedding(self, embedding: Operation) -> None:
+        self._embedding = embedding
+
+    @property
+    def num_wires(self) -> int:
+        return self._num_wires
+
+    @property
+    def device(self) -> Any:
+        return self._device
+
+    @device.setter
+    def device(self, device: str) -> None:
+        self._device = qml.device(device, wires=self._num_wires)
+
+    @property
+    def max_vmap(self) -> int:
+        return self._max_vmap
+
+    @max_vmap.setter
+    def max_vmap(self, max_vmap: int) -> None:
+        self._max_vmap = max_vmap
+
+    def _validate_inputs(
+        self, x: np.ndarray, y: np.ndarray | None = None
+    ) -> Tuple[np.ndarray, np.ndarray | None]:
+        if not isinstance(x, np.ndarray):
+            x = np.asarray(x)
+
+        if x.ndim > 2:
             raise ValueError(
-                f"Data must be given as np.ndarray but has type {type(psi_vec)}!"
+                f"{x} must be a one or two-dimensional array but has size {x.ndim}!"
             )
 
-        if psi_vec.ndim > 2:
-            raise ValueError(
-                f"{psi_vec} must be a one or two-dimensional array but has size {psi_vec.ndim}!"
-            )
+        if x.ndim == 1:
+            x = x.reshape(-1, len(x))
 
-        if psi_vec.ndim == 1:
-            psi_vec = psi_vec.reshape(-1, len(psi_vec))
-
-        if psi_vec.shape[1] != self._feature_dimension:
+        if x.shape[1] != self._num_wires:
             try:
-                self._feature_map.num_qubits = psi_vec.shape[1]
+                self._embedding.num_wires = x.shape[1]
             except AttributeError as ae:
                 raise ValueError(
-                    f"Incompatible dimensions found between {psi_vec} and class {self._feature_map.name}."
-                    f"{psi_vec} has {psi_vec.shape[1]} but {self._feature_map.name} has "
-                    f"{self._feature_map.num_qubits}."
+                    f"Incompatible dimensions found between {x} and class {self._embedding.name}."
+                    f"{x} has {x.shape[1]} but {self._embedding.name} has "
+                    f"{self._embedding.num_qubits}."
                 ) from ae
 
-        if phi_vec is not None:
-            if not isinstance(phi_vec, np.ndarray):
+        if y is not None:
+            if not isinstance(y, np.ndarray):
+                y = np.asarray(y)
+
+            if y.ndim > 2:
                 raise ValueError(
-                    f"Data must be given as np.ndarray but has type {type(phi_vec)}!"
+                    f"{y} must be a one or two-dimensional array but has size {y.ndim}!"
                 )
 
-            if phi_vec.ndim > 2:
-                raise ValueError(
-                    f"{phi_vec} must be a one or two-dimensional array but has size {phi_vec.ndim}!"
-                )
+            if y.ndim == 1:
+                y = y.reshape(-1, len(y))
 
-            if phi_vec.ndim == 1:
-                phi_vec = phi_vec.reshape(-1, len(phi_vec))
-
-        return psi_vec, phi_vec
+        return x, y
 
     def _ensure_psd(self, kernel_matrix: np.ndarray) -> np.ndarray:
         w, v = np.linalg.eig(kernel_matrix)

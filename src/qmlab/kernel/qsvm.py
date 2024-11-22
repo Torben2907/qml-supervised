@@ -1,84 +1,58 @@
-from typing import Dict
-import jax
-import jax.numpy as jnp
+from typing import Any
+from sklearn.svm import SVC
+from .quantum_kernel import QuantumKernel
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
-from sklearn.svm import SVC
-from pennylane import QNode
 
 
-from abc import ABC, abstractmethod
-
-
-class QSVC(ABC, BaseEstimator, ClassifierMixin):
-
+class BaseQSVM(BaseEstimator, ClassifierMixin):
     def __init__(
         self,
-        svm=SVC(kernel="precomputed", probability=True),
-        reps: int = 2,
-        C: float = 1.0,
-        jit: bool = False,
-        random_state: int = 42,
-        max_vmap: int = 250,
-        dev_type: str = "default.qubit",
-        qnode_kwargs: dict[str, str | None] = {
-            "interface": "jax-jit",
-            "diff_method": None,
-        },
-    ) -> None:
-        self.svm = svm
-        self.reps = reps
-        self.C = C
-        self.jit = jit
-        self.random_state = random_state
-        self.max_vmap = max_vmap
-        self.dev_type = dev_type
-        self.qnode_kwargs = qnode_kwargs
-        self.circuit = None
+        svm: Any,
+        quantum_kernel: QuantumKernel,
+        **kwargs,
+    ):
+        if quantum_kernel is None:
+            raise ValueError("`quantum_kernel` must be provided.")
+        self._quantum_kernel = quantum_kernel
+        self._svm = svm(
+            kernel=self._quantum_kernel.evaluate, probability=True, **kwargs
+        )
 
-        self.parameters: Dict[str, np.ndarray] = {}
+    @property
+    def quantum_kernel(self) -> QuantumKernel:
+        return self._quantum_kernel
 
-    def create_random_key(self) -> jnp.ndarray:
-        return jax.random.key(np.random.default_rng().integers(self.random_state))
-
-    @abstractmethod
-    def build_circuit(self) -> QNode:
-        raise NotImplementedError()
-
-    def initialize_params(
-        self, feature_dimension: int, class_labels: np.ndarray | None
-    ) -> None:
-        if class_labels is None:
-            class_labels = np.asarray([-1, 1])
-
-        self.classes_ = class_labels
-        self.num_classes = len(self.classes_)
-        assert self.num_classes == 2, "Only binary classification supported."
-        assert (
-            -1 in self.classes_ and +1 in self.classes_
-        ), "labels must be in {-1, +1}!"
-        self.num_qubits = feature_dimension
-
-        self.build_circuit()
-
-    @abstractmethod
-    def evaluate(self, x_vec: np.ndarray, y_vec: np.ndarray) -> np.ndarray:
-        raise NotImplementedError()
-
-    @abstractmethod
-    def fit(self, X: np.ndarray, y: np.ndarray) -> "QSVC":
-        raise NotImplementedError()
+    @quantum_kernel.setter
+    def quantum_kernel(self, quantum_kernel: QuantumKernel):
+        self._quantum_kernel = quantum_kernel
+        self._svm.kernel = self._quantum_kernel.evaluate
 
     def _check_fitted(self) -> None:
-        if "X_train" not in self.parameters:
-            raise ValueError(
-                "Model cannot predict without being fitted on the data beforehand."
-            )
+        if "X_train" not in self._params:
+            raise ValueError("Model needs to be fitted before you can evaluate it.")
 
-    @abstractmethod
+    def fit(
+        self, X: np.ndarray, y: np.ndarray, sample_weight: np.ndarray | None = None
+    ):
+        self._params = {"X_train": X}
+        self._quantum_kernel.initialize(X.shape[1], np.unique(y))
+        self._svm.fit(X, y, sample_weight)
+
     def predict(self, X: np.ndarray) -> np.ndarray:
-        raise NotImplementedError()
+        self._check_fitted()
+        return self._svm.predict(X)
 
-    @abstractmethod
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
-        raise NotImplementedError()
+        self._check_fitted()
+        return self._svm.predict_proba(X)
+
+    def score(
+        self, X: np.ndarray, y: np.ndarray, sample_weight: np.ndarray | None = None
+    ) -> float:
+        return self._svm.score(X, y, sample_weight)
+
+
+class QSVC(BaseQSVM):
+    def __init__(self, quantum_kernel: QuantumKernel, **kwargs):
+        super().__init__(SVC, quantum_kernel, **kwargs)

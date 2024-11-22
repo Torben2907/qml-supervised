@@ -1,26 +1,32 @@
-from typing import List, Tuple
+import jax
 import numpy as np
 from .quantum_kernel import QuantumKernel
-from qiskit import QuantumCircuit
-from qiskit_algorithms.state_fidelities import BaseStateFidelity, ComputeUncompute
-from qiskit.primitives import Sampler
+from pennylane import QNode
+from pennylane.operation import Operation
+from pennylane.measurements import ProbabilityMP
+import pennylane as qml
+import jax.numpy as jnp
+from qmlab.utils import chunk_vmapped_fn
 
 
 class FidelityQuantumKernel(QuantumKernel):
     def __init__(
         self,
         *,
-        feature_map: QuantumCircuit | None = None,
-        fidelity: BaseStateFidelity | None = None,
-        evaluate_duplicates: str = "off_diagonal",
-        max_circuits_per_job: int | None = None,
+        embedding: Operation,
+        device: str = "default.qubit",
         enforce_psd: bool = True,
+        jit: bool = True,
+        max_vmap: int = 250,
+        evaluate_duplicates: str = "off_diagonal",
     ):
-        super().__init__(feature_map=feature_map, enforce_psd=enforce_psd)
-        if not fidelity:
-            fidelity = ComputeUncompute(sampler=Sampler())
-        self._fidelity = fidelity
-        self.max_circuits_per_job = max_circuits_per_job
+        super().__init__(
+            embedding=embedding,
+            device=device,
+            enforce_psd=enforce_psd,
+            jit=jit,
+            max_vmap=max_vmap,
+        )
         evaluate_duplicates = evaluate_duplicates.lower()
         if evaluate_duplicates not in ("all", "off_diagonal", "none"):
             raise ValueError(
@@ -28,117 +34,51 @@ class FidelityQuantumKernel(QuantumKernel):
             )
         self._evaluate_duplicates = evaluate_duplicates
 
-    def evaluate_kernel(self, psi_vec: np.ndarray, phi_vec: np.ndarray | None = None):
-        psi_vec, phi_vec = self._validate_inputs(psi_vec, phi_vec)
-        is_symmetric = phi_vec is None or np.array_equal(psi_vec, phi_vec)
-        gram_matrix_shape = (
-            len(psi_vec),
-            len(phi_vec) if phi_vec is not None else len(psi_vec),
-        )
+    def build_circuit(self) -> QNode:
 
-        if is_symmetric:
-            params = self._get_symmetric_parameterization(psi_vec)
-            gram_matrix = self._compute_symmetric_kernel(gram_matrix_shape, *params)
-            if self._enforce_psd:
-                gram_matrix = self._ensure_psd(gram_matrix)
-        else:
-            if phi_vec is not None:
-                params = self._get_parameterization(psi_vec, phi_vec)
-                gram_matrix = self._compute_kernel(gram_matrix_shape, *params)
-            else:
-                raise ValueError("phi_vec cannot be None in the non-symmetric case!")
-
-        return gram_matrix
-
-    def _get_parameterization(
-        self, psi_vec: np.ndarray, phi_vec: np.ndarray
-    ) -> tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
-        indices = [
-            (i, j)
-            for i, x_i in enumerate(psi_vec)
-            for j, y_j in enumerate(phi_vec)
-            if not self._is_trivial(i, j, x_i, y_j, False)
-        ]
-
-        return (
-            psi_vec[[i for i, _ in indices]],
-            phi_vec[[j for _, j in indices]],
-            indices,
-        )
-
-    def _get_symmetric_parameterization(
-        self, psi_vec: np.ndarray
-    ) -> tuple[np.ndarray, np.ndarray, List[Tuple[int, int]]]:
-        indices = [
-            (i, i + j)
-            for i, x_i in enumerate(psi_vec)
-            for j, x_j in enumerate(psi_vec[i:])
-            if not self._is_trivial(i, i + j, x_i, x_j, True)
-        ]
-
-        return (
-            psi_vec[[i for i, _ in indices]],
-            psi_vec[[j for _, j in indices]],
-            indices,
-        )
-
-    def _compute_kernel(
-        self,
-        kernel_shape: tuple[int, int],
-        left_parameters: np.ndarray,
-        right_parameters: np.ndarray,
-        indices: List[Tuple[int, int]],
-    ) -> np.ndarray:
-        entries = self._compute_gram_entries(left_parameters, right_parameters)
-        kernel_matrix = np.ones(kernel_shape)
-        for i, (col, row) in enumerate(indices):
-            kernel_matrix[col, row] = entries[i]
-        return kernel_matrix
-
-    def _compute_symmetric_kernel(
-        self,
-        gram_matrix_shape: tuple[int, int],
-        left_parameters: np.ndarray,
-        right_parameters: np.ndarray,
-        indices: List[Tuple[int, int]],
-    ) -> np.ndarray:
-        entries = self._compute_gram_entries(left_parameters, right_parameters)
-        kernel_matrix = np.ones(gram_matrix_shape)
-        for i, (col, row) in enumerate(indices):
-            kernel_matrix[row, col] = entries[i]
-            if row != col:
-                kernel_matrix[col, row] = entries[i]
-        return kernel_matrix
-
-    def _compute_gram_entries(
-        self, left_parameters: np.ndarray, right_parameters: np.ndarray
-    ) -> List[float]:
-        if not left_parameters.size:
-            return []
-
-        entries = []
-        if self.max_circuits_per_job:
-            for start in range(0, len(left_parameters), self.max_circuits_per_job):
-                end = start + self.max_circuits_per_job
-                entries.extend(
-                    self._run_fidelity(
-                        left_parameters[start:end], right_parameters[start:end]
-                    )
+        @qml.qnode(self._device, **self._qnode_kwargs)
+        def circuit(z: np.ndarray) -> ProbabilityMP:
+            self._embedding(features=z[: self.num_qubits], wires=range(self.num_qubits))
+            qml.adjoint(
+                self._embedding(
+                    features=z[self.num_qubits :], wires=range(self.num_qubits)
                 )
-        else:
-            entries = self._run_fidelity(left_parameters, right_parameters)
-        return entries
+            )
+            return qml.probs()
 
-    def _run_fidelity(
-        self, left_parameters: np.ndarray, right_parameters: np.ndarray
-    ) -> List[float]:
-        job = self.fidelity.run(
-            [self.feature_map] * len(left_parameters),
-            [self.feature_map] * len(left_parameters),
-            left_parameters,
-            right_parameters,
+        self.circuit = circuit
+        if self._jit:
+            circuit = jax.jit(circuit)
+
+        return circuit
+
+    def evaluate(self, x: np.ndarray, y: np.ndarray | None = None):
+        x, y = self._validate_inputs(x, y)
+        # is_symmetric = y is None or np.array_equal(x, y)
+        kernel_matrix_shape = (
+            len(x),
+            len(y) if y is not None else len(x),
         )
-        return job.result().fidelities
+
+        if y is not None:
+            Z = jnp.array(
+                [
+                    np.concatenate((x[i], y[j]))
+                    for i in range(len(x))
+                    for j in range(len(y))
+                ]
+            )
+
+        circuit = self.build_circuit()
+        self.batched_circuit = chunk_vmapped_fn(
+            jax.vmap(circuit, 0), start=0, max_vmap=self._max_vmap
+        )
+
+        # remember from the derivation in the thesis,
+        # we are only interested in measuring |0>
+        kernel_values = self.batched_circuit(Z)[:, 0]
+        kernel_matrix = np.reshape(kernel_values, kernel_matrix_shape)
+        return kernel_matrix
 
     def _is_trivial(
         self, i: int, j: int, psi_i: np.ndarray, phi_j: np.ndarray, symmetric: bool
@@ -150,10 +90,6 @@ class FidelityQuantumKernel(QuantumKernel):
         if np.array_equal(psi_i, phi_j) and self._evaluate_duplicates == "none":
             return True
         return False
-
-    @property
-    def fidelity(self):
-        return self._fidelity
 
     @property
     def evaluate_duplicates(self):
