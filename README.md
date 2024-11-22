@@ -16,18 +16,18 @@ All of the datasets don't consist of a large number of examples $m$, but have a 
 a large number of features $d$. 
 In the original paper different algorithms for data augmentation have been compared.
 
-| **Name**      | $m$  | Cases $(+1)$ | Controls $(-1)$ | $d$|
-|---------------|------|--------------|-----------------|----|                 
-| **SOBAR**     | 72   | 21           | 51              | 19 |
-| **NAFLD**     | 74   | 22           | 52              | 9  |
-| **Fertility** | 100  | 12           | 88              | 9  |
-| **WPDC**      | 198  | 47           | 151             | 32 |
-| **Haberman**  | 306  | 81           | 225             | 3  |
-| **HCV**       | 546  | 20           | 526             | 12 |
-| **WDBC**      | 569  | 212          | 357             | 30 |
-| **CCRF**      | 761  | 17           | 744             | 7  |
-| **Heroin**    | 942  | 97           | 845             | 11 |
-| **CTG**       | 1831 | 176          | 1655            | 22 |
+| **Name**      | $m$  | Cases $(+1)$ | Controls $(-1)$ | $d$ |
+|---------------|------|--------------|-----------------|-----|                 
+| **SOBAR**     | 72   | 21           | 51              | 19  |
+| **NAFLD**     | 74   | 22           | 52              | 9   |
+| **Fertility** | 100  | 12           | 88              | 9   |
+| **WPDC**      | 198  | 47           | 151             | 32  |
+| **Haberman**  | 306  | 81           | 225             | 3   |
+| **HCV**       | 546  | 20           | 526             | 12  |
+| **WDBC**      | 569  | 212          | 357             | 30  |
+| **CCRF**      | 761  | 17           | 744             | 7   |
+| **Heroin**    | 942  | 97           | 845             | 11  |
+| **CTG**       | 1831 | 176          | 1655            | 22  |
 
 ## What is a Quantum Support Vector Machine? 🤔
 
