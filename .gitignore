@@ -2,6 +2,9 @@
 .vscode
 .VSCodeCounter
 
+# ignore pycharm files
+.idea*
+
 # ignore python cache files 
 .pytest_cache
 .mypy_cache

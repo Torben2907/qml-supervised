@@ -16,7 +16,19 @@ All of the datasets don't consist of a large number of examples $m$, but have a 
 a large number of features $d$. 
 In the original paper different algorithms for data augmentation have been compared.
 
-![Overview of the datasets](/figures/information_datasets.png)
+| {\sf Name}      | $m$  | Cases $(+1)$ | Controls $(-1)$ |
+|-----------------|------|--------------|-----------------|
+|                 | $d$  |
+| {\sf SOBAR}     | 72   | 21           | 51              | 19 |
+| {\sf NAFLD}     | 74   | 22           | 52              | 9  |
+| {\sf Fertility} | 100  | 12           | 88              | 9  |
+| {\sf WPDC}      | 198  | 47           | 151             | 32 |
+| {\sf Haberman}  | 306  | 81           | 225             | 3  |
+| {\sf HCV}       | 546  | 20           | 526             | 12 |
+| {\sf WDBC}      | 569  | 212          | 357             | 30 |
+| {\sf CCRF}      | 761  | 17           | 744             | 7  |
+| {\sf Heroin}    | 942  | 97           | 845             | 11 |
+| {\sf CTG}       | 1831 | 176          | 1655            | 22 |
 
 ## What is a Quantum Support Vector Machine? 🤔
 
