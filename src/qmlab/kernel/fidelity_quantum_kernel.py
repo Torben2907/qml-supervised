@@ -16,7 +16,7 @@ class FidelityQuantumKernel(QuantumKernel):
         *,
         embedding: Operation,
         device: str = "default.qubit",
-        enforce_psd: bool = True,
+        enforce_psd: bool = False,
         jit: bool = True,
         max_vmap: int = 250,
         evaluate_duplicates: str = "off_diagonal",

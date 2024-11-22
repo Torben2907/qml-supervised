@@ -14,7 +14,7 @@ class QuantumKernel(ABC):
         *,
         embedding: Operation = None,
         device: str = "default.qubit",
-        enforce_psd: bool = True,
+        enforce_psd: bool = False,
         jit: bool = True,
         max_vmap: int = 250,
         qnode_kwargs: Dict[str, str | None] = {

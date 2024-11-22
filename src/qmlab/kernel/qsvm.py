@@ -73,5 +73,5 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
 
 
 class QSVC(BaseQSVM):
-    def __init__(self, quantum_kernel: QuantumKernel, **kwargs):
-        super().__init__(SVC, quantum_kernel, **kwargs)
+    def __init__(self, quantum_kernel: QuantumKernel, random_state: int = 42, **kwargs):
+        super().__init__(SVC, quantum_kernel, random_state, **kwargs)

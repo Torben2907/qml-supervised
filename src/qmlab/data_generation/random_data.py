@@ -1,4 +1,4 @@
-from typing import Callable, Tuple
+from typing import Any, Callable, List, Tuple
 from functools import reduce
 import itertools as it
 
@@ -22,7 +22,7 @@ def generate_random_data(
 
     if not isinstance(interval, tuple) or len(interval) != 2:
         raise ValueError(
-            "`interval` must be a tuple containing two floating point values!"
+            "Parameter `interval` must be a tuple containing two floating point values!"
         )
 
     num_points = 100 if feature_dimension == 2 else 20
@@ -47,8 +47,9 @@ def generate_random_data(
     par_op = reduce(jnp.kron, [single_z] * feature_dimension)
     assert _is_hermitian(par_op) and _is_unitary(par_op) is True
 
-    # generate real random vals and create hermitian by the trick
-    # explained in the function _hermitian_random docstring!
+    """Generate real random values and create a hermitian operator via the trick
+    that is explained in the docstring of the function `_hermitian_random`!
+    """
     random_hermitian = _hermitian_random(size=2**feature_dimension, key=key)
     assert _is_hermitian(random_hermitian) is True
 
@@ -125,9 +126,15 @@ def _hermitian_random(size: int, key: jnp.ndarray) -> jnp.ndarray:
     return C.conj().T @ C
 
 
-def _sample_data(sample_total, xvals, total_num_examples, feature_dimension):
+def _sample_data(
+    sample_total: jnp.ndarray,
+    xvals: jnp.ndarray,
+    total_num_examples: int,
+    feature_dimension: int,
+) -> Tuple[jnp.ndarray, jnp.ndarray]:
     count = sample_total.shape[0]
-    sample_pos, sample_neg = [], []
+    sample_pos: List[Any] = []
+    sample_neg: List[Any] = []
     for i, sample_list in enumerate([sample_pos, sample_neg]):
         label = 1 if i == 0 else -1
         while len(sample_list) < total_num_examples:

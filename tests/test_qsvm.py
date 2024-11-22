@@ -1,7 +1,8 @@
-import sklearn
 import pytest
 import numpy as np
 import pennylane as qml
+import sklearn.datasets
+import sklearn.model_selection
 from qmlab_testcase import QMLabTest
 from qmlab.kernel import QSVC
 from qmlab.kernel import FidelityQuantumKernel
