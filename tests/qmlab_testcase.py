@@ -4,6 +4,7 @@ import os
 import unittest
 import time
 import yaml
+import pytest
 import numpy as np
 from qiskit_algorithms.utils import algorithm_globals
 
@@ -28,3 +29,7 @@ class QMLabTest(unittest.TestCase, ABC):
         test_runtime = time.time() - self._start
         if test_runtime > 5.0:
             print(f"Test took {round(test_runtime):.2f}", flush=True)
+
+    @pytest.fixture(autouse=True)
+    def __inject_fixtures(self, mocker):
+        self.mocker = mocker
