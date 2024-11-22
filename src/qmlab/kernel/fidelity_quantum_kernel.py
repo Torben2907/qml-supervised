@@ -1,3 +1,4 @@
+from typing import Dict
 import jax
 import numpy as np
 from .quantum_kernel import QuantumKernel
@@ -19,6 +20,10 @@ class FidelityQuantumKernel(QuantumKernel):
         jit: bool = True,
         max_vmap: int = 250,
         evaluate_duplicates: str = "off_diagonal",
+        qnode_kwargs: Dict[str, str | None] = {
+            "interface": "jax-jit",
+            "diff_method": None,
+        },
     ):
         super().__init__(
             embedding=embedding,
@@ -26,6 +31,7 @@ class FidelityQuantumKernel(QuantumKernel):
             enforce_psd=enforce_psd,
             jit=jit,
             max_vmap=max_vmap,
+            qnode_kwargs=qnode_kwargs,
         )
         evaluate_duplicates = evaluate_duplicates.lower()
         if evaluate_duplicates not in ("all", "off_diagonal", "none"):
@@ -74,10 +80,13 @@ class FidelityQuantumKernel(QuantumKernel):
             jax.vmap(circuit, 0), start=0, max_vmap=self._max_vmap
         )
 
-        # remember from the derivation in the thesis,
         # we are only interested in measuring |0>
         kernel_values = self.batched_circuit(Z)[:, 0]
         kernel_matrix = np.reshape(kernel_values, kernel_matrix_shape)
+
+        if self._enforce_psd:
+            kernel_matrix = self._make_psd(kernel_matrix)
+
         return kernel_matrix
 
     def _is_trivial(

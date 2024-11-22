@@ -1,4 +1,4 @@
-from typing import Any, Tuple
+from typing import Any, Dict, List, Tuple
 import numpy as np
 import logging
 from abc import abstractmethod, ABC
@@ -17,7 +17,7 @@ class QuantumKernel(ABC):
         enforce_psd: bool = True,
         jit: bool = True,
         max_vmap: int = 250,
-        qnode_kwargs: dict[str, str | None] = {
+        qnode_kwargs: Dict[str, str | None] = {
             "interface": "jax-jit",
             "diff_method": None,
         },
@@ -35,13 +35,18 @@ class QuantumKernel(ABC):
         raise NotImplementedError()
 
     def initialize(
-        self, feature_dimension: int, class_labels: np.ndarray | None = None
+        self, feature_dimension: int, class_labels: List[int] | np.ndarray | None = None
     ) -> None:
         if class_labels is None:
-            class_labels = np.asarray([-1, 1])
+            class_labels = [-1, 1]
 
-        self.classes_ = class_labels
-        self.n_classes_ = self.classes_.size
+        self.classes_ = (
+            class_labels.tolist()
+            if isinstance(class_labels, np.ndarray)
+            else class_labels
+        )
+        self.n_classes_ = len(self.classes_)
+        assert +1 and -1 in self.classes_
         assert self.n_classes_ == 2
         self.num_qubits = feature_dimension
 
@@ -88,7 +93,9 @@ class QuantumKernel(ABC):
         self._max_vmap = max_vmap
 
     def _validate_inputs(
-        self, x: np.ndarray, y: np.ndarray | None = None
+        self,
+        x: np.ndarray | List[List[float]],
+        y: np.ndarray | List[List[float]] | None = None,
     ) -> Tuple[np.ndarray, np.ndarray | None]:
         if not isinstance(x, np.ndarray):
             x = np.asarray(x)
@@ -125,7 +132,7 @@ class QuantumKernel(ABC):
 
         return x, y
 
-    def _ensure_psd(self, kernel_matrix: np.ndarray) -> np.ndarray:
+    def _make_psd(self, kernel_matrix: np.ndarray) -> np.ndarray:
         w, v = np.linalg.eig(kernel_matrix)
         m = v @ np.diag(np.maximum(0, w)) @ v.transpose()
         return m.real

@@ -3,6 +3,7 @@ from sklearn.svm import SVC
 from .quantum_kernel import QuantumKernel
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
+from ..exceptions import NotFittedError
 
 
 class BaseQSVM(BaseEstimator, ClassifierMixin):
@@ -15,6 +16,10 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
     ):
         if quantum_kernel is None:
             raise ValueError("Parameter `quantum_kernel` must be provided.")
+        elif not isinstance(quantum_kernel, QuantumKernel):
+            raise ValueError(
+                "Parameter `quantum_kernel` must be of type QuantumKernel."
+            )
         self._quantum_kernel = quantum_kernel
         self._random_state = random_state
         self._svm = svm(
@@ -41,14 +46,16 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
 
     def _check_fitted(self) -> None:
         if "X_train" not in self.params_:
-            raise ValueError("The model needs to be fitted before you can evaluate it.")
+            raise NotFittedError("The model needs to be fitted before evaluating it.")
 
     def fit(
         self, X: np.ndarray, y: np.ndarray, sample_weight: np.ndarray | None = None
     ):
         self._svm.random_state = self._random_state
         self.params_ = {"X_train": X}
-        self._quantum_kernel.initialize(X.shape[1], np.unique(y))
+        self._quantum_kernel.initialize(
+            feature_dimension=X.shape[1], class_labels=np.unique(y).tolist()
+        )
         self._svm.fit(X, y, sample_weight)
 
     def predict(self, X: np.ndarray) -> np.ndarray:
