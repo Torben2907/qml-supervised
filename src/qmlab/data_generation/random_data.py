@@ -53,7 +53,7 @@ def generate_random_data(
     random_hermitian = _hermitian_random(size=2**feature_dimension, key=key)
     assert _is_hermitian(random_hermitian) is True
 
-    eigvals, eigvecs = jnp.linalg.eigh(random_hermitian)
+    eigvals, eigvecs = jnp.linalg.eig(random_hermitian)
     idcs = jnp.argsort(eigvals)[::-1]
     eigvecs = eigvecs[:, idcs]
     assert _is_unitary(eigvecs) is True
