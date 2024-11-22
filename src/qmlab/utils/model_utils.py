@@ -3,12 +3,13 @@ import jax.numpy as jnp
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
 from sklearn import metrics
-from sklearn.base import BaseEstimator, ClassifierMixin
+from sklearn.svm import SVC
 from sklearn.utils import gen_batches
+from ..kernel.qsvm import QSVC
 
 
 def run_cross_validation(
-    clf: BaseEstimator | ClassifierMixin,
+    clf: SVC | QSVC,
     X: np.ndarray,
     y: np.ndarray,
     num_splits: int = 10,
@@ -55,31 +56,15 @@ def run_cross_validation(
     return results
 
 
-def chunk_vmapped_fn(
+def vmap_batch(
     vmapped_fn: Callable[..., jnp.ndarray], start: int, max_vmap: int
 ) -> Callable[..., jnp.ndarray]:
-    """
-    Convert a vmapped function to an equivalent function that evaluates in chunks of size
-    max_vmap. The behaviour of chunked_fn should be the same as vmapped_fn, but with a
-    lower memory cost.
-
-    The input vmapped_fn should have in_axes = (None, None, ..., 0,0,...,0)
-
-    Args:
-        vmapped (func): vmapped function with in_axes = (None, None, ..., 0,0,...,0)
-        start (int): The index where the first 0 appears in in_axes
-        max_vmap (int) The max chunk size with which to evaluate the function
-
-    Returns:
-        chunked version of the function
-    """
-
     def chunked_fn(*args):
         batch_len = len(args[start])
         batch_slices = list(gen_batches(batch_len, max_vmap))
         res = [
-            vmapped_fn(*args[:start], *[arg[slice] for arg in args[start:]])
-            for slice in batch_slices
+            vmapped_fn(*args[:start], *[arg[single_slice] for arg in args[start:]])
+            for single_slice in batch_slices
         ]
         # jnp.concatenate needs to act on arrays with the same shape, so pad the last array if necessary
         if batch_len / max_vmap % 1 != 0.0:

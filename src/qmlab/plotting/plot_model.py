@@ -1,10 +1,10 @@
 import numpy as np
-from sklearn.base import ClassifierMixin, BaseEstimator
+from sklearn.svm import SVC
 from .plot_utils import set_figure_params
 
 
 def plot_decision_boundaries(
-    clf: ClassifierMixin | BaseEstimator,
+    clf: SVC,
     X_train: np.ndarray,
     y_train: np.ndarray,
     X_test: np.ndarray,

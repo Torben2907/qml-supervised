@@ -9,8 +9,8 @@ import numpy as np
 from qiskit_algorithms.utils import algorithm_globals
 
 
-fname = os.path.join(os.path.dirname(__file__), "config_test.yaml")
-with open(fname) as f:
+file_name = os.path.join(os.path.dirname(__file__), "config_test.yaml")
+with open(file_name) as f:
     file = yaml.safe_load(f)
 
 random_state = file["random_state"]

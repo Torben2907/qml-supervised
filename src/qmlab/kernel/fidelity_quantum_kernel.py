@@ -1,4 +1,3 @@
-from typing import Dict
 import jax
 import numpy as np
 from .quantum_kernel import QuantumKernel
@@ -7,23 +6,20 @@ from pennylane.operation import Operation
 from pennylane.measurements import ProbabilityMP
 import pennylane as qml
 import jax.numpy as jnp
-from qmlab.utils import chunk_vmapped_fn
+from ..utils import vmap_batch
 
 
 class FidelityQuantumKernel(QuantumKernel):
     def __init__(
-        self,
-        *,
-        embedding: Operation,
-        device: str = "default.qubit",
-        enforce_psd: bool = False,
-        jit: bool = True,
-        max_vmap: int = 250,
-        evaluate_duplicates: str = "off_diagonal",
-        qnode_kwargs: Dict[str, str | None] = {
-            "interface": "jax-jit",
-            "diff_method": None,
-        },
+            self,
+            *,
+            embedding: Operation,
+            device: str = "default.qubit",
+            enforce_psd: bool = False,
+            jit: bool = True,
+            max_vmap: int = 250,
+            evaluate_duplicates: str = "off_diagonal",
+            interface: str = "jax-jit",
     ):
         super().__init__(
             embedding=embedding,
@@ -31,7 +27,7 @@ class FidelityQuantumKernel(QuantumKernel):
             enforce_psd=enforce_psd,
             jit=jit,
             max_vmap=max_vmap,
-            qnode_kwargs=qnode_kwargs,
+            interface=interface
         )
         evaluate_duplicates = evaluate_duplicates.lower()
         if evaluate_duplicates not in ("all", "off_diagonal", "none"):
@@ -39,15 +35,19 @@ class FidelityQuantumKernel(QuantumKernel):
                 f"Value {evaluate_duplicates} isn't supported for attribute `eval_duplicates`!"
             )
         self._evaluate_duplicates = evaluate_duplicates
+        self.circuit = None
+        self.batched_circuit = None
 
     def build_circuit(self) -> QNode:
 
-        @qml.qnode(self._device, **self._qnode_kwargs)
-        def circuit(z: np.ndarray) -> ProbabilityMP:
+        @qml.qnode(self._device, interface=self.interface, diff_method=None)
+        def circuit(z: jnp.ndarray) -> ProbabilityMP:
+            # noinspection PyCallingNonCallable
             self._embedding(features=z[: self.num_qubits], wires=range(self.num_qubits))
+            # noinspection PyCallingNonCallable
             qml.adjoint(
                 self._embedding(
-                    features=z[self.num_qubits :], wires=range(self.num_qubits)
+                    features=z[self.num_qubits:], wires=range(self.num_qubits)
                 )
             )
             return qml.probs()
@@ -58,7 +58,7 @@ class FidelityQuantumKernel(QuantumKernel):
 
         return circuit
 
-    def evaluate(self, x: np.ndarray, y: np.ndarray | None = None):
+    def evaluate(self, x: np.ndarray, y: np.ndarray):
         x, y = self._validate_inputs(x, y)
         # is_symmetric = y is None or np.array_equal(x, y)
         kernel_matrix_shape = (
@@ -66,17 +66,16 @@ class FidelityQuantumKernel(QuantumKernel):
             len(y) if y is not None else len(x),
         )
 
-        if y is not None:
-            Z = jnp.array(
-                [
-                    np.concatenate((x[i], y[j]))
-                    for i in range(len(x))
-                    for j in range(len(y))
-                ]
-            )
+        Z = jnp.array(
+            [
+                np.concatenate((x[i], y[j]))
+                for i in range(len(x))
+                for j in range(len(y))
+            ]
+        )
 
         circuit = self.build_circuit()
-        self.batched_circuit = chunk_vmapped_fn(
+        self.batched_circuit = vmap_batch(
             jax.vmap(circuit, 0), start=0, max_vmap=self._max_vmap
         )
 
@@ -85,12 +84,12 @@ class FidelityQuantumKernel(QuantumKernel):
         kernel_matrix = np.reshape(kernel_values, kernel_matrix_shape)
 
         if self._enforce_psd:
-            kernel_matrix = self._make_psd(kernel_matrix)
+            kernel_matrix = self.make_psd(kernel_matrix)
 
         return kernel_matrix
 
     def _is_trivial(
-        self, i: int, j: int, psi_i: np.ndarray, phi_j: np.ndarray, symmetric: bool
+            self, i: int, j: int, psi_i: np.ndarray, phi_j: np.ndarray, symmetric: bool
     ) -> bool:
         if self._evaluate_duplicates == "all":
             return False
