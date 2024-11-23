@@ -75,7 +75,7 @@ class QuantumKernel(ABC):
                 + f"kernel computation, i. e. evaluating self inner product of {x}."
             )
         raise NotImplementedError(
-            "You're trying to call an abstract method of the base quantum kernel class."
+            "You're trying to call the `evaluate` method of the base quantum kernel class, which is abstract."
         )
 
     @staticmethod
