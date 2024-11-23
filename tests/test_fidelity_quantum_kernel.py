@@ -2,7 +2,7 @@ import pytest
 from pennylane import AmplitudeEmbedding, AngleEmbedding, IQPEmbedding, AdamOptimizer
 from qmlab.kernel import FidelityQuantumKernel
 from qmlab.exceptions import InvalidEmbeddingError
-from qmlab_testcase import QMLabTest
+from .qmlab_testcase import QMLabTest
 
 
 class TestFidelityQuantumKernel(QMLabTest):

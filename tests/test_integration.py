@@ -3,7 +3,7 @@ from sklearn.datasets import load_iris
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 import pennylane as qml
-from qmlab_testcase import QMLabTest
+from .qmlab_testcase import QMLabTest
 from qmlab.kernel import QSVC
 from qmlab.kernel import FidelityQuantumKernel
 from qmlab.data_generation import generate_random_data

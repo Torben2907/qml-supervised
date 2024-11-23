@@ -39,8 +39,8 @@ def compute_svm_results(
                 results = run_cross_validation(
                     svm, X_sub, y, num_splits=num_splits, random_state=random_state
                 )
-                acc, mcc = tuple(results.values())
-                entry[group_name] = f"{acc:.5f}, {mcc:.5f}"
+                acc, f1, mcc, auc = tuple(results.values())
+                entry[group_name] = f"{acc:.5f}, {mcc:.5f}, {f1:.5f}, {auc:.5f}"
             results_summary.append(entry)
     return pd.DataFrame(results_summary)
 

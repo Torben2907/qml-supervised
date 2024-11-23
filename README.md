@@ -1,6 +1,6 @@
 # A quantum-based approach for supervised learning (bachelor thesis) 
 
-This repository provides code for comparing classical machine learning models with their quantum-hybrid counterparts. We've trained and evaluated these models on real-world biomedical data to investigate whether the quantum-hybrid versions can achieve a better performance than their classical counterparts, potentially demonstrating a quantum advantage.
+This repository provides code for comparing classical kernel models with their quantum-hybrid counterparts. We've trained and evaluated these models on real-world biomedical data to investigate whether the quantum-hybrid versions can achieve a better performance than their classical counterparts, potentially demonstrating a quantum advantage.
 
 ## Welcome to QMLab! 🧪
 
@@ -10,13 +10,12 @@ The package we created is called `QMLab` - written entirely in Python, using [Pe
 
 ## Information about the data 🧬
 
-We're dealing with 9 different biomedical datasets in the thesis. The collection is coming from the study of <cite>Jacqueline Beinecke & Dominik Heider [[1]]</cite> on comparing different augmentation methods for biomedical
-data.
-All of the datasets don't consist of a large number of examples $m$, but have a high class imbalance and 
+We're dealing with 9 different biomedical datasets in the thesis. The collection is coming from the study of <cite>Jacqueline Beinecke & Dominik Heider [[1]]</cite> that comparse different augmentation methods for 
+dealing with the imbalance in biomedical data.
+All of the datasets don't consist of a large number of examples $m$, but have the high class imbalance and 
 a large number of features $d$. 
-In the original paper different algorithms for data augmentation have been compared.
 
-| **Name**      | $m$  | Cases $(+1)$ | Controls $(-1)$ | $d$ |
+| **NAME**      | $m$  | Cases (+1)   | Controls (-1)   | $d$ |
 |---------------|------|--------------|-----------------|-----|                 
 | **SOBAR**     | 72   | 21           | 51              | 19  |
 | **NAFLD**     | 74   | 22           | 52              | 9   |
@@ -29,21 +28,37 @@ In the original paper different algorithms for data augmentation have been compa
 | **Heroin**    | 942  | 97           | 845             | 11  |
 | **CTG**       | 1831 | 176          | 1655            | 22  |
 
+In the original paper different algorithms for data augmentation in order to deal with the imbalance 
+have been compared.
+We have implemented a quantum kernel classifier from {\cite havlicek here} and compared its performance 
+to common kernel classifiers known from traditional machine learning, like the rbf or polynomial 
+kernel.
+
 ## What is a Quantum Support Vector Machine? 🤔
 
 Since real quantum hardware is noisy and prone for errors a whole field submerged of quantum hybrid algorithms 
 which are based on classical learning algorithms but outsource suitable parts to a quantum computer.
 
-The basic support vector machine algorithm can only classify data that is linearly separable. 
+The traditional support vector machine algorithm can only classify data that is linearly separable. 
 It becomes way more powerful when we introduce a class of functions called **kernels**. 
 Kernels allow us to map our data in a higher, perhaps infinite dimensional space where it is linearly separable. 
-Therefore we can classify non-linearly separable data with a linear model introducing those kernels.
+Therefore we can classify non-linearly separable data with a linear model.
 
 A **quantum kernel** is a function
 
 
 
 ## Can we train a Quantum Kernel? 🤨
+
+
+Run all tests of the project (`-v` for verbose output):
+```shell
+pytest -v 
+```
+Run all tests with coverage:
+```shell
+pytest -v --cov=src/qmlab tests/   
+```
 
 ---
 [1]: https://biodatamining.biomedcentral.com/articles/10.1186/s13040-021-00283-6#Tab1

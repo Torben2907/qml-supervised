@@ -1,5 +1,5 @@
 import numpy as np
-from qmlab_testcase import QMLabTest
+from .qmlab_testcase import QMLabTest
 from qmlab.data_generation import generate_random_data
 
 
