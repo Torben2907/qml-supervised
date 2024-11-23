@@ -7,7 +7,7 @@ from pennylane.operation import Operation
 from pennylane.measurements import ProbabilityMP
 import pennylane as qml
 import jax.numpy as jnp
-from ..utils import vmap_batch
+from .kernel_utils import vmap_batch
 from ..exceptions import QMLabError
 
 
