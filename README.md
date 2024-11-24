@@ -52,20 +52,24 @@ A **quantum kernel** is a function
 
 
 ## Installation and Tests 
-Install all required Python packages via 
+Create a new python environment using 
 ```shell 
+python -m venv ~/myvirtualenv 
+```
+or if you are using `python3`: 
+```shell 
+python3 -m venv ~/myvirtualenv
+```
+and then install all of the required packages via:
+```shell
 pip install -r requirements.txt
 ```
-when in folder or activate the virtual environment I used during development: 
-```shell
-source qmlab/bin/activate
-```
 for unix operating systems.
-Run all tests of the project (Add the `-v` for verbose output):
+Check if all tests of the project (Add the `-v` for verbose output) run:
 ```shell
 pytest -v 
 ```
-Run all tests with coverage:
+Additionally run all tests with coverage:
 ```shell
 pytest -v --cov=src/qmlab tests/   
 ```
