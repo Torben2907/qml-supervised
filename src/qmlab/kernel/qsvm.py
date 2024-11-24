@@ -44,7 +44,7 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
     def random_state(self, random_state: int) -> None:
         self._random_state = random_state
 
-    def _check_fitted(self) -> None:
+    def check_if_fitted(self) -> None:
         if "X_train" not in self.params_:
             raise NotFittedError(
                 "Model needs to be fitted on the data before evaluating it."
@@ -62,11 +62,11 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        self._check_fitted()
+        self.check_if_fitted()
         return self._svm.predict(X)
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
-        self._check_fitted()
+        self.check_if_fitted()
         return self._svm.predict_proba(X)
 
     def score(

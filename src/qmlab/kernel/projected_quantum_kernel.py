@@ -29,9 +29,9 @@ class ProjectedQuantumKernel(QuantumKernel):
         assert self.n_classes_ == 2
         self.n_features_ = feature_dimension
 
-        if self.embedding == "IQP":
+        if self.data_embedding == "IQP":
             self.n_qubits_ = self.n_features_
-        elif self.embedding == "Hamiltonian":
+        elif self.data_embedding == "Hamiltonian":
             self.n_qubits_ = self.n_features_ + 1
             self.rotation_angles_ = jnp.array(
                 np.random.default_rng().uniform(size=(self.n_qubits_, 3)) * np.pi * 2

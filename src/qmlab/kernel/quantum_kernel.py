@@ -15,7 +15,7 @@ class QuantumKernel(ABC):
     def __init__(
         self,
         *,
-        embedding: Operation = None,
+        data_embedding: Operation = None,
         device: str = "default.qubit",
         enforce_psd: bool = False,
         jit: bool = True,
@@ -23,8 +23,8 @@ class QuantumKernel(ABC):
         interface: str = "jax-jit",
     ) -> None:
         self._available_embeddings = ("Amplitude", "Angle", "IQP")
-        self._embedding = self.initialize_embedding(embedding)
-        self._num_wires = self._embedding.num_wires
+        self._data_embedding = self.initialize_embedding(data_embedding)
+        self._num_wires = self._data_embedding.num_wires
         self._device = qml.device(device, wires=self._num_wires)
         self._enforce_psd = enforce_psd
         self._jit = jit
@@ -83,12 +83,12 @@ class QuantumKernel(ABC):
         return jax.random.PRNGKey(np.random.default_rng().integers(1000000))
 
     @property
-    def embedding(self) -> Operation:
-        return self._embedding
+    def data_embedding(self) -> Operation:
+        return self._data_embedding
 
-    @embedding.setter
-    def embedding(self, embedding: Operation) -> None:
-        self._embedding = embedding
+    @data_embedding.setter
+    def data_embedding(self, data_embedding: Operation) -> None:
+        self._data_embedding = data_embedding
 
     @property
     def num_wires(self) -> int:
@@ -122,12 +122,12 @@ class QuantumKernel(ABC):
         x = self.check_type_and_dimension(x)
         if x.shape[1] != self._num_wires:
             try:
-                self._embedding.num_wires = x.shape[1]
+                self._data_embedding.num_wires = x.shape[1]
             except AttributeError as ae:
                 raise ValueError(
-                    f"Incompatible dimensions found between {x} and class {self._embedding.name}."
-                    f"{x} has {x.shape[1]} but {self._embedding.name} has "
-                    f"{self._embedding.num_wires}."
+                    f"Incompatible dimensions found between {x} and class {self._data_embedding.name}."
+                    f"{x} has {x.shape[1]} but {self._data_embedding.name} has "
+                    f"{self._data_embedding.num_wires}."
                 ) from ae
 
         if y is not None:

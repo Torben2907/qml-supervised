@@ -13,7 +13,7 @@ class TestQSVC(QMLabTest):
 
     def setUp(self) -> None:
         super().setUp()
-        self.qkernel = FidelityQuantumKernel(embedding=qml.IQPEmbedding)
+        self.qkernel = FidelityQuantumKernel(data_embedding=qml.IQPEmbedding)
         self.X = np.array([[-1, -1], [-2, -1], [1, 1], [2, 1]])
         self.y = np.array([-1, -1, 1, 1])
 

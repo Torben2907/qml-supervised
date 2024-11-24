@@ -1,12 +1,12 @@
 from typing import List
 import jax
 import numpy as np
+import jax.numpy as jnp
+import pennylane as qml
 from .quantum_kernel import QuantumKernel
 from pennylane import QNode
 from pennylane.operation import Operation
 from pennylane.measurements import ProbabilityMP
-import pennylane as qml
-import jax.numpy as jnp
 from .kernel_utils import vmap_batch
 from ..exceptions import QMLabError
 
@@ -15,7 +15,7 @@ class FidelityQuantumKernel(QuantumKernel):
     def __init__(
         self,
         *,
-        embedding: Operation,
+        data_embedding: Operation,
         device: str = "default.qubit",
         enforce_psd: bool = False,
         jit: bool = True,
@@ -24,7 +24,7 @@ class FidelityQuantumKernel(QuantumKernel):
         interface: str = "jax-jit",
     ):
         super().__init__(
-            embedding=embedding,
+            data_embedding=data_embedding,
             device=device,
             enforce_psd=enforce_psd,
             jit=jit,
@@ -51,9 +51,12 @@ class FidelityQuantumKernel(QuantumKernel):
         assert +1 and -1 in self.classes_
         assert self.n_classes_ == 2
 
-        if self._embedding == qml.IQPEmbedding or self._embedding == qml.AngleEmbedding:
+        if (
+            self._data_embedding == qml.IQPEmbedding
+            or self._data_embedding == qml.AngleEmbedding
+        ):
             self.num_qubits = feature_dimension
-        elif self._embedding == qml.AmplitudeEmbedding:
+        elif self._data_embedding == qml.AmplitudeEmbedding:
             self.num_qubits = int(np.ceil(np.log2(feature_dimension)))
         else:
             raise QMLabError("Invalid embedding. Stop.")
@@ -63,10 +66,12 @@ class FidelityQuantumKernel(QuantumKernel):
         @qml.qnode(self._device, interface=self.interface, diff_method=None)
         def circuit(z: jnp.ndarray) -> ProbabilityMP:
             # noinspection PyCallingNonCallable
-            self._embedding(features=z[: self.num_qubits], wires=range(self.num_qubits))
+            self._data_embedding(
+                features=z[: self.num_qubits], wires=range(self.num_qubits)
+            )
             # noinspection PyCallingNonCallable
             qml.adjoint(
-                self._embedding(
+                self._data_embedding(
                     features=z[self.num_qubits :], wires=range(self.num_qubits)
                 )
             )

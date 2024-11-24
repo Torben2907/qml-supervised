@@ -1,5 +1,6 @@
 """script to create 2-dimensional plots of all datasets with train and 
-    test split
+    test split. I'm keeping this for completeness but I didn't use those further,
+    since scaling down the dimensions so vastly wasn't a good approach.
 """
 
 import os
@@ -21,7 +22,7 @@ if __name__ == "__main__":
 
     for name in data_names:
         plt.clf()  # Clear the current figure
-        X, y = parse_biomed_data_to_ndarray(name)
+        X, y, _ = parse_biomed_data_to_ndarray(name, return_X_y=True)
         X = reduce_feature_dim(X, method="PCA")
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
         plot_2d_data_with_train_test_split(

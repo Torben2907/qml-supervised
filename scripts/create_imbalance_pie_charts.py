@@ -29,7 +29,7 @@ with open(path_to_data) as file:
 ncols = 5
 nrows = math.ceil(len(datasets) / ncols)
 assert nrows == 2  # this should be true cause we got 9 datasets in total :)
-fig, axes = plt.subplots(nrows, ncols, figsize=(6 * len(datasets), 6))
+fig, axes = plt.subplots(nrows, ncols, figsize=(len(datasets), 1))
 axes = axes.flatten()
 
 # this scaling is adjusted to the width of the .tex layout!

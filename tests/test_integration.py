@@ -12,7 +12,7 @@ from qmlab.data_generation import generate_random_data
 class TestQSVCIntegration(QMLabTest):
 
     def test_classification_with_iris_data(self) -> None:
-        qkernel = FidelityQuantumKernel(embedding=qml.IQPEmbedding)
+        qkernel = FidelityQuantumKernel(data_embedding=qml.IQPEmbedding)
         qsvm = QSVC(quantum_kernel=qkernel, random_state=self.random_state)
 
         X, y = load_iris(return_X_y=True)
@@ -35,7 +35,7 @@ class TestQSVCIntegration(QMLabTest):
         assert score == 1.0
 
     def test_classification_with_random_data(self) -> None:
-        qkernel = FidelityQuantumKernel(embedding=qml.IQPEmbedding)
+        qkernel = FidelityQuantumKernel(data_embedding=qml.IQPEmbedding)
         qsvm = QSVC(quantum_kernel=qkernel, random_state=self.random_state)
 
         X_train, y_train, X_test, y_test = generate_random_data(

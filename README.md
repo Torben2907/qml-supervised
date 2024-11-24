@@ -51,7 +51,17 @@ A **quantum kernel** is a function
 ## Can we train a Quantum Kernel? 🤨
 
 
-Run all tests of the project (`-v` for verbose output):
+## Installation and Tests 
+Install all required Python packages via 
+```shell 
+pip install -r requirements.txt
+```
+when in folder or activate the virtual environment I used during development: 
+```shell
+source qmlab/bin/activate
+```
+for unix operating systems.
+Run all tests of the project (Add the `-v` for verbose output):
 ```shell
 pytest -v 
 ```
