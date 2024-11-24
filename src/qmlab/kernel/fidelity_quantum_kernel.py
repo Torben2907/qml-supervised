@@ -15,7 +15,7 @@ class FidelityQuantumKernel(QuantumKernel):
     def __init__(
         self,
         *,
-        data_embedding: Operation,
+        data_embedding: Operation | str,
         device: str = "default.qubit",
         enforce_psd: bool = False,
         jit: bool = True,

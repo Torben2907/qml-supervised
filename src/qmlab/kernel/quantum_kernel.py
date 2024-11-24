@@ -15,7 +15,7 @@ class QuantumKernel(ABC):
     def __init__(
         self,
         *,
-        data_embedding: Operation = None,
+        data_embedding: Operation | str = None,
         device: str = "default.qubit",
         enforce_psd: bool = False,
         jit: bool = True,

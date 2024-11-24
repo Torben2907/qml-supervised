@@ -52,7 +52,10 @@ A **quantum kernel** is a function
 
 
 ## Installation and Tests 
-Create a new python environment using 
+
+### 
+### For Unix OS
+Create a new python environment using `python`-command:
 ```shell 
 python -m venv ~/myvirtualenv 
 ```
@@ -64,7 +67,9 @@ and then install all of the required packages via:
 ```shell
 pip install -r requirements.txt
 ```
-for unix operating systems.
+
+### For Windows OS 
+<!-- TODO: -->
 Check if all tests of the project (Add the `-v` for verbose output) run:
 ```shell
 pytest -v 
