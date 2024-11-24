@@ -22,7 +22,7 @@ def compute_qsvm_results_for_dataset(
     num_features_to_subsample: int = 3,
 ) -> pd.DataFrame:
     results_summary = []
-    for embedding in data_embeddings:
+    for embedding in tqdm(data_embeddings, desc=f"Embedding ({dataset})"):
         entry = {"Dataset": dataset, "Kernel": embedding}
         X, y, feature_names = parse_biomed_data_to_ndarray(dataset, return_X_y=True)
         X = scale_to_specified_interval(X, interval=(-np.pi / 2, np.pi / 2))
@@ -45,11 +45,12 @@ path_to_data_names = os.path.join(os.path.dirname(__file__), "../data_names.yaml
 with open(path_to_data_names) as file:
     datasets: list[str] = yaml.safe_load(file)
 
-datasets = ["haberman_new"]
+datasets.remove("ctg_new")
+# datasets = ["haberman_new"]
 data_embeddings = ("IQP", "Angle")
 
 if __name__ == "__main__":
-    for data in tqdm(datasets):
+    for data in tqdm(datasets, desc="Datasets"):
         df = compute_qsvm_results_for_dataset(data, data_embeddings)
         res_name = f"QSVM_{data}_results.csv"
         path_out = os.path.join(res_dir, res_name)

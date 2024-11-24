@@ -78,7 +78,7 @@ matplotlib-inline==0.1.7
 mdit-py-plugins==0.4.2
 mdurl==0.1.2
 mistune==3.0.2
-ml_dtypes==0.5.0
+ml_dtypes==0.4.1
 mpmath==1.3.0
 mypy==1.13.0
 mypy-extensions==1.0.0
@@ -133,7 +133,7 @@ qiskit==1.1.0
 qiskit-algorithms==0.3.1
 qiskit-ibm-runtime==0.33.1
 qiskit-machine-learning==0.8.0
--e git+https://github.com/Torben2907/qml-supervised.git@d6d9a27e25276a0e4d0c81285d083ad4c0c09ddf#egg=QMLab
+-e git+https://github.com/Torben2907/qml-supervised.git@3b38c23038d1cc215724666dfce81d9452d01497#egg=QMLab
 referencing==0.35.1
 requests==2.32.3
 requests_ntlm==1.3.0
@@ -177,7 +177,8 @@ types-PyYAML==6.0.12.20240917
 typing_extensions==4.12.2
 tzdata==2024.2
 uri-template==1.3.0
-urllib3==1.26.20
+# urllib3==1.26.20
+urllib3==2.2.3
 virtualenv==20.27.0
 wcwidth==0.2.13
 webcolors==24.11.1
