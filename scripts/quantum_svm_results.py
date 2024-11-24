@@ -27,13 +27,13 @@ def compute_qsvm_results_for_dataset(
         X, y, feature_names = parse_biomed_data_to_ndarray(dataset, return_X_y=True)
         X = scale_to_specified_interval(X, interval=(-np.pi / 2, np.pi / 2))
         subsampling_results = subsample_features(
-            X, feature_names, num_features_to_subsample=3
+            X, feature_names, num_features_to_subsample
         )
         qkernel = FidelityQuantumKernel(data_embedding=embedding, jit=True)
         qsvm = QSVC(quantum_kernel=qkernel, random_state=42)
         for X_sub, feature_names_sub in subsampling_results:
             group_name = str(feature_names_sub)
-            results = run_cross_validation(qsvm, X_sub, y, num_splits)
+            results = run_cross_validation(qsvm, X_sub, y, num_splits, random_state)
             acc, f1, mcc, auc = tuple(results.values())
             entry[group_name] = f"{acc:.5f}, {mcc:.5f}, {f1:.5f}, {auc:.5f}"
         results_summary.append(entry)
