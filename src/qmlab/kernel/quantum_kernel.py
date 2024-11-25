@@ -25,12 +25,12 @@ class QuantumKernel(ABC):
         self._available_embeddings = ("Amplitude", "Angle", "IQP")
         self._data_embedding = self.initialize_embedding(data_embedding)
         self._num_wires = self._data_embedding.num_wires
-        self._device = qml.device(device, wires=self._num_wires)
+        # self._device = qml.device(device, wires=self._num_wires)
         self._enforce_psd = enforce_psd
         self._jit = jit
         self._max_vmap = max_vmap
         self.interface = interface
-
+        self._device = device
         self.classes_: List[int] | None = None
         self.n_classes_: int | None = None
         self.num_qubits: None | int = None

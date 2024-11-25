@@ -63,12 +63,18 @@ class FidelityQuantumKernel(QuantumKernel):
 
     def build_circuit(self) -> QNode:
 
-        @qml.qnode(self._device, interface=self.interface, diff_method=None)
+        if self.num_qubits is None:
+            raise QMLabError(
+                "`inititalize`-method has not been called before building the circuit!"
+            )
+        device = qml.device(self._device, wires=self.num_qubits)
+
+        @qml.qnode(
+            device,
+            interface=self.interface,
+            diff_method=None,
+        )
         def circuit(concat_vec: jnp.ndarray) -> ProbabilityMP:
-            if self.num_qubits is None:
-                raise QMLabError(
-                    "`inititalize`-method has not been called before building the circuit!"
-                )
             # noinspection PyCallingNonCallable
             self._data_embedding(
                 features=concat_vec[: self.num_qubits], wires=range(self.num_qubits)

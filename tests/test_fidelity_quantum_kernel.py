@@ -38,20 +38,21 @@ class TestFidelityQuantumKernel(QMLabTest):
         qkernel = FidelityQuantumKernel(data_embedding=IQPEmbedding)
         assert qkernel.data_embedding == IQPEmbedding
 
-    # def test_gram_matrix_is_psd(self):
-    #     qkernel = FidelityQuantumKernel(data_embedding="IQP")
-    #     qkernel.initialize(feature_dimension=self.features.shape[1])
-    #     gram_matrix = qkernel.evaluate(self.features, self.features)
-    #     del qkernel
-    #     assert np.all(np.linalg.eigvals(gram_matrix) > 0)
+    def test_gram_matrix_is_psd(self):
+        gram_matrix = self.compute_gram_matrix()
+        assert np.all(np.linalg.eigvals(gram_matrix) > 0)
 
-    # def test_gram_matrix_has_ones_across_diagonal(self):
-    #     qkernel = FidelityQuantumKernel(data_embedding="IQP")
-    #     qkernel.initialize(feature_dimension=self.features.shape[1])
-    #     gram_matrix = qkernel.evaluate(self.features, self.features)
-    #     del qkernel
-    #     assert round(np.trace(gram_matrix)) == self.features.shape[1]
+    def test_gram_matrix_has_ones_across_diagonal(self):
+        gram_matrix = self.compute_gram_matrix()
+        assert round(np.trace(gram_matrix)) == self.features.shape[1]
 
-    # def test_gram_matrix_is_symmetric(self):
-    #     gram_matrix = self.compute_gram_matrix()
-    #     np.testing.assert_array_equal(gram_matrix.T, gram_matrix)
+    def test_gram_matrix_is_symmetric(self):
+        gram_matrix = self.compute_gram_matrix()
+        np.testing.assert_array_equal(gram_matrix.T, gram_matrix)
+
+    def compute_gram_matrix(self):
+        qkernel = FidelityQuantumKernel(data_embedding="IQP")
+        qkernel.initialize(feature_dimension=self.features.shape[1])
+        gram_matrix = qkernel.evaluate(self.features, self.features)
+        del qkernel
+        return gram_matrix
