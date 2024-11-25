@@ -16,26 +16,27 @@ class QuantumKernel(ABC):
         self,
         *,
         data_embedding: Operation | str = None,
-        device: str = "default.qubit",
+        device_type: str = "default.qubit",
         enforce_psd: bool = False,
         jit: bool = True,
         max_vmap: int = 250,
         interface: str = "jax-jit",
     ) -> None:
-        self._available_embeddings = ("Amplitude", "Angle", "IQP")
+        self._available_embeddings: Tuple[str, ...] = ("Amplitude", "Angle", "IQP")
         self._data_embedding = self.initialize_embedding(data_embedding)
         self._num_wires = self._data_embedding.num_wires
-        # self._device = qml.device(device, wires=self._num_wires)
         self._enforce_psd = enforce_psd
         self._jit = jit
         self._max_vmap = max_vmap
         self.interface = interface
-        self._device = device
+        self._device_type = device_type
+
         self.classes_: List[int] | None = None
         self.n_classes_: int | None = None
-        self.num_qubits: None | int = None
-        self.batched_circuit: None | Callable = None
-        self.circuit: None | Callable = None
+        self.num_qubits: int | None = None
+        self.batched_circuit: Callable | None = None
+        self.circuit: Callable | None = None
+        self.device: QNode | None = None
 
     def initialize_embedding(self, embedding: str | Operation) -> Operation:
         if isinstance(embedding, str):
@@ -90,7 +91,7 @@ class QuantumKernel(ABC):
         return self._data_embedding
 
     @data_embedding.setter
-    def data_embedding(self, data_embedding: Operation) -> None:
+    def data_embedding(self, data_embedding: Operation | str) -> None:
         self._data_embedding = data_embedding
 
     @property
@@ -98,12 +99,12 @@ class QuantumKernel(ABC):
         return self._num_wires
 
     @property
-    def device(self) -> Any:
-        return self._device
+    def device_type(self) -> Any:
+        return self._device_type
 
-    @device.setter
-    def device(self, device: str) -> None:
-        self._device = qml.device(device, wires=self._num_wires)
+    @device_type.setter
+    def device_type(self, device_type: str) -> None:
+        self._device_type = device_type
 
     @property
     def max_vmap(self) -> int:

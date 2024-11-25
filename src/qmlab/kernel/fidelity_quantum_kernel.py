@@ -25,7 +25,7 @@ class FidelityQuantumKernel(QuantumKernel):
     ):
         super().__init__(
             data_embedding=data_embedding,
-            device=device,
+            device_type=device,
             enforce_psd=enforce_psd,
             jit=jit,
             max_vmap=max_vmap,
@@ -62,19 +62,14 @@ class FidelityQuantumKernel(QuantumKernel):
             raise InvalidEmbeddingError("Invalid embedding. Stop.")
 
     def build_circuit(self) -> QNode:
+        self.device = qml.device(self._device_type, wires=self.num_qubits)
 
-        if self.num_qubits is None:
-            raise QMLabError(
-                "`inititalize`-method has not been called before building the circuit!"
-            )
-        device = qml.device(self._device, wires=self.num_qubits)
-
-        @qml.qnode(
-            device,
-            interface=self.interface,
-            diff_method=None,
-        )
+        @qml.qnode(self.device, interface=self.interface, diff_method=None)
         def circuit(concat_vec: jnp.ndarray) -> ProbabilityMP:
+            if self.num_qubits is None:
+                raise QMLabError(
+                    "Number of qubits has not been specified before building the circuit!"
+                )
             # noinspection PyCallingNonCallable
             self._data_embedding(
                 features=concat_vec[: self.num_qubits], wires=range(self.num_qubits)

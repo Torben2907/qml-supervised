@@ -44,6 +44,7 @@ class TestFidelityQuantumKernel(QMLabTest):
 
     def test_gram_matrix_has_ones_across_diagonal(self):
         gram_matrix = self.compute_gram_matrix()
+        # rounding because of finite precision
         assert round(np.trace(gram_matrix)) == self.features.shape[1]
 
     def test_gram_matrix_is_symmetric(self):
