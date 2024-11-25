@@ -1,15 +1,16 @@
 import numpy as np
+from numpy.typing import NDArray
 from sklearn.svm import SVC
 from .plot_utils import set_figure_params
 
 
 def plot_decision_boundaries(
     clf: SVC,
-    X_train: np.ndarray,
-    y_train: np.ndarray,
-    X_test: np.ndarray,
-    y_test: np.ndarray,
-):
+    X_train: NDArray,
+    y_train: NDArray,
+    X_test: NDArray,
+    y_test: NDArray,
+) -> None:
     # Create a 10x10 mesh in the data plane
     x_min, x_max = X_train[:, 0].min(), X_train[:, 0].max()
     y_min, y_max = X_train[:, 1].min(), X_train[:, 1].max()

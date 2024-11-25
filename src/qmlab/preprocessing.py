@@ -6,6 +6,7 @@ from sklearn.decomposition import PCA, KernelPCA
 from sklearn.preprocessing import MinMaxScaler
 import itertools as it
 from sklearn.utils import resample
+from numpy.typing import NDArray
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "../../data/")
 
@@ -22,18 +23,18 @@ def parse_biomed_data_to_df(dataset_name: str) -> pd.DataFrame:
 @overload
 def parse_biomed_data_to_ndarray(
     dataset_name: str, return_X_y: Literal[True]
-) -> Tuple[np.ndarray, np.ndarray, List[str]]: ...
+) -> Tuple[NDArray, NDArray, List[str]]: ...
 
 
 @overload
 def parse_biomed_data_to_ndarray(
     dataset_name: str, return_X_y: Literal[False]
-) -> Tuple[np.ndarray, List[str]]: ...
+) -> Tuple[NDArray, List[str]]: ...
 
 
 def parse_biomed_data_to_ndarray(
     dataset_name: str, return_X_y: bool = True
-) -> Tuple[np.ndarray, np.ndarray, List[str]] | Tuple[np.ndarray, List[str]]:
+) -> Tuple[NDArray, NDArray, List[str]] | Tuple[NDArray, List[str]]:
     """Function to read in the biomedical datasets as .csv-files
        and output as `numpy.ndarrays`.
 
@@ -97,8 +98,8 @@ def parse_biomed_data_to_ndarray(
 
 
 def downsample_biomed_data(
-    X: np.ndarray, y: np.ndarray, replace: bool = True, random_state: int = 42
-) -> Tuple[np.ndarray, np.ndarray]:
+    X: NDArray, y: NDArray, replace: bool = True, random_state: int = 42
+) -> Tuple[NDArray, NDArray]:
     X_pos, X_neg = X[y == +1], X[y == -1]
     y_pos, y_neg = y[y == +1], y[y == -1]
 
@@ -113,8 +114,8 @@ def downsample_biomed_data(
 
 
 def upsample_biomed_data(
-    X: np.ndarray, y: np.ndarray, replace: bool = True, random_state: int = 42
-):
+    X: NDArray, y: NDArray, replace: bool = True, random_state: int = 42
+) -> Tuple[NDArray, NDArray]:
     X_pos, X_neg = X[y == +1], X[y == -1]
     y_pos, y_neg = y[y == +1], y[y == -1]
 
@@ -129,11 +130,11 @@ def upsample_biomed_data(
 
 
 def subsample_features(
-    X: np.ndarray,
+    X: NDArray,
     feature_names: List[str],
     num_features_to_subsample: int,
     all_possible_combinations: bool = False,
-) -> List[Tuple[np.ndarray, List[str]]]:
+) -> List[Tuple[NDArray, List[str]]]:
     feature_dimension = X.shape[1]
     if feature_dimension != len(feature_names):
         raise ValueError(
@@ -170,8 +171,8 @@ def subsample_features(
 
 
 def reduce_feature_dim(
-    X: np.ndarray, output_dimension: int = 2, method: str = "PCA"
-) -> np.ndarray:
+    X: NDArray, output_dimension: int = 2, method: str = "PCA"
+) -> NDArray:
     """Reduces the dimension of the input feature matrix X which is
         assummed to have shape (m, d), where
         - m is the number of examples,
@@ -203,10 +204,10 @@ def reduce_feature_dim(
 
 
 def scale_to_specified_interval(
-    X: np.ndarray,
+    X: NDArray,
     interval: tuple[float, float] = (-np.pi / 2, np.pi / 2),
     scaling: float = 1.0,
-) -> np.ndarray:
+) -> NDArray:
     """Scales all values of the feature matrix X to the interval specified
     in `interval`.
 
@@ -228,7 +229,7 @@ def scale_to_specified_interval(
     return X * scaling
 
 
-def pad_and_normalize_data(X: np.ndarray, pad_with: float = 0.0) -> np.ndarray:
+def pad_and_normalize_data(X: NDArray, pad_with: float = 0.0) -> NDArray:
     r"""Padding and normalization for Amplitude Embedding.
 
     Remember that padding is necessary because we're mapping

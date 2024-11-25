@@ -4,6 +4,7 @@ from typing import Any, Callable, List, Tuple
 
 import jax
 import numpy as np
+from numpy.typing import NDArray, ArrayLike
 import pennylane as qml
 from pennylane import QNode
 from pennylane.operation import Operation
@@ -36,7 +37,7 @@ class QuantumKernel(ABC):
         self.num_qubits: int | None = None
         self.batched_circuit: Callable | None = None
         self.circuit: Callable | None = None
-        self.device: QNode | None = None
+        self.device: Any | None = None
 
     def initialize_embedding(self, embedding: str | Operation) -> Operation:
         if isinstance(embedding, str):
@@ -72,7 +73,7 @@ class QuantumKernel(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def evaluate(self, x: np.ndarray, y: np.ndarray) -> None:
+    def evaluate(self, x: NDArray, y: NDArray) -> None:
         if y is None:
             logging.warning(
                 "You've passed one state vector to the"
@@ -83,7 +84,7 @@ class QuantumKernel(ABC):
         )
 
     @staticmethod
-    def create_random_key():
+    def create_random_key() -> jax.Array:
         return jax.random.PRNGKey(np.random.default_rng().integers(1000000))
 
     @property
@@ -99,7 +100,7 @@ class QuantumKernel(ABC):
         return self._num_wires
 
     @property
-    def device_type(self) -> Any:
+    def device_type(self) -> str:
         return self._device_type
 
     @device_type.setter
@@ -120,9 +121,9 @@ class QuantumKernel(ABC):
 
     def _validate_inputs(
         self,
-        x: np.ndarray | List[List[float]],
-        y: np.ndarray | List[List[float]],
-    ) -> Tuple[np.ndarray, np.ndarray]:
+        x: NDArray | ArrayLike,
+        y: NDArray | ArrayLike,
+    ) -> Tuple[NDArray, NDArray]:
         x = self._check_type_and_dimension(x)
         if x.shape[1] != self._num_wires:
             try:
@@ -139,7 +140,7 @@ class QuantumKernel(ABC):
         return x, y
 
     @staticmethod
-    def _check_type_and_dimension(data: np.ndarray | List[List[float]]) -> np.ndarray:
+    def _check_type_and_dimension(data: NDArray | ArrayLike) -> NDArray:
         if not isinstance(data, np.ndarray):
             data = np.asarray(data)
         if data.ndim > 2:
@@ -151,7 +152,7 @@ class QuantumKernel(ABC):
         return data
 
     @staticmethod
-    def make_psd(kernel_matrix: np.ndarray) -> np.ndarray:
+    def make_psd(kernel_matrix: NDArray) -> NDArray:
         w, v = np.linalg.eig(kernel_matrix)
         m = v @ np.diag(np.maximum(0, w)) @ v.transpose()
         return m.real

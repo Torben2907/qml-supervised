@@ -4,7 +4,9 @@ import itertools as it
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 from qiskit_algorithms.utils import algorithm_globals
+from numpy.typing import NDArray
 
 
 def generate_random_data(
@@ -14,7 +16,7 @@ def generate_random_data(
     delta: float = 0.3,
     random_state: int = 42,
     interval: Tuple[float, float] = (0.0, 2 * jnp.pi),
-) -> Tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray, jnp.ndarray]:
+) -> Tuple[NDArray, NDArray, NDArray, NDArray]:
 
     key = jax.random.key(seed=random_state)
     algorithm_globals.random_seed = random_state
@@ -152,21 +154,21 @@ def _sample_data(
 
 def _features_and_labels_transform(
     dataset: dict, class_labels: list
-) -> Tuple[jnp.ndarray, jnp.ndarray]:
-    features = jnp.concatenate(list(dataset.values()))
-    raw_labels = jnp.concatenate(
-        [jnp.full((v.shape[0],), k) for k, v in enumerate(dataset.values())]
+) -> Tuple[NDArray, NDArray]:
+    features = np.concatenate(list(dataset.values()))
+    raw_labels = np.concatenate(
+        [np.full((v.shape[0],), k) for k, v in enumerate(dataset.values())]
     )
     label_mapping = {class_labels[0]: -1, class_labels[1]: 1}
-    labels = jnp.array(
+    labels = np.array(
         [label_mapping[class_labels[int(label)]] for label in raw_labels],
     )
     return features, labels
 
 
 def _rand(
-    size: int, key: jnp.ndarray, low: float = 0.0, high: float = 1.0
-) -> Tuple[jnp.ndarray, jnp.ndarray]:
+    size: int, key: jax.Array, low: float = 0.0, high: float = 1.0
+) -> Tuple[jax.Array, jax.Array]:
     new_key, subkey1, subkey2 = jax.random.split(key, num=3)
     del key
     A = jax.random.normal(subkey1, (size, size)) * (high - low) + low
@@ -174,12 +176,12 @@ def _rand(
     return A, B
 
 
-def _is_hermitian(H: jnp.ndarray) -> bool:
+def _is_hermitian(H: jax.Array) -> bool:
     H_dagger = jnp.conj(H.T)
     return jnp.allclose(H, H_dagger, atol=1e-6, rtol=1e-6).item()
 
 
-def _is_unitary(U: jnp.ndarray) -> bool:
+def _is_unitary(U: jax.Array) -> bool:
     U_dagger = jnp.conj(U.T)
     relation_1 = U_dagger @ U
     relation_2 = U @ U_dagger

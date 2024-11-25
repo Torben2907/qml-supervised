@@ -1,6 +1,7 @@
 from typing import List
 import jax
 import numpy as np
+from numpy.typing import NDArray, ArrayLike
 import jax.numpy as jnp
 import pennylane as qml
 from .quantum_kernel import QuantumKernel
@@ -65,7 +66,7 @@ class FidelityQuantumKernel(QuantumKernel):
         self.device = qml.device(self._device_type, wires=self.num_qubits)
 
         @qml.qnode(self.device, interface=self.interface, diff_method=None)
-        def circuit(concat_vec: jnp.ndarray) -> ProbabilityMP:
+        def circuit(concat_vec: jax.Array) -> ProbabilityMP:
             if self.num_qubits is None:
                 raise QMLabError(
                     "Number of qubits has not been specified before building the circuit!"
@@ -88,7 +89,7 @@ class FidelityQuantumKernel(QuantumKernel):
 
         return circuit
 
-    def evaluate(self, x: np.ndarray, y: np.ndarray):
+    def evaluate(self, x: NDArray, y: NDArray):
         x, y = self._validate_inputs(x, y)
         # is_symmetric = y is None or np.array_equal(x, y)
         kernel_matrix_shape = (
@@ -115,7 +116,7 @@ class FidelityQuantumKernel(QuantumKernel):
         return kernel_matrix
 
     def _is_trivial(
-        self, i: int, j: int, psi_i: np.ndarray, phi_j: np.ndarray, symmetric: bool
+        self, i: int, j: int, psi_i: NDArray, phi_j: NDArray, symmetric: bool
     ) -> bool:
         if self._evaluate_duplicates == "all":
             return False
