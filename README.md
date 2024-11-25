@@ -70,7 +70,7 @@ pip install -r requirements.txt
 
 ### For Windows OS 
 <!-- TODO: -->
-Check if all tests of the project (Add the `-v` for verbose output) run:
+Check if all tests of the project run (Add the `-v` for verbose output):
 ```shell
 pytest -v 
 ```
@@ -78,6 +78,11 @@ Additionally run all tests with coverage:
 ```shell
 pytest -v --cov=src/qmlab tests/   
 ```
+
+
+The code reproducability has been tested with [Docker](https://github.com/docker). 
+
+
 
 ---
 [1]: https://biodatamining.biomedcentral.com/articles/10.1186/s13040-021-00283-6#Tab1

@@ -2,7 +2,6 @@ import numpy as np
 from sklearn.datasets import load_iris
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-import pennylane as qml
 from .qmlab_testcase import QMLabTest
 from qmlab.kernel import QSVC
 from qmlab.kernel import FidelityQuantumKernel
@@ -12,13 +11,13 @@ from qmlab.data_generation import generate_random_data
 class TestQSVCIntegration(QMLabTest):
 
     def test_classification_with_iris_data(self) -> None:
-        qkernel = FidelityQuantumKernel(data_embedding=qml.IQPEmbedding)
+        qkernel = FidelityQuantumKernel(data_embedding="IQP")
         qsvm = QSVC(quantum_kernel=qkernel, random_state=self.random_state)
 
         X, y = load_iris(return_X_y=True)
 
         # make it a binary classification problem,
-        # i.e. remove`virginica`-class.
+        # i.e. remove the virginica-class.
         X = X[:100]
         y = y[:100]
 
@@ -26,7 +25,9 @@ class TestQSVCIntegration(QMLabTest):
         X_scaled = scaler.transform(X)
         y_scaled = 2 * y - 1
 
-        X_train, X_test, y_train, y_test = train_test_split(X_scaled, y_scaled)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X_scaled, y_scaled, random_state=self.random_state
+        )
 
         qsvm.fit(X_train, y_train)
 
@@ -35,7 +36,7 @@ class TestQSVCIntegration(QMLabTest):
         assert score == 1.0
 
     def test_classification_with_random_data(self) -> None:
-        qkernel = FidelityQuantumKernel(data_embedding=qml.IQPEmbedding)
+        qkernel = FidelityQuantumKernel(data_embedding="IQP")
         qsvm = QSVC(quantum_kernel=qkernel, random_state=self.random_state)
 
         X_train, y_train, X_test, y_test = generate_random_data(

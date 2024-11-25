@@ -1,6 +1,6 @@
 import logging
 from abc import abstractmethod, ABC
-from typing import Any, List, Tuple
+from typing import Any, Callable, List, Tuple
 
 import jax
 import numpy as np
@@ -33,6 +33,9 @@ class QuantumKernel(ABC):
 
         self.classes_: List[int] | None = None
         self.n_classes_: int | None = None
+        self.num_qubits: None | int = None
+        self.batched_circuit: None | Callable = None
+        self.circuit: None | Callable = None
 
     def initialize_embedding(self, embedding: str | Operation) -> Operation:
         if isinstance(embedding, str):
@@ -119,7 +122,7 @@ class QuantumKernel(ABC):
         x: np.ndarray | List[List[float]],
         y: np.ndarray | List[List[float]],
     ) -> Tuple[np.ndarray, np.ndarray]:
-        x = self.check_type_and_dimension(x)
+        x = self._check_type_and_dimension(x)
         if x.shape[1] != self._num_wires:
             try:
                 self._data_embedding.num_wires = x.shape[1]
@@ -131,11 +134,11 @@ class QuantumKernel(ABC):
                 ) from ae
 
         if y is not None:
-            y = self.check_type_and_dimension(y)
+            y = self._check_type_and_dimension(y)
         return x, y
 
     @staticmethod
-    def check_type_and_dimension(data: np.ndarray | List[List[float]]) -> np.ndarray:
+    def _check_type_and_dimension(data: np.ndarray | List[List[float]]) -> np.ndarray:
         if not isinstance(data, np.ndarray):
             data = np.asarray(data)
         if data.ndim > 2:

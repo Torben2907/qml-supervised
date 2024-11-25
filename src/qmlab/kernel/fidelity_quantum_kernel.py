@@ -8,7 +8,7 @@ from pennylane import QNode
 from pennylane.operation import Operation
 from pennylane.measurements import ProbabilityMP
 from .kernel_utils import vmap_batch
-from ..exceptions import QMLabError
+from ..exceptions import InvalidEmbeddingError, QMLabError
 
 
 class FidelityQuantumKernel(QuantumKernel):
@@ -59,20 +59,24 @@ class FidelityQuantumKernel(QuantumKernel):
         elif self._data_embedding == qml.AmplitudeEmbedding:
             self.num_qubits = int(np.ceil(np.log2(feature_dimension)))
         else:
-            raise QMLabError("Invalid embedding. Stop.")
+            raise InvalidEmbeddingError("Invalid embedding. Stop.")
 
     def build_circuit(self) -> QNode:
 
         @qml.qnode(self._device, interface=self.interface, diff_method=None)
-        def circuit(z: jnp.ndarray) -> ProbabilityMP:
+        def circuit(concat_vec: jnp.ndarray) -> ProbabilityMP:
+            if self.num_qubits is None:
+                raise QMLabError(
+                    "`inititalize`-method has not been called before building the circuit!"
+                )
             # noinspection PyCallingNonCallable
             self._data_embedding(
-                features=z[: self.num_qubits], wires=range(self.num_qubits)
+                features=concat_vec[: self.num_qubits], wires=range(self.num_qubits)
             )
             # noinspection PyCallingNonCallable
             qml.adjoint(
                 self._data_embedding(
-                    features=z[self.num_qubits :], wires=range(self.num_qubits)
+                    features=concat_vec[self.num_qubits :], wires=range(self.num_qubits)
                 )
             )
             return qml.probs()
