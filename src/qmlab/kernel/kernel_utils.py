@@ -1,11 +1,12 @@
+import jax
 from typing import Callable
 import jax.numpy as jnp
 from sklearn.utils import gen_batches
 
 
 def vmap_batch(
-    vmapped_fn: Callable[..., jnp.ndarray], start: int, max_vmap: int
-) -> Callable[..., jnp.ndarray]:
+    vmapped_fn: Callable[..., jax.Array], start: int, max_vmap: int
+) -> Callable[..., jax.Array]:
     def chunked_fn(*args):
         batch_len = len(args[start])
         batches = list(gen_batches(batch_len, max_vmap))

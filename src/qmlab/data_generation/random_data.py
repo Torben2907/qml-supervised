@@ -17,7 +17,6 @@ def generate_random_data(
     random_state: int = 42,
     interval: Tuple[float, float] = (0.0, 2 * jnp.pi),
 ) -> Tuple[NDArray, NDArray, NDArray, NDArray]:
-
     key = jax.random.key(seed=random_state)
     algorithm_globals.random_seed = random_state
     class_labels = [r"+1", r"-1"]
@@ -108,10 +107,10 @@ def generate_random_data(
 def _generate_sample_grid(
     num_points: int,
     feature_dimension: int,
-    xvals: jnp.ndarray,
-    compute_expval: Callable[..., jnp.ndarray],
+    xvals: jax.Array,
+    compute_expval: Callable[..., jax.Array],
     delta: float,
-) -> jnp.ndarray:
+) -> jax.Array:
     mesh_axes = jnp.meshgrid(*[xvals] * feature_dimension, indexing="ij")
     grid_points = jnp.stack([axis.flatten() for axis in mesh_axes], axis=-1)
     compute_expval_vmap = jax.vmap(compute_expval)
@@ -122,18 +121,18 @@ def _generate_sample_grid(
     return labeled_grid
 
 
-def _hermitian_random(size: int, key: jnp.ndarray) -> jnp.ndarray:
+def _hermitian_random(size: int, key: jax.Array) -> jax.Array:
     A, B = _rand(size, key)
     C = A + 1j * B
     return C.conj().T @ C
 
 
 def _sample_data(
-    sample_total: jnp.ndarray,
-    xvals: jnp.ndarray,
+    sample_total: jax.Array,
+    xvals: jax.Array,
     total_num_examples: int,
     feature_dimension: int,
-) -> Tuple[jnp.ndarray, jnp.ndarray]:
+) -> Tuple[jax.Array, jax.Array]:
     count = sample_total.shape[0]
     sample_pos: List[Any] = []
     sample_neg: List[Any] = []
