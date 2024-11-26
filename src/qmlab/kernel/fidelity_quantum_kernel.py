@@ -18,6 +18,7 @@ class FidelityQuantumKernel(QuantumKernel):
         *,
         data_embedding: Operation | str,
         device: str = "default.qubit",
+        reps: int = 2,
         enforce_psd: bool = False,
         jit: bool = True,
         max_vmap: int = 250,
@@ -27,6 +28,7 @@ class FidelityQuantumKernel(QuantumKernel):
         super().__init__(
             data_embedding=data_embedding,
             device_type=device,
+            reps=reps,
             enforce_psd=enforce_psd,
             jit=jit,
             max_vmap=max_vmap,
@@ -39,7 +41,7 @@ class FidelityQuantumKernel(QuantumKernel):
             )
         self._evaluate_duplicates = evaluate_duplicates
 
-    def initialize(
+    def initialize_params(
         self,
         feature_dimension: int,
         class_labels: List[int] | None = None,
@@ -57,6 +59,7 @@ class FidelityQuantumKernel(QuantumKernel):
             or self._data_embedding == qml.AngleEmbedding
         ):
             self.num_qubits = feature_dimension
+            self._data_embedding.n_repeats = self.reps
         elif self._data_embedding == qml.AmplitudeEmbedding:
             self.num_qubits = int(np.ceil(np.log2(feature_dimension)))
         else:
@@ -89,7 +92,7 @@ class FidelityQuantumKernel(QuantumKernel):
 
         return circuit
 
-    def evaluate(self, x: NDArray, y: NDArray):
+    def evaluate(self, x: NDArray, y: NDArray) -> NDArray:
         x, y = self._validate_inputs(x, y)
         # is_symmetric = y is None or np.array_equal(x, y)
         kernel_matrix_shape = (

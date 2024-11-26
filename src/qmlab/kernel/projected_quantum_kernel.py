@@ -18,7 +18,7 @@ class ProjectedQuantumKernel(QuantumKernel):
     ) -> None:
         self._embedding = self.initialize_embedding(embedding)
 
-    def initialize(
+    def initialize_params(
         self, feature_dimension: int, class_labels: List[int] | None = None
     ) -> None:
         if class_labels is None:

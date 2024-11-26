@@ -54,7 +54,7 @@ class TestFidelityQuantumKernel(QMLabTest):
 
     def compute_gram_matrix(self) -> NDArray:
         qkernel = FidelityQuantumKernel(data_embedding="IQP")
-        qkernel.initialize(feature_dimension=self.features.shape[1])
+        qkernel.initialize_params(feature_dimension=self.features.shape[1])
         gram_matrix = qkernel.evaluate(self.features, self.features)
         del qkernel
         return gram_matrix

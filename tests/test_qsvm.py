@@ -67,7 +67,7 @@ class TestQSVC(QMLabTest):
 
     def test_qsvm_fit_calls_kernel_initialize(self) -> None:
         qsvm = QSVC(quantum_kernel=self.qkernel)
-        qkernel_initialize = self.mocker.spy(self.qkernel, "initialize")
+        qkernel_initialize = self.mocker.spy(self.qkernel, "initialize_params")
 
         qsvm.fit(self.X, self.y)
 

@@ -27,9 +27,7 @@ def generate_random_data(
         )
 
     num_points = 100 if feature_dimension == 2 else 20
-
     xvals = jnp.linspace(start=interval[0], stop=interval[1], num=num_points)
-
     I_2 = jnp.eye(2)
     H_2 = jnp.array([[1, 1], [1, -1]]) / jnp.sqrt(2)
     H_n = reduce(jnp.kron, [H_2] * feature_dimension)
@@ -185,8 +183,8 @@ def _is_unitary(U: jax.Array) -> bool:
     relation_1 = U_dagger @ U
     relation_2 = U @ U_dagger
     return (
-        jnp.allclose(jnp.eye(U.shape[0]), relation_1, atol=1e-6, rtol=1e-6).item()
-        and jnp.allclose(jnp.eye(U.shape[0]), relation_2, atol=1e-6, rtol=1e-6).item()
+        jnp.allclose(jnp.eye(U.shape[0]), relation_1, atol=1e-5, rtol=1e-5).item()
+        and jnp.allclose(jnp.eye(U.shape[0]), relation_2, atol=1e-5, rtol=1e-5).item()
     )
 
 

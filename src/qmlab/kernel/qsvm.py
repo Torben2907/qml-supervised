@@ -55,7 +55,7 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
     ) -> "BaseQSVM":
         self._svm.random_state = self._random_state
         self.params_ = {"X_train": X}
-        self._quantum_kernel.initialize(
+        self._quantum_kernel.initialize_params(
             feature_dimension=X.shape[1], class_labels=np.unique(y).tolist()
         )
         self._svm.fit(X, y, sample_weight)
