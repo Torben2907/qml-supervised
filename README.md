@@ -1,6 +1,6 @@
 # A quantum-based approach for supervised learning (bachelor thesis) 
 
-This repository is the codebase for comparing classical kernel models with their quantum-hybrid counterparts. We've trained and evaluated these models on real-world biomedical data to investigate whether the quantum-hybrid versions can achieve a better performance than their classical counterparts, potentially demonstrating a quantum advantage.
+This is the codebase for comparing classical kernel models with their quantum-hybrid counterparts. We've trained and evaluated these models on real-world biomedical data to investigate whether the quantum-hybrid versions can achieve a better performance than their classical counterparts, potentially demonstrating a quantum advantage.
 
 ## Welcome to QMLab! 🧪
 
@@ -40,25 +40,27 @@ Since real quantum hardware is noisy and prone for errors a whole field submerge
 which are based on classical learning algorithms but outsource suitable parts to a quantum computer.
 
 The traditional support vector machine algorithm can only classify data that is linearly separable. 
-It becomes way more powerful when we introduce a class of functions called **kernels**. 
+It becomes way more powerful when we introduce a class of positive semi-definite functions called **kernels**. 
 Kernels allow us to map our data in a higher, perhaps infinite dimensional space where it is linearly separable. 
-Therefore we can classify non-linearly separable data with a linear model.
+Therefore we are able to classify non-linearly separable data with a linear model.
 
 A **quantum kernel** is a bivariate and positive semi-definite function that takes on the form 
 
-$$ k(\mathbf{x}, \mathbf{x}) = \langle \phi(\mathbf{x}) | \phi(\mathbf{y}) \rangle $$
+$$ k(\mathbf{x}, \mathbf{y}) = \langle \phi(\mathbf{x}) | \phi(\mathbf{y}) \rangle $$
 
 where $\phi(\mathbf{x})$ is a quantum feature map. 
-The quantum feature map is a function that maps classical data to a quantum state 
+The quantum feature map is a mapping from classical data to a quantum state 
 
-$$ \phi: \mathbf{x} \longrightarrow \Ket{\psi(\mathbf{x})} $$.
+$$ \phi: \mathbf{x} \longrightarrow |\psi(\mathbf{x}) \rangle $$.
 
 The quantum kernel is then calculated by taking the inner product of two quantum states. 
+
+We can pass the resulting Gram matrix to the traditional SVC making it a QSVC. 
 
 ## Can we train a Quantum Kernel? 🤨
 
 
-## Installation
+## Installation / Setup 👨‍🔧
 
 All the following commands will assume that you opened a shell environment in the `qml-supervised` folder.
 
@@ -96,7 +98,7 @@ Finally install all of the required packages via
 pip install -r requirements.txt
 ```
 
-## Tests
+## Tests 🟢🤞
 After installation you should check that all tests of the project run (Add the `-v` flag for verbose output):
 ```shell
 pytest -v 
