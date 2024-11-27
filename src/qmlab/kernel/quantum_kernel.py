@@ -29,6 +29,7 @@ class QuantumKernel(ABC):
         data_embedding: Operation | str = None,
         device_type: str = "default.qubit",
         reps: int = 2,
+        rotation: str | None = "Z",
         enforce_psd: bool = False,
         jit: bool = True,
         max_batch_size: int = 256,
@@ -45,6 +46,13 @@ class QuantumKernel(ABC):
         reps : int, optional
             Number of reps when IQP is used to embed data, by default 2 and will
             be ignored when any other embedding than IQP is specified.
+        rotation: str, optional
+            Chooses the type of rotation used for AngleEmbedding:
+            Use:
+            - "X" for the R_x gates,
+            - "Y" for the R_y gates,
+            - "Z" for the R_z gates.
+            This will be ignored if a different embedding than Angle is specified.
         enforce_psd : bool, optional
             Ensures that gram matrix is positive semi-definite, by default False
         jit : bool, optional
@@ -60,6 +68,7 @@ class QuantumKernel(ABC):
         self._data_embedding = self.initialize_embedding(data_embedding)
         self._num_wires = self._data_embedding.num_wires
         self.reps = reps
+        self.rotation = rotation
         self._enforce_psd = enforce_psd
         self._jit = jit
         self._max_batch_size = max_batch_size

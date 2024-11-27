@@ -58,6 +58,16 @@ class TestFidelityQuantumKernel(QMLabTest):
         gram_matrix = self.compute_gram_matrix()
         np.testing.assert_array_equal(gram_matrix.T, gram_matrix)
 
+    def test_correct_value_computation_with_angle(self) -> None:
+        qkernel = FidelityQuantumKernel(data_embedding="Angle")
+        x1 = np.array([[0, np.pi / 2, np.pi]])
+        x2 = np.array([[0, -np.pi, np.pi / 2]])
+        qkernel.initialize_params(feature_dimension=x1.shape[1])
+        # again we use allclose here because of the problem of finite precision
+        np.testing.assert_allclose(
+            actual=qkernel.evaluate(x1, x2), desired=np.array(1.0), atol=1e-7
+        )
+
     def compute_gram_matrix(self) -> NDArray:
         """helper function that does the necessary steps to obtain the gram matrix
         of the dummy data.

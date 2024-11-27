@@ -13,7 +13,7 @@ class Wrapper:
 
         @qml.qnode(dev)
         def circuit(x: NDArray):
-            self.embedding(x, wires=range(self.num_qubits), rotation="Z")
+            self.embedding(x, wires=range(self.num_qubits), rotation=["X", "Y", "Z"])
             return qml.state()
 
         return circuit
@@ -24,4 +24,4 @@ class Wrapper:
 
 
 w = Wrapper()
-print(w.evaluate([0, np.pi / 2, np.pi]))
+print(w.evaluate([0, -np.pi, np.pi / 2]))

@@ -19,6 +19,7 @@ class FidelityQuantumKernel(QuantumKernel):
         data_embedding: Operation | str,
         device_type: str = "default.qubit",
         reps: int = 2,
+        rotation: str = "Z",
         enforce_psd: bool = False,
         jit: bool = True,
         max_batch_size: int = 256,
@@ -29,6 +30,7 @@ class FidelityQuantumKernel(QuantumKernel):
             data_embedding=data_embedding,
             device_type=device_type,
             reps=reps,
+            rotation=rotation,
             enforce_psd=enforce_psd,
             jit=jit,
             max_batch_size=max_batch_size,
@@ -75,15 +77,31 @@ class FidelityQuantumKernel(QuantumKernel):
                     "Number of qubits has not been specified before building the circuit!"
                 )
             # noinspection PyCallingNonCallable
-            self._data_embedding(
-                features=concat_vec[: self.num_qubits], wires=range(self.num_qubits)
-            )
-            # noinspection PyCallingNonCallable
-            qml.adjoint(
+            if self._data_embedding == qml.AngleEmbedding:
                 self._data_embedding(
-                    features=concat_vec[self.num_qubits :], wires=range(self.num_qubits)
+                    features=concat_vec[: self.num_qubits],
+                    wires=range(self.num_qubits),
+                    rotation=self.rotation,
                 )
-            )
+                # noinspection PyCallingNonCallable
+                qml.adjoint(
+                    self._data_embedding(
+                        features=concat_vec[self.num_qubits :],
+                        wires=range(self.num_qubits),
+                        rotation=self.rotation,
+                    )
+                )
+            else:
+                self._data_embedding(
+                    features=concat_vec[: self.num_qubits], wires=range(self.num_qubits)
+                )
+                # noinspection PyCallingNonCallable
+                qml.adjoint(
+                    self._data_embedding(
+                        features=concat_vec[self.num_qubits :],
+                        wires=range(self.num_qubits),
+                    )
+                )
             return qml.probs()
 
         self.circuit = circuit
