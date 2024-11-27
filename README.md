@@ -10,7 +10,7 @@ The package created is called `QMLab` - written entirely in Python, using [Penny
 
 ## Information about the data 🧬
 
-We're dealing with 9 different biomedical datasets in the thesis. The collection is coming from the study of <cite>Jacqueline Beinecke & Dominik Heider [[1]]</cite> that comparse different augmentation methods for 
+We're dealing with 9 different biomedical datasets in the thesis. The collection is coming from the study of <cite>Jacqueline Beinecke & Dominik Heider [[1]]</cite> that compares different augmentation methods for 
 dealing with the imbalance in biomedical data.
 All of the datasets don't consist of a large number of examples $m$, but have the high class imbalance and 
 a large number of features $d$. 
@@ -46,12 +46,12 @@ Therefore we can classify non-linearly separable data with a linear model.
 
 A **quantum kernel** is a bivariate and positive semi-definite function that takes on the form 
 
-$$ k(\mathbf{x}, \mathbf{x}) = \langle \phi(\mathbf{x}) | \phi(\mathbf{y}) \rangle$$
+$$ k(\mathbf{x}, \mathbf{x}) = \langle \phi(\mathbf{x}) | \phi(\mathbf{y}) \rangle $$
 
 where $\phi(\mathbf{x})$ is a quantum feature map. 
 The quantum feature map is a function that maps classical data to a quantum state 
 
-$$ \phi: \mathbf{x} \longrightarrow \Ket{\psi(\bm{x})}$$.
+$$ \phi: \mathbf{x} \longrightarrow \Ket{\psi(\mathbf{x})} $$.
 
 The quantum kernel is then calculated by taking the inner product of two quantum states. 
 
@@ -66,10 +66,14 @@ All the following commands will assume that you opened a shell environment in th
 Create a new python environment using `python`-command:
 ```shell 
 python -m venv myvirtualenv 
-```
+<!-- ```
 or if you are using `python3`: 
 ```shell 
 python3 -m venv myvirtualenv
+``` -->
+Activate that environment via 
+```shell 
+source myvirtualenv/bin/activate
 ```
 and then install all of the required packages via:
 ```shell
