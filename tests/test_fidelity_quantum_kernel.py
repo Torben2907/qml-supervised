@@ -5,13 +5,14 @@ from pennylane import AmplitudeEmbedding, AngleEmbedding, IQPEmbedding, AdamOpti
 from qmlab.kernel import FidelityQuantumKernel
 from qmlab.exceptions import InvalidEmbeddingError
 from .qmlab_testcase import QMLabTest
+from qmlab.exceptions import QMLabError
 
 
 class TestFidelityQuantumKernel(QMLabTest):
 
     def setUp(self) -> None:
         super().setUp()
-        self.features = np.asarray([[0, 0], [1, 1]])
+        self.X = np.asarray([[0, 0], [1, 1]])
 
     def test_wrong_embedding_as_str(self) -> None:
         with pytest.raises(InvalidEmbeddingError):
@@ -39,6 +40,11 @@ class TestFidelityQuantumKernel(QMLabTest):
         qkernel = FidelityQuantumKernel(data_embedding=IQPEmbedding)
         assert qkernel.data_embedding == IQPEmbedding
 
+    def test_evaluate_called_before_param_initialization(self) -> None:
+        qkernel = FidelityQuantumKernel(data_embedding="IQP")
+        with pytest.raises(QMLabError):
+            qkernel.evaluate(self.X, self.X)
+
     def test_gram_matrix_is_psd(self) -> None:
         gram_matrix = self.compute_gram_matrix()
         assert np.all(np.linalg.eigvals(gram_matrix) > 0)
@@ -46,15 +52,24 @@ class TestFidelityQuantumKernel(QMLabTest):
     def test_gram_matrix_has_ones_across_diagonal(self) -> None:
         gram_matrix = self.compute_gram_matrix()
         # rounding because of finite precision
-        assert round(np.trace(gram_matrix)) == self.features.shape[1]
+        assert round(np.trace(gram_matrix)) == self.X.shape[1]
 
     def test_gram_matrix_is_symmetric(self) -> None:
         gram_matrix = self.compute_gram_matrix()
         np.testing.assert_array_equal(gram_matrix.T, gram_matrix)
 
     def compute_gram_matrix(self) -> NDArray:
+        """helper function that does the necessary steps to obtain the gram matrix
+        of the dummy data.
+
+        Returns
+        -------
+        NDArray
+            Gram matrix, Array of shape (m,m) where m is the number of examples contained
+            in the dummy data.
+        """
         qkernel = FidelityQuantumKernel(data_embedding="IQP")
-        qkernel.initialize_params(feature_dimension=self.features.shape[1])
-        gram_matrix = qkernel.evaluate(self.features, self.features)
+        qkernel.initialize_params(feature_dimension=self.X.shape[1])
+        gram_matrix = qkernel.evaluate(self.X, self.X)
         del qkernel
         return gram_matrix

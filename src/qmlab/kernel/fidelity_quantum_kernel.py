@@ -17,21 +17,21 @@ class FidelityQuantumKernel(QuantumKernel):
         self,
         *,
         data_embedding: Operation | str,
-        device: str = "default.qubit",
+        device_type: str = "default.qubit",
         reps: int = 2,
         enforce_psd: bool = False,
         jit: bool = True,
-        max_vmap: int = 250,
+        max_batch_size: int = 256,
         evaluate_duplicates: str = "off_diagonal",
-        interface: str = "jax-jit",
+        interface: str = "jax",
     ):
         super().__init__(
             data_embedding=data_embedding,
-            device_type=device,
+            device_type=device_type,
             reps=reps,
             enforce_psd=enforce_psd,
             jit=jit,
-            max_vmap=max_vmap,
+            max_batch_size=max_batch_size,
             interface=interface,
         )
         evaluate_duplicates = evaluate_duplicates.lower()
@@ -106,10 +106,11 @@ class FidelityQuantumKernel(QuantumKernel):
 
         circuit = self.build_circuit()
         self.batched_circuit = vmap_batch(
-            jax.vmap(circuit, 0), start=0, max_vmap=self._max_vmap
+            jax.vmap(circuit, 0), start=0, max_batch_size=self._max_batch_size
         )
 
-        # we are only interested in measuring |0>
+        # we are only interested in measuring |0^n>
+        # n refers to the number of qubits.
         kernel_values = self.batched_circuit(Z)[:, 0]
         kernel_matrix = np.reshape(kernel_values, kernel_matrix_shape)
 

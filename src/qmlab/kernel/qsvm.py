@@ -5,6 +5,8 @@ import numpy as np
 from numpy.typing import NDArray
 from sklearn.base import BaseEstimator, ClassifierMixin
 from ..exceptions import NotFittedError, QMLabError
+import pennylane as qml
+from qmlab.preprocessing import pad_and_normalize_data
 
 
 class BaseQSVM(BaseEstimator, ClassifierMixin):
@@ -95,10 +97,10 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
         self, X: NDArray, y: NDArray, sample_weight: NDArray | None = None
     ) -> "BaseQSVM":
         """Fit the model to the training data. Ideally this will do 3 things:
-        1) save the feature matrix used for training so we can check if the model
+        1. save the feature matrix used for training so we can check if the model
         is fitted later on,
-        2) Initialize a valid quantum kernel
-        3) Evaluate the quantum kernel, i.e. obtain a real-valued kernel matrix, that can
+        2. Initialize a valid quantum kernel
+        3. Evaluate the quantum kernel, i.e. obtain a real-valued kernel matrix, that can
         be used by the scikit-learn implementation of the traditional support vector machine.
 
         Parameters
@@ -120,6 +122,8 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
         self._quantum_kernel.initialize_params(
             feature_dimension=X.shape[1], class_labels=np.unique(y).tolist()
         )
+        if self._quantum_kernel.data_embedding == qml.AmplitudeEmbedding:
+            X = pad_and_normalize_data(X)
         self._svm.fit(X, y, sample_weight)
         return self
 

@@ -1,10 +1,27 @@
 import numpy as np
+from numpy.typing import NDArray
 import pennylane as qml
-from qmlab.preprocessing import parse_biomed_data_to_ndarray
-from qmlab.kernel import QSVC, FidelityQuantumKernel
-from qmlab.utils import run_cross_validation
 
-X, y, feature_names = parse_biomed_data_to_ndarray("haberman_new", return_X_y=True)
-qkernel = FidelityQuantumKernel(data_embedding=qml.IQPEmbedding, jit=True)
-qsvc = QSVC(quantum_kernel=qkernel)
-print(run_cross_validation(qsvc, X, y))
+
+class Wrapper:
+    def __init__(self, num_qubits: int = 3):
+        self.num_qubits = num_qubits
+        self.embedding = qml.AngleEmbedding
+
+    def build_circuit(self):
+        dev = qml.device("default.qubit", wires=self.num_qubits)
+
+        @qml.qnode(dev)
+        def circuit(x: NDArray):
+            self.embedding(x, wires=range(self.num_qubits), rotation="Z")
+            return qml.state()
+
+        return circuit
+
+    def evaluate(self, x):
+        self.circuit = self.build_circuit()
+        return self.circuit(x)
+
+
+w = Wrapper()
+print(w.evaluate([0, np.pi / 2, np.pi]))

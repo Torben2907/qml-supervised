@@ -44,16 +44,15 @@ It becomes way more powerful when we introduce a class of positive semi-definite
 Kernels allow us to map our data in a higher, perhaps infinite dimensional space where it is linearly separable. 
 Therefore we are able to classify non-linearly separable data with a linear model.
 
-A **quantum kernel** is a bivariate and positive semi-definite function that takes on the form 
+A **quantum kernel** is a bivariate, positive semi-definite function that takes on the form 
 
-$$ k(\mathbf{x}, \mathbf{y}) = \langle \phi(\mathbf{x}) | \phi(\mathbf{y}) \rangle $$
+$$ k(\mathbf{x}, \mathbf{y}) = \left\langle \phi(\mathbf{x}) | \phi(\mathbf{y}) \right\rangle, $$
 
-where $\phi(\mathbf{x})$ is a quantum feature map. 
-The quantum feature map is a mapping from classical data to a quantum state 
+where $\phi(\mathbf{x})$ is a quantum feature map that is a mapping from classical data to a quantum state 
 
-$$ \phi: \mathbf{x} \longrightarrow |\psi(\mathbf{x}) \rangle $$.
+$$ \phi: \mathbf{x} \longrightarrow |\psi(\mathbf{x}) \rangle. $$
 
-The quantum kernel is then calculated by taking the inner product of two quantum states. 
+The quantum kernel is then calculated by taking the inner product of the two resulting quantum states. 
 
 We can pass the resulting Gram matrix to the traditional SVC making it a QSVC. 
 

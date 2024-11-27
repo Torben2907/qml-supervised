@@ -1,5 +1,6 @@
 from typing import Dict
 import numpy as np
+from numpy.typing import NDArray
 from sklearn.model_selection import StratifiedKFold
 from sklearn import metrics
 from sklearn.svm import SVC
@@ -8,8 +9,8 @@ from ..kernel.qsvm import QSVC
 
 def run_cross_validation(
     clf: SVC | QSVC,
-    X: np.ndarray,
-    y: np.ndarray,
+    X: NDArray,
+    y: NDArray,
     num_splits: int = 10,
     random_state: int = 42,
 ) -> Dict[str, float]:

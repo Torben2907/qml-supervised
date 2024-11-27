@@ -31,7 +31,7 @@ class QuantumKernel(ABC):
         reps: int = 2,
         enforce_psd: bool = False,
         jit: bool = True,
-        max_vmap: int = 250,
+        max_batch_size: int = 256,
         interface: str = "jax",
     ) -> None:
         """Constructor of Quantum Kernel. Contains defaults.
@@ -49,8 +49,10 @@ class QuantumKernel(ABC):
             Ensures that gram matrix is positive semi-definite, by default False
         jit : bool, optional
             Activates or deactivates JAX's just-in-time compilation, by default True
-        max_vmap : int, optional
-            _description_, by default 250
+        max_batch_size : int, optional
+            Maximum batch size that a JAX vmap function can process in a single call, by default 256
+            - Too small values will result to overhead
+            - Too large values may exceed memory or computational limits
         interface : str, optional
             Interface that will be used for computations, by default "jax"
         """
@@ -60,7 +62,7 @@ class QuantumKernel(ABC):
         self.reps = reps
         self._enforce_psd = enforce_psd
         self._jit = jit
-        self._max_vmap = max_vmap
+        self._max_batch_size = max_batch_size
         self.interface = interface
         self._device_type = device_type
 
@@ -87,7 +89,7 @@ class QuantumKernel(ABC):
         elif isinstance(embedding, ABCCaptureMeta):
             """actually passing in `qml.operation.Operation` should work here, but when passing
             in the argument without brackets it creates this abstract
-            class from the capture module. might have to investigate this further."""
+            class from the capture module."""
             return embedding
         else:
             raise InvalidEmbeddingError(f"{embedding} is an invalid embedding type.")
@@ -195,11 +197,11 @@ class QuantumKernel(ABC):
 
     @property
     def max_vmap(self) -> int:
-        return self._max_vmap
+        return self._max_batch_size
 
     @max_vmap.setter
     def max_vmap(self, max_vmap: int) -> None:
-        self._max_vmap = max_vmap
+        self._max_batch_size = max_vmap
 
     @property
     def available_embeddings(self) -> Tuple[str, ...]:
