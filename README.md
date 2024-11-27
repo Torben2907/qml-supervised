@@ -66,11 +66,7 @@ All the following commands will assume that you opened a shell environment in th
 Create a new python environment using `python`-command:
 ```shell 
 python -m venv myvirtualenv 
-<!-- ```
-or if you are using `python3`: 
-```shell 
-python3 -m venv myvirtualenv
-``` -->
+```
 Activate that environment via 
 ```shell 
 source myvirtualenv/bin/activate
