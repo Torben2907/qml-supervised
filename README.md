@@ -1,10 +1,10 @@
 # A quantum-based approach for supervised learning (bachelor thesis) 
 
-This repository provides code for comparing classical kernel models with their quantum-hybrid counterparts. We've trained and evaluated these models on real-world biomedical data to investigate whether the quantum-hybrid versions can achieve a better performance than their classical counterparts, potentially demonstrating a quantum advantage.
+This repository is the codebase for comparing classical kernel models with their quantum-hybrid counterparts. We've trained and evaluated these models on real-world biomedical data to investigate whether the quantum-hybrid versions can achieve a better performance than their classical counterparts, potentially demonstrating a quantum advantage.
 
 ## Welcome to QMLab! 🧪
 
-The package we created is called `QMLab` - written entirely in Python, using [Pennylane](https://github.com/PennyLaneAI/pennylane) for simulation of a quantum mechanical backend and [Sklearn](https://github.com/scikit-learn/scikit-learn) for the classical backend. The main class we use is [`QSVC`]() - short for **Q**uantum **S**upport **V**ector **C**lassifier. It inherits from the [`SVC`](https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/svm/_classes.py#L604) class of Scikit-Learn and extends its functionality by allowing a quantum kernel as well as classical ones.
+The package created is called `QMLab` - written entirely in Python, using [Pennylane](https://github.com/PennyLaneAI/pennylane) for the simulation of a quantum mechanical backend and [Sklearn](https://github.com/scikit-learn/scikit-learn) for the classical backend. The main class we use is [`QSVC`]() - short for **Q**uantum **S**upport **V**ector **C**lassifier. It inherits from the [`SVC`](https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/svm/_classes.py#L604) class of Scikit-Learn and extends its functionality by allowing a quantum kernel as well as classical ones.
 
 [Get started with the Jupyter-Tutorial-Series here!](./tutorials/01_classical_kernel_methods.ipynb)
 
@@ -44,24 +44,32 @@ It becomes way more powerful when we introduce a class of functions called **ker
 Kernels allow us to map our data in a higher, perhaps infinite dimensional space where it is linearly separable. 
 Therefore we can classify non-linearly separable data with a linear model.
 
-A **quantum kernel** is a function
+A **quantum kernel** is a bivariate and positive semi-definite function that takes on the form 
 
+$$ k(\mathbf{x}, \mathbf{x}) = \langle \phi(\mathbf{x}) | \phi(\mathbf{y}) \rangle$$
 
+where $\phi(\mathbf{x})$ is a quantum feature map. 
+The quantum feature map is a function that maps classical data to a quantum state 
+
+$$ \phi: \mathbf{x} \longrightarrow \Ket{\psi(\bm{x})}$$.
+
+The quantum kernel is then calculated by taking the inner product of two quantum states. 
 
 ## Can we train a Quantum Kernel? 🤨
 
 
-## Installation and Tests 
+## Installation
 
-### 
+All the following commands will assume that you opened a shell environment in the `qml-supervised` folder.
+
 ### For Unix OS
 Create a new python environment using `python`-command:
 ```shell 
-python -m venv ~/myvirtualenv 
+python -m venv myvirtualenv 
 ```
 or if you are using `python3`: 
 ```shell 
-python3 -m venv ~/myvirtualenv
+python3 -m venv myvirtualenv
 ```
 and then install all of the required packages via:
 ```shell
@@ -69,8 +77,27 @@ pip install -r requirements.txt
 ```
 
 ### For Windows OS 
-<!-- TODO: -->
-Check if all tests of the project run (Add the `-v` for verbose output):
+You need this additional package (unix users do not need to have this installed apparently)
+```shell 
+pip install virtualenv
+```
+Note that this command will install this globally for your python binary.
+Then create a virtual environment for installment of the required packages via
+```shell 
+virtualenv --python C:\Path\To\Python\python.exe myvirtualenv
+```
+Note that you should replace the path with the location of your global python binary in the command above.
+Then activate the virtual environment with
+```shell
+.\myvirtualenv\Scripts\activate
+```
+Finally install all of the required packages via
+```shell
+pip install -r requirements.txt
+```
+
+## Tests
+After installation you should check that all tests of the project run (Add the `-v` flag for verbose output):
 ```shell
 pytest -v 
 ```
@@ -79,10 +106,10 @@ Additionally run all tests with coverage:
 pytest -v --cov=src/qmlab tests/   
 ```
 
-
+Please note:
 The code reproducability has been tested with [Docker](https://github.com/docker). 
-
-
+Let me know if there are any issues!
+torben.heckes@uni-duesseldorf.de
 
 ---
 [1]: https://biodatamining.biomedcentral.com/articles/10.1186/s13040-021-00283-6#Tab1

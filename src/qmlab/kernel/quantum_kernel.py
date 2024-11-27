@@ -122,14 +122,14 @@ class QuantumKernel(ABC):
         """Initialization of the data dependent attributes, like number of features
         and class labels. Depending on which data embedding has been specified by the user
         it will also initialize the number of qubits. When working with a quantum kernel
-        it's mandatory to firstly call this method before trying to evaluate the gram matrix!
+        it's mandatory to first call this method before trying to evaluate the gram matrix!
 
         Parameters
         ----------
         feature_dimension : int
             Number of features in the data domain.
         class_labels : List[int] | None, optional
-            Class labels, by default None, will be [-1, +1] throughout the work of the thesis.
+            Class labels, by default None, will be [-1, +1] throughout the study.
 
         Raises
         ------

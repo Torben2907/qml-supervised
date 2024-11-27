@@ -1,7 +1,7 @@
 from typing import List
 import jax
 import numpy as np
-from numpy.typing import NDArray, ArrayLike
+from numpy.typing import NDArray
 import jax.numpy as jnp
 import pennylane as qml
 from .quantum_kernel import QuantumKernel
