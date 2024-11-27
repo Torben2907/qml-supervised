@@ -1,17 +1,22 @@
 import os
 import yaml
+import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from typing import List, Tuple
+from typing import Tuple
 from sklearn.svm import SVC
 from qmlab.utils import run_cross_validation
-from qmlab.preprocessing import parse_biomed_data_to_ndarray, subsample_features
+from qmlab.preprocessing import (
+    parse_biomed_data_to_ndarray,
+    subsample_features,
+    scale_to_specified_interval,
+)
 
 random_state = 42
 
-kernels = ("rbf", "poly", "linear", "sigmoid")
+kernels = ("rbf", "poly", "sigmoid")
 
-out_dir = os.path.join(os.path.dirname(__file__), "../res/")
+res_dir = os.path.join(os.path.dirname(__file__), "../res/")
 
 path_to_data = os.path.join(os.path.dirname(__file__), "../data_names.yaml")
 with open(path_to_data) as file:
@@ -19,40 +24,37 @@ with open(path_to_data) as file:
 
 
 def compute_svm_results(
-    datasets: List[str],
+    dataset: str,
     kernels: Tuple[str, ...],
     num_splits: int = 5,
     random_state: int = 42,
-    num_features_to_subsample: int = 4,
+    num_features_to_subsample: int = 9,
 ) -> pd.DataFrame:
     results_summary = []
-    for dataset in tqdm(datasets, desc="Datasets"):
-        for kernel in tqdm(kernels, desc="Kernels"):
-            entry = {"Dataset": dataset, "Kernel": kernel}
-            X, y, feature_names = parse_biomed_data_to_ndarray(dataset, return_X_y=True)
-            subsampled_results = subsample_features(
-                X, feature_names, num_features_to_subsample
+    X, y, feature_names = parse_biomed_data_to_ndarray(dataset, return_X_y=True)
+    X = scale_to_specified_interval(X, interval=(-np.pi / 2, np.pi / 2))
+    for kernel in tqdm(kernels, desc="Kernels"):
+        entry = {"Dataset": dataset, "Kernel": kernel}
+        subsampled_results = subsample_features(
+            X, feature_names, num_features_to_subsample
+        )
+        svm = SVC(kernel=kernel, probability=True, random_state=random_state)
+        for X_sub, feature_names_sub in subsampled_results:
+            group_name = str(feature_names_sub)
+            results = run_cross_validation(
+                svm, X_sub, y, num_splits=num_splits, random_state=random_state
             )
-            svm = SVC(kernel=kernel, probability=True, random_state=random_state)
-            for X_sub, feature_names_sub in subsampled_results:
-                group_name = str(feature_names_sub)
-                results = run_cross_validation(
-                    svm, X_sub, y, num_splits=num_splits, random_state=random_state
-                )
-                acc, f1, mcc, auc = tuple(results.values())
-                entry[group_name] = f"{acc:.5f}, {mcc:.5f}, {f1:.5f}, {auc:.5f}"
-            results_summary.append(entry)
+            acc, f1, auc, mcc = tuple(results.values())
+            entry[group_name] = f"{acc:.9f}, {f1:.9f}, {auc:.9f}, {mcc:.9f}"
+        results_summary.append(entry)
+        del svm
     return pd.DataFrame(results_summary)
 
 
 if __name__ == "__main__":
-    df = compute_svm_results(
-        datasets,
-        kernels,
-        num_splits=10,
-        random_state=random_state,
-        num_features_to_subsample=3,
-    )
-    results_filename = "Classical_SVC_results.csv"
-    path_out = os.path.join(out_dir, results_filename)
-    df.to_csv(path_out)
+    for data in tqdm(datasets, desc="Datasets"):
+        df = compute_svm_results(data, kernels)
+        res_name = f"SVM_{data}_results.csv"
+        path_out = os.path.join(res_dir, res_name)
+        df.to_csv(path_out, index=False)
+        print(f"Results saved to {path_out}")

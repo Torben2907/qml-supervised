@@ -61,7 +61,6 @@ class FidelityQuantumKernel(QuantumKernel):
             or self._data_embedding == qml.AngleEmbedding
         ):
             self.num_qubits = feature_dimension
-            self._data_embedding.n_repeats = self.reps
         elif self._data_embedding == qml.AmplitudeEmbedding:
             self.num_qubits = int(np.ceil(np.log2(feature_dimension)))
         else:
@@ -76,32 +75,54 @@ class FidelityQuantumKernel(QuantumKernel):
                 raise QMLabError(
                     "Number of qubits has not been specified before building the circuit!"
                 )
-            # noinspection PyCallingNonCallable
-            if self._data_embedding == qml.AngleEmbedding:
-                self._data_embedding(
-                    features=concat_vec[: self.num_qubits],
-                    wires=range(self.num_qubits),
-                    rotation=self.rotation,
-                )
-                # noinspection PyCallingNonCallable
-                qml.adjoint(
+            match self._data_embedding:
+                case qml.AngleEmbedding:
+                    # noinspection PyCallingNonCallable
                     self._data_embedding(
-                        features=concat_vec[self.num_qubits :],
+                        features=concat_vec[: self.num_qubits],
                         wires=range(self.num_qubits),
                         rotation=self.rotation,
                     )
-                )
-            else:
-                self._data_embedding(
-                    features=concat_vec[: self.num_qubits], wires=range(self.num_qubits)
-                )
-                # noinspection PyCallingNonCallable
-                qml.adjoint(
-                    self._data_embedding(
-                        features=concat_vec[self.num_qubits :],
-                        wires=range(self.num_qubits),
+                    # noinspection PyCallingNonCallable
+                    qml.adjoint(
+                        self._data_embedding(
+                            features=concat_vec[self.num_qubits :],
+                            wires=range(self.num_qubits),
+                            rotation=self.rotation,
+                        )
                     )
-                )
+                case qml.IQPEmbedding:
+                    # noinspection PyCallingNonCallable
+                    self._data_embedding(
+                        features=concat_vec[: self.num_qubits],
+                        wires=range(self.num_qubits),
+                        n_repeats=self.reps,
+                    )
+                    # noinspection PyCallingNonCallable
+                    qml.adjoint(
+                        self._data_embedding(
+                            features=concat_vec[self.num_qubits :],
+                            wires=range(self.num_qubits),
+                            n_repeats=self.reps,
+                        )
+                    )
+                case qml.AmplitudeEmbedding:
+                    # noinspection PyCallingNonCallable
+                    self._data_embedding(
+                        features=concat_vec[: self.num_qubits],
+                        wires=range(self.num_qubits),
+                        pad_with=0.0,
+                        normalize=True,
+                    )
+                    # noinspection PyCallingNonCallable
+                    qml.adjoint(
+                        self._data_embedding(
+                            features=concat_vec[self.num_qubits :],
+                            wires=range(self.num_qubits),
+                            pad_with=0.0,
+                            normalize=True,
+                        )
+                    )
             return qml.probs()
 
         self.circuit = circuit

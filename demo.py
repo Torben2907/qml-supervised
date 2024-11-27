@@ -1,27 +1,36 @@
+import jax.numpy as jnp
 import numpy as np
-from numpy.typing import NDArray
 import pennylane as qml
+import jax
+from qmlab.kernel.kernel_utils import vmap_batch
+
+dev = qml.device("default.qubit", wires=range(2))
 
 
-class Wrapper:
-    def __init__(self, num_qubits: int = 3):
-        self.num_qubits = num_qubits
-        self.embedding = qml.AngleEmbedding
-
-    def build_circuit(self):
-        dev = qml.device("default.qubit", wires=self.num_qubits)
-
-        @qml.qnode(dev)
-        def circuit(x: NDArray):
-            self.embedding(x, wires=range(self.num_qubits), rotation=["X", "Y", "Z"])
-            return qml.state()
-
-        return circuit
-
-    def evaluate(self, x):
-        self.circuit = self.build_circuit()
-        return self.circuit(x)
+@qml.qnode(dev)
+def circuit(concat_vec=None):
+    qml.AmplitudeEmbedding(
+        features=concat_vec[:2], wires=range(2), pad_with=0.0, normalize=True
+    )
+    qml.adjoint(
+        qml.AmplitudeEmbedding(
+            features=concat_vec[2:], wires=range(2), pad_with=0.0, normalize=True
+        )
+    )
+    return qml.state()
 
 
-w = Wrapper()
-print(w.evaluate([0, -np.pi, np.pi / 2]))
+f1 = np.array([[0, np.pi, np.pi / 2]])
+f2 = np.array([[0, np.pi / 2, np.pi]])
+
+Z = np.array(
+    [np.concatenate((f1[i], f2[j])) for i in range(len(f1)) for j in range(len(f2))]
+)
+
+print(Z)
+
+
+batched_circuit = vmap_batch(jax.vmap(circuit), start=0, max_batch_size=256)
+
+state = batched_circuit(Z)
+print(state)

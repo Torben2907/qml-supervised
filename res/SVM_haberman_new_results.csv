@@ -1,0 +1,4 @@
+Dataset,Kernel,"['V2', 'V3', 'V4']"
+haberman_new,rbf,"0.72549, 0.02000, 0.71069, -0.01688"
+haberman_new,poly,"0.72877, 0.04353, 0.62661, 0.02642"
+haberman_new,sigmoid,"0.73533, 0.00000, 0.48823, 0.00000"

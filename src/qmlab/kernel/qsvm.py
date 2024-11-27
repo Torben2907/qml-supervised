@@ -28,7 +28,7 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
         random_state: int = 42,
         **svm_kwargs,
     ) -> None:
-        """Constructor of quantum support vector machine.
+        """Constructor of the quantum support vector machine (QSVM).
 
         Parameters
         ----------
@@ -122,8 +122,8 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
         self._quantum_kernel.initialize_params(
             feature_dimension=X.shape[1], class_labels=np.unique(y).tolist()
         )
-        if self._quantum_kernel.data_embedding == qml.AmplitudeEmbedding:
-            X = pad_and_normalize_data(X)
+        # if self._quantum_kernel.data_embedding == qml.AmplitudeEmbedding:
+        #     X = pad_and_normalize_data(X)
         self._svm.fit(X, y, sample_weight)
         return self
 

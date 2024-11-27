@@ -1,4 +1,5 @@
 import os
+import logging
 from typing import List, Literal, Tuple, overload
 import pandas as pd
 import numpy as np
@@ -100,6 +101,27 @@ def parse_biomed_data_to_ndarray(
 def downsample_biomed_data(
     X: NDArray, y: NDArray, replace: bool = True, random_state: int = 42
 ) -> Tuple[NDArray, NDArray]:
+    r"""Create balanced data by removing feature vectors that belong to the negative
+    label. (Downsampling)
+
+    Parameters
+    ----------
+    X : NDArray
+        2D Array of shape (m, d) where m is the number of examples, d the number of features.
+    y : NDArray
+        1D Array of shape (m,) where m is the number of examples
+    replace : bool, optional
+        _description_, by default True
+    random_state : int, optional
+        Fix seed for reproducability, by default 42
+
+    Returns
+    -------
+    Tuple[NDArray, NDArray]
+        Downsampled data: Reduced feature matrix, a 2D array of shape ($\tilde{m}$, d),
+        and reduced label vector of shape ($\tilde{m}$,) where $\tilde{m}$ refers to the
+        number of examples that belong to the positive class.
+    """
     X_pos, X_neg = X[y == +1], X[y == -1]
     y_pos, y_neg = y[y == +1], y[y == -1]
 
@@ -136,16 +158,17 @@ def subsample_features(
     all_possible_combinations: bool = False,
 ) -> List[Tuple[NDArray, List[str]]]:
     feature_dimension = X.shape[1]
+    subsampled_results: List[Tuple[np.ndarray, List[str]]] = []
     if feature_dimension != len(feature_names):
         raise ValueError(
             "The length of `feature_names` must match the number of columns in `X`."
         )
-    if num_features_to_subsample > feature_dimension:
-        raise ValueError(
-            "`num_features_to_subsample` cannot be greater than the total number of features."
+    if num_features_to_subsample >= feature_dimension:
+        logging.info(
+            f"You specified {num_features_to_subsample}, which is greater or equal"
+            f"to the number of total features in the dataset {feature_dimension}."
         )
-    subsampled_results: List[Tuple[np.ndarray, List[str]]] = []
-
+        return [(X, feature_names)]
     if all_possible_combinations is True:
         all_combs = list(
             it.combinations(range(feature_dimension), num_features_to_subsample)

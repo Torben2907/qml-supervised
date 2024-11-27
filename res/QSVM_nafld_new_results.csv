@@ -1,3 +1,3 @@
 Dataset,Kernel,"['Geschlecht', 'Alter', 'M30', 'M65', 'Adiponektin', 'TNFa', 'AST', 'ALT', 'ALT_AST_ratio']"
-nafld_new,IQP,"0.68952, 0.00000, 0.90945, -0.03223"
-nafld_new,Angle,"0.78476, 0.42857, 0.91064, 0.39237"
+nafld_new,IQP,"0.702857143, 0.000000000, 0.684727273, 0.000000000"
+nafld_new,Angle,"0.702857143, 0.000000000, 0.377363636, 0.000000000"

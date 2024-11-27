@@ -16,8 +16,6 @@ def run_cross_validation(
 ) -> Dict[str, float]:
     skf = StratifiedKFold(n_splits=num_splits, random_state=random_state, shuffle=True)
     accuracies = []
-    # precisions = []
-    # recalls = []
     f1_scores = []
     auc_scores = []
     mccs = []
@@ -31,22 +29,17 @@ def run_cross_validation(
         y_pred_proba = clf.predict_proba(X_test)[:, 1]
 
         accuracy = metrics.accuracy_score(y_test, y_pred)
-        # precision = metrics.precision_score(y_test, y_pred)
-        # recall = metrics.recall_score(y_test, y_pred)
         f1 = metrics.f1_score(y_test, y_pred)
         mcc = metrics.matthews_corrcoef(y_test, y_pred)
         auc = metrics.roc_auc_score(y_test, y_pred_proba)
 
         accuracies.append(accuracy)
-        # precisions.append(precision)
-        # recalls.append(recall)
         f1_scores.append(f1)
-        mccs.append(mcc)
         auc_scores.append(auc)
+        mccs.append(mcc)
 
     results = {
         "accuracy": np.mean(accuracies).item(),
-        # "recall": np.mean(recalls).item(),
         "f1": np.mean(f1_scores).item(),
         "auc": np.mean(auc_scores).item(),
         "mcc": np.mean(mccs).item(),
