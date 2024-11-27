@@ -14,12 +14,12 @@ from qmlab.kernel import QSVC
 from qmlab.utils import run_cross_validation
 
 
-def compute_qsvm_results_for_dataset(
+def compute_qsvm_results(
     dataset: str,
     data_embeddings: Tuple[str, ...],
     num_splits: int = 5,
     random_state: int = 42,
-    num_features_to_subsample: int = 9,
+    num_features_to_subsample: int = 10,
 ) -> pd.DataFrame:
     results_summary = []
     X, y, feature_names = parse_biomed_data_to_ndarray(dataset, return_X_y=True)
@@ -51,7 +51,7 @@ data_embeddings = ("IQP", "Angle")
 
 if __name__ == "__main__":
     for data in tqdm(datasets, desc="Datasets"):
-        df = compute_qsvm_results_for_dataset(data, data_embeddings)
+        df = compute_qsvm_results(data, data_embeddings)
         res_name = f"QSVM_{data}_results.csv"
         path_out = os.path.join(res_dir, res_name)
         df.to_csv(path_out, index=False)

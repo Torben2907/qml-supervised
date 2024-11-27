@@ -28,12 +28,12 @@ def compute_svm_results(
     kernels: Tuple[str, ...],
     num_splits: int = 5,
     random_state: int = 42,
-    num_features_to_subsample: int = 9,
+    num_features_to_subsample: int = 10,
 ) -> pd.DataFrame:
     results_summary = []
     X, y, feature_names = parse_biomed_data_to_ndarray(dataset, return_X_y=True)
     X = scale_to_specified_interval(X, interval=(-np.pi / 2, np.pi / 2))
-    for kernel in tqdm(kernels, desc="Kernels"):
+    for kernel in tqdm(kernels, desc=f"Kernels ({dataset})"):
         entry = {"Dataset": dataset, "Kernel": kernel}
         subsampled_results = subsample_features(
             X, feature_names, num_features_to_subsample

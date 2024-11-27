@@ -13,7 +13,7 @@ class TestQSVC(QMLabTest):
 
     def setUp(self) -> None:
         super().setUp()
-        self.qkernel = FidelityQuantumKernel(data_embedding=qml.IQPEmbedding)
+        self.qkernel = FidelityQuantumKernel(data_embedding="IQP", reps=1)
         self.X = np.array([[-1, -1], [-2, -1], [1, 1], [2, 1]])
         self.y = np.array([-1, -1, 1, 1])
 
@@ -72,3 +72,21 @@ class TestQSVC(QMLabTest):
         qsvm.fit(self.X, self.y)
 
         qkernel_initialize.assert_called_once_with(self.X.shape[1], [-1, +1])
+
+    def test_correctly_classify_dummy_data(self) -> None:
+        qsvc = QSVC(quantum_kernel=self.qkernel)
+        X = np.asarray([[0.0, 0.0], [1.0, 1.0]])
+        y = np.asarray([-1.0, 1.0])
+        qsvc.fit(X, y)
+
+        x_test = [
+            np.asarray([[0.0, 0.0]]),
+            np.asarray([[0.2, 0.2]]),
+            np.asarray([[0.4, 0.4]]),
+            np.asarray([[0.6, 0.6]]),
+            np.asarray([[0.8, 0.8]]),
+            np.asarray([[1.0, 1.0]]),
+        ]
+        y_test = [-1, -1, -1, 1, 1, 1]
+        for i, xi in enumerate(x_test):
+            assert qsvc.predict(xi) == y_test[i]
