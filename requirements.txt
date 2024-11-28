@@ -134,7 +134,7 @@ qiskit==1.1.0
 qiskit-algorithms==0.3.1
 qiskit-ibm-runtime==0.33.1
 qiskit-machine-learning==0.8.0
--e git+https://github.com/Torben2907/qml-supervised.git@fb6f4c9bff5a2c3c5e36a6dda45fde76080db69b#egg=QMLab
+-e git+https://github.com/Torben2907/qml-supervised.git@179370a10907ba8fc4a0f11083c1847d9e1f2a52#egg=QMLab
 referencing==0.35.1
 requests==2.32.3
 requests_ntlm==1.3.0
