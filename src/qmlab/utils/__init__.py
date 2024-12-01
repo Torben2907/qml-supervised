@@ -1,3 +1,3 @@
-from .model_utils import run_cross_validation
+from .model_utils import run_cv, run_cv_roc_analysis
 
-__all__ = ["run_cross_validation", "vmap_batch"]
+__all__ = ["run_cv", "run_cv_roc_analysis"]

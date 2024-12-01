@@ -1,4 +1,4 @@
-Dataset,Kernel,"['Season', 'Age', 'diseases', 'Accident', 'Surgical', 'fevers', 'alcohol', 'smoking', 'sitting']"
-fertility_new,rbf,"0.880000000, 0.000000000, 0.451143791, 0.000000000"
-fertility_new,poly,"0.880000000, 0.000000000, 0.470751634, 0.000000000"
-fertility_new,sigmoid,"0.880000000, 0.000000000, 0.452777778, 0.000000000"
+Dataset,Kernel
+fertility_new,rbf
+fertility_new,poly
+fertility_new,sigmoid

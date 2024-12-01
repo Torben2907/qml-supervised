@@ -1,4 +1,4 @@
-Dataset,Kernel,"['behavior_sexualRisk', 'behavior_eating', 'behavior_personalHygine', 'intention_aggregation', 'intention_commitment', 'attitude_consistency', 'attitude_spontaneity', 'norm_significantPerson', 'norm_fulfillment']","['perception_vulnerability', 'perception_severity', 'motivation_strength', 'motivation_willingness', 'socialSupport_emotionality', 'socialSupport_appreciation', 'socialSupport_instrumental', 'empowerment_knowledge', 'empowerment_abilities']","['empowerment_desires', 'behavior_sexualRisk', 'behavior_eating', 'behavior_personalHygine', 'intention_aggregation', 'intention_commitment', 'attitude_consistency', 'attitude_spontaneity', 'norm_significantPerson']"
-sobar_new,rbf,"0.874285714, 0.729206349, 0.917000000, 0.694664025","0.888571429, 0.761428571, 0.911000000, 0.723537041","0.845714286, 0.617142857, 0.860454545, 0.559052905"
-sobar_new,poly,"0.832380952, 0.680216450, 0.894909091, 0.616628506","0.875238095, 0.715714286, 0.973000000, 0.694477081","0.775238095, 0.550216450, 0.842818182, 0.450845805"
-sobar_new,sigmoid,"0.779047619, 0.447619048, 0.826363636, 0.384882348","0.876190476, 0.691428571, 0.906909091, 0.645831240","0.846666667, 0.676825397, 0.909000000, 0.637891703"
+Dataset,Kernel
+sobar_new,rbf
+sobar_new,poly
+sobar_new,sigmoid

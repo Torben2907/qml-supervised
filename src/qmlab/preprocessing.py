@@ -269,15 +269,14 @@ def pad_and_normalize_data(X: NDArray, pad_with: float = 0.0) -> NDArray:
         Amplitude Embeddings.
     """
     assert X.ndim == 2, "X must be a 2D-feature array"
-
-    num_features = X.shape[1]
-    num_qubits = int(np.ceil(np.log2(num_features)))
-    max_num_features = 2**num_qubits
-    padding_amount = max_num_features - num_features
+    feature_dimension = X.shape[1]
+    num_qubits_ae = int(np.ceil(np.log2(feature_dimension)))
+    num_qubits = 2 ** int(np.ceil(np.log2(num_qubits_ae)))
+    max_feature_dimension = 2**num_qubits
+    padding_amount = max_feature_dimension - feature_dimension
     padding = np.empty(shape=(len(X), padding_amount))
     padding.fill(pad_with)
-    padding /= max_num_features
-
+    padding /= max_feature_dimension
     X_pad = np.c_[X, padding]
     X_norm = np.divide(X_pad, np.linalg.norm(X_pad, axis=1)[:, None])
     return X_norm

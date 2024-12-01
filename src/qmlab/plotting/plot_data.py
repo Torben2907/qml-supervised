@@ -30,13 +30,16 @@ def labels_pie_chart(
         num_labels = len(unique_labels)
         colors = [plasma(i / num_labels) for i in range(num_labels)]
 
+    explode = (0, 0.1)
     ax.pie(
         label_counts,
+        explode=explode,
         labels=unique_labels,
         autopct="%1.2f%%",
         startangle=90,
         colors=colors,
-        labeldistance=1.2,
+        pctdistance=1.25,
+        labeldistance=0.6,
     )
     ax.set_title(title)
     return fig

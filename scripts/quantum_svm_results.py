@@ -11,7 +11,7 @@ from qmlab.preprocessing import (
 )
 from qmlab.kernel import FidelityQuantumKernel
 from qmlab.kernel import QSVC
-from qmlab.utils import run_cross_validation
+from qmlab.utils import run_cv
 
 
 def compute_qsvm_results(
@@ -33,7 +33,7 @@ def compute_qsvm_results(
         qsvm = QSVC(quantum_kernel=qkernel, random_state=random_state)
         for X_sub, feature_names_sub in subsampling_results:
             group_name = str(feature_names_sub)
-            results = run_cross_validation(qsvm, X_sub, y, num_splits, random_state)
+            results = run_cv(qsvm, X_sub, y, num_splits, random_state)
             acc, f1, auc, mcc = tuple(results.values())
             entry[group_name] = f"{acc:.9f}, {f1:.9f}, {auc:.9f}, {mcc:.9f}"
         results_summary.append(entry)
@@ -46,8 +46,8 @@ path_to_data_names = os.path.join(os.path.dirname(__file__), "../data_names.yaml
 with open(path_to_data_names) as file:
     datasets: list[str] = yaml.safe_load(file)
 
-datasets = ["nafld_new"]
-data_embeddings = ("IQP", "Angle")
+datasets = ["ctg_new"]
+data_embeddings = ("Angle", "IQP")
 
 if __name__ == "__main__":
     for data in tqdm(datasets, desc="Datasets"):

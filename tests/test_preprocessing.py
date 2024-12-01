@@ -169,12 +169,20 @@ def test_subsample_features_no_wrap_around() -> None:
     assert first_feature_name == ["V2"]
 
 
-def test_subsample_features_wrap_around() -> None:
+def test_subsample_features_wrap_around_1() -> None:
     X, _, feature_names = parse_biomed_data_to_ndarray("haberman_new", return_X_y=True)
     results = subsample_features(
         X, feature_names, num_features_to_subsample=2, all_possible_combinations=False
     )
     assert len(results) == 2
+
+
+def test_subsample_wrap_around_2() -> None:
+    X, _, feature_names = parse_biomed_data_to_ndarray("ctg_new", return_X_y=True)
+    results = subsample_features(
+        X, feature_names, num_features_to_subsample=10, all_possible_combinations=False
+    )
+    assert len(results) == 3
 
 
 def test_subsample_features_all_possible_combinations() -> None:

@@ -6,7 +6,7 @@ from numpy.typing import NDArray
 from sklearn.base import BaseEstimator, ClassifierMixin
 from ..exceptions import NotFittedError, QMLabError
 import pennylane as qml
-from qmlab.preprocessing import pad_and_normalize_data
+from ..preprocessing import pad_and_normalize_data
 
 
 class BaseQSVM(BaseEstimator, ClassifierMixin):
@@ -115,15 +115,15 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
         Returns
         -------
         BaseQSVM
-            The model itself fitted on the data now. Usually this output can be safely ignored by the user.
+            The model itself fitted on the data. This output can be safely ignored by the user.
         """
         self._svm.random_state = self._random_state
         self.params_ = {"X_train": X}
         self._quantum_kernel.initialize_params(
             feature_dimension=X.shape[1], class_labels=np.unique(y).tolist()
         )
-        # if self._quantum_kernel.data_embedding == qml.AmplitudeEmbedding:
-        #     X = pad_and_normalize_data(X)
+        if qml.AmplitudeEmbedding == self._quantum_kernel._data_embedding:
+            X = pad_and_normalize_data(X)
         self._svm.fit(X, y, sample_weight)
         return self
 

@@ -46,11 +46,11 @@ Therefore we are able to classify non-linearly separable data with a linear mode
 
 A **quantum kernel** is a bivariate, positive semi-definite function that takes on the form 
 
-$$ k(\mathbf{x}, \mathbf{y}) = \left\langle \phi(\mathbf{x}) | \phi(\mathbf{y}) \right\rangle, $$
+$$ k(\mathbf{x}, \mathbf{y}) = \left|\left\langle \psi(\mathbf{x}) | \psi(\mathbf{y}) \right\rangle \right|^2, $$
 
 where $\phi(\mathbf{x})$ is a quantum feature map that is a mapping from classical data to a quantum state 
 
-$$ \phi: \mathbf{x} \longrightarrow |\psi(\mathbf{x}) \rangle. $$
+$$ \phi: \mathbf{x} \longrightarrow \left|\right.\psi(\mathbf{x}) \rangle. $$
 
 The quantum kernel is then calculated by taking the inner product of the two resulting quantum states. 
 

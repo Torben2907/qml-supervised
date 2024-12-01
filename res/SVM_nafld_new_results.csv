@@ -1,4 +1,4 @@
-Dataset,Kernel,"['Geschlecht', 'Alter', 'M30', 'M65', 'Adiponektin', 'TNFa', 'AST', 'ALT', 'ALT_AST_ratio']"
-nafld_new,rbf,"0.825714286, 0.550000000, 0.964272727, 0.507959364"
-nafld_new,poly,"0.919047619, 0.832539683, 0.949818182, 0.807215221"
-nafld_new,sigmoid,"0.812380952, 0.534761905, 0.921727273, 0.512191209"
+Dataset,Kernel
+nafld_new,rbf
+nafld_new,poly
+nafld_new,sigmoid
