@@ -1,4 +1,4 @@
-Dataset,Kernel
-haberman_new,rbf
-haberman_new,poly
-haberman_new,sigmoid
+Dataset,Kernel,"['V2', 'V3', 'V4']"
+haberman_new,rbf,"0.722210471, 0.116666667, 0.711495098, -0.009531191"
+haberman_new,poly,"0.718931782, 0.066666667, 0.729485294, 0.000587734"
+haberman_new,sigmoid,"0.607985193, 0.231868132, 0.560955882, -0.041537500"

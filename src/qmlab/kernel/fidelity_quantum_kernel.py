@@ -9,7 +9,6 @@ from pennylane import QNode
 from pennylane.operation import Operation
 from pennylane.measurements import ProbabilityMP
 from .kernel_utils import vmap_batch
-from ..preprocessing import pad_and_normalize_data
 from ..exceptions import InvalidEmbeddingError, QMLabError
 
 
@@ -137,7 +136,6 @@ class FidelityQuantumKernel(QuantumKernel):
 
     def evaluate(self, x: NDArray, y: NDArray) -> NDArray:
         x, y = self._validate_inputs(x, y)
-        # is_symmetric = y is None or np.array_equal(x, y)
         kernel_matrix_shape = (
             len(x),
             len(y) if y is not None else len(x),

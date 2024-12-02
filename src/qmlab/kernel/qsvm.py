@@ -1,3 +1,4 @@
+import time
 from typing import Any, Dict
 from sklearn.svm import SVC
 from .quantum_kernel import QuantumKernel
@@ -5,8 +6,6 @@ import numpy as np
 from numpy.typing import NDArray
 from sklearn.base import BaseEstimator, ClassifierMixin
 from ..exceptions import NotFittedError, QMLabError
-import pennylane as qml
-from ..preprocessing import pad_and_normalize_data
 
 
 class BaseQSVM(BaseEstimator, ClassifierMixin):
@@ -59,6 +58,7 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
         )
         """This dict will save the feature matrix used for training of the quantum 
         kernel. This way we can check whether the QSVM is fitted or not."""
+        self.classes_: None | NDArray = None
         self.params_: Dict[str, NDArray] = {}
 
     @property
@@ -117,14 +117,15 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
         BaseQSVM
             The model itself fitted on the data. This output can be safely ignored by the user.
         """
+        self.classes_ = np.unique(y)
         self._svm.random_state = self._random_state
         self.params_ = {"X_train": X}
         self._quantum_kernel.initialize_params(
-            feature_dimension=X.shape[1], class_labels=np.unique(y).tolist()
+            feature_dimension=X.shape[1], class_labels=self.classes_.tolist()
         )
-        if qml.AmplitudeEmbedding == self._quantum_kernel._data_embedding:
-            X = pad_and_normalize_data(X)
+        start = time.time()
         self._svm.fit(X, y, sample_weight)
+        self.training_time_ = time.time() - start
         return self
 
     def predict(self, X: NDArray) -> NDArray:

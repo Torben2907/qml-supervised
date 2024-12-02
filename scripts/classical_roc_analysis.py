@@ -1,7 +1,6 @@
 import os
 import yaml
 import numpy as np
-import pandas as pd
 from tqdm import tqdm
 from typing import List, Tuple
 from sklearn.svm import SVC

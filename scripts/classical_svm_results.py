@@ -44,11 +44,14 @@ def compute_svm_results(
             results = run_cv(
                 svm, X_sub, y, num_splits=num_splits, random_state=random_state
             )
-            acc, f1, auc, mcc = tuple(results.values())
-            entry[group_name] = f"{acc:.9f}, {f1:.9f}, {auc:.9f}, {mcc:.9f}"
+            acc, pr, auc, mcc = tuple(results.values())
+            entry[group_name] = f"{acc:.9f}, {pr:.9f}, {auc:.9f}, {mcc:.9f}"
         results_summary.append(entry)
         del svm
     return pd.DataFrame(results_summary)
+
+
+datasets = ["haberman_new"]
 
 
 if __name__ == "__main__":
