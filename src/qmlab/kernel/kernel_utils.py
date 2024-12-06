@@ -4,6 +4,9 @@ import jax.numpy as jnp
 from sklearn.utils import gen_batches
 
 
+jax.config.update("jax_default_matmul_precision", "highest")
+
+
 def vmap_batch(
     vmapped_fn: Callable[..., jax.Array], start: int, max_batch_size: int
 ) -> Callable[..., jax.Array]:

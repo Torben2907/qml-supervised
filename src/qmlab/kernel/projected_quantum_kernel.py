@@ -7,6 +7,8 @@ from .quantum_kernel import QuantumKernel
 from pennylane.operation import Operation
 from .kernel_utils import vmap_batch
 
+jax.config.update("jax_default_matmul_precision", "highest")
+
 
 class ProjectedQuantumKernel(QuantumKernel):
 
