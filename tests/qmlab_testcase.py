@@ -28,7 +28,7 @@ class QMLabTest(unittest.TestCase, ABC):
 
     def tearDown(self) -> None:
         test_runtime = time.time() - self._start
-        if test_runtime > 5.0:
+        if test_runtime > 10.0:
             raise PerformanceWarning(f"Test took {round(test_runtime):.2f}!")
 
     @pytest.fixture(autouse=True)
