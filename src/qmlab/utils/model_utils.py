@@ -1,5 +1,5 @@
 import os
-from typing import Dict, List
+from typing import Dict, List, Union
 import numpy as np
 from numpy.typing import NDArray
 from sklearn.model_selection import StratifiedKFold
@@ -8,6 +8,7 @@ from sklearn.svm import SVC
 from sklearn.metrics import RocCurveDisplay, auc
 from ..kernel.qsvm import QSVC
 import matplotlib
+from scipy.stats import norm
 
 matplotlib.use("pgf")
 import matplotlib.pyplot as plt
@@ -29,13 +30,12 @@ def run_cv(
     y: NDArray,
     num_splits: int = 10,
     random_state: int = 42,
-) -> Dict[str, float]:
+    confidence: float = 0.95,
+) -> Dict[str, Dict[str, float | List[float]]]:
     scv = StratifiedKFold(n_splits=num_splits, random_state=random_state, shuffle=True)
     accuracies = []
-    # f1_scores = []
-    precisions = []
-    auc_scores = []
-    mccs = []
+    aucs = []
+
     for train_idx, test_idx in scv.split(X, y):
         X_train, X_test = X[train_idx], X[test_idx]
         y_train, y_test = y[train_idx], y[test_idx]
@@ -46,23 +46,17 @@ def run_cv(
         y_pred_proba = clf.predict_proba(X_test)[:, 1]
 
         accuracy = metrics.accuracy_score(y_test, y_pred)
-        # f1 = metrics.f1_score(y_test, y_pred)
-        precision = metrics.precision_score(y_test, y_pred)
-        mcc = metrics.matthews_corrcoef(y_test, y_pred)
         auc = metrics.roc_auc_score(y_test, y_pred_proba)
 
         accuracies.append(accuracy)
-        # f1_scores.append(f1)
-        precisions.append(precision)
-        auc_scores.append(auc)
-        mccs.append(mcc)
+        aucs.append(auc)
+
+    accuracy_ci = compute_confidence_interval(accuracies, confidence)
+    auc_ci = compute_confidence_interval(aucs, confidence)
 
     results = {
-        "accuracy": np.mean(accuracies).item(),
-        # "f1": np.mean(f1_scores).item(),
-        "precision": np.mean(precisions).item(),
-        "auc": np.mean(auc_scores).item(),
-        "mcc": np.mean(mccs).item(),
+        "accuracy": {"mean": np.mean(accuracies).tolist(), "CI": accuracy_ci},
+        "auc": {"mean": np.mean(aucs).tolist(), "CI": auc_ci},
     }
 
     return results
@@ -85,9 +79,7 @@ def run_cv_roc_analysis(
     aucs = []
     mean_fpr = np.linspace(0, 1, 100)
     fig, ax = plt.subplots(figsize=(3, 3))  # Smaller figure size
-    fig.set_size_inches(
-        w=2.95333, h=1.5
-    )  # Half of the original size for LaTeX rendering
+    fig.set_size_inches(w=2.5, h=1.5)  # Half of the original size for LaTeX rendering
     plot_files = []
 
     for fold, (train, test) in enumerate(scv.split(X, y)):
@@ -144,11 +136,12 @@ def run_cv_roc_analysis(
         output_dir,
         generate_plot_filename(dataset_name, kernel_name, feature_names),
     )
+
     ax.get_legend().remove()  # Remove legend
     plt.savefig(overall_plot_path, bbox_inches="tight", transparent=True)
     plot_files.append(overall_plot_path)
-
     plt.close(fig)
+
     return plot_files
 
 
@@ -184,3 +177,18 @@ def generate_plot_filename(
 
     # Ensure filename is safe for the filesystem
     return filename.replace(" ", "_").replace(",", "").replace("/", "_")
+
+
+def compute_confidence_interval(
+    data: list[float], confidence: float = 0.95
+) -> List[float]:
+    """
+    Compute the confidence interval for a given data set.
+    """
+    n = len(data)
+    mean = np.mean(data)
+    std_err = np.std(data, ddof=1) / np.sqrt(n)  # Standard error
+    z_score = norm.ppf((1 + confidence) / 2)  # Z-score for the confidence level
+    margin = z_score * std_err
+    CI = np.array([mean - margin, mean + margin])
+    return CI.tolist()

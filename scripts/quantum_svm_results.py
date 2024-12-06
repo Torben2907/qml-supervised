@@ -19,13 +19,13 @@ def compute_qsvm_results(
     data_embeddings: Tuple[str, ...],
     num_splits: int = 5,
     random_state: int = 42,
-    num_features_to_subsample: int = 10,
+    num_features_to_subsample: int = 20,
 ) -> pd.DataFrame:
     results_summary = []
     X, y, feature_names = parse_biomed_data_to_ndarray(dataset, return_X_y=True)
     X = scale_to_specified_interval(X, interval=(-np.pi / 2, np.pi / 2))
     for embedding in tqdm(data_embeddings, desc=f"Embedding ({dataset})"):
-        entry = {"Dataset": dataset, "Kernel": embedding}
+        entry = {"Dataset": dataset, "Embedding": embedding}
         subsampling_results = subsample_features(
             X, feature_names, num_features_to_subsample
         )
@@ -33,20 +33,27 @@ def compute_qsvm_results(
         qsvm = QSVC(quantum_kernel=qkernel, random_state=random_state)
         for X_sub, feature_names_sub in subsampling_results:
             group_name = str(feature_names_sub)
-            results = run_cv(qsvm, X_sub, y, num_splits, random_state)
-            acc, f1, auc, mcc = tuple(results.values())
-            entry[group_name] = f"{acc:.9f}, {f1:.9f}, {auc:.9f}, {mcc:.9f}"
+            results = run_cv(
+                qsvm, X_sub, y, num_splits=num_splits, random_state=random_state
+            )
+            auc = results["auc"]
+            mean = auc["mean"]
+            CI = auc["CI"]
+            if isinstance(CI, list):
+                rounded_CI = [round(value, 5) for value in CI]
+            entry[group_name] = f"{mean:.5f}, CI: {rounded_CI}"
         results_summary.append(entry)
         del (qkernel, qsvm)
     return pd.DataFrame(results_summary)
 
 
 res_dir = os.path.join(os.path.dirname(__file__), "../res/")
+os.makedirs(res_dir, exist_ok=True)
 path_to_data_names = os.path.join(os.path.dirname(__file__), "../data_names.yaml")
 with open(path_to_data_names) as file:
     datasets: list[str] = yaml.safe_load(file)
 
-datasets = ["ctg_new"]
+datasets = ["haberman_new", "nafld_new", "fertility_new", "sobar_new"]
 data_embeddings = ("Angle", "IQP")
 
 if __name__ == "__main__":

@@ -1,4 +1,0 @@
-Dataset,Kernel
-wdbc_new,rbf
-wdbc_new,poly
-wdbc_new,sigmoid

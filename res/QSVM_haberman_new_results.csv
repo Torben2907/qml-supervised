@@ -1,3 +1,3 @@
-Dataset,Kernel,"['V2', 'V3', 'V4']"
-haberman_new,Angle,"0.735325225, 0.000000000, 0.508194444, 0.000000000"
-haberman_new,IQP,"0.725489159, 0.021052632, 0.638357843, -0.014611298"
+Dataset,Embedding,"['V2', 'V3', 'V4']"
+haberman_new,Angle,"0.50819, CI: [0.4247, 0.59169]"
+haberman_new,IQP,"0.63836, CI: [0.58879, 0.68793]"

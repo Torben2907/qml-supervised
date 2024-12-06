@@ -1,4 +1,4 @@
-Dataset,Kernel
-sobar_new,rbf
-sobar_new,poly
-sobar_new,sigmoid
+Dataset,Kernel,"['behavior_sexualRisk', 'behavior_eating', 'behavior_personalHygine', 'intention_aggregation', 'intention_commitment', 'attitude_consistency', 'attitude_spontaneity', 'norm_significantPerson', 'norm_fulfillment', 'perception_vulnerability']","['perception_severity', 'motivation_strength', 'motivation_willingness', 'socialSupport_emotionality', 'socialSupport_appreciation', 'socialSupport_instrumental', 'empowerment_knowledge', 'empowerment_abilities', 'empowerment_desires', 'behavior_sexualRisk']"
+sobar_new,rbf,"0.96000, CI: [0.8816, 1.0384]","0.83250, CI: [0.6532, 1.0118]"
+sobar_new,poly,"0.85250, CI: [0.68411, 1.02089]","0.87250, CI: [0.73168, 1.01332]"
+sobar_new,sigmoid,"0.53500, CI: [0.31107, 0.75893]","0.80750, CI: [0.61906, 0.99594]"

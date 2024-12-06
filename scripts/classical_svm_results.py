@@ -3,13 +3,14 @@ import yaml
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from typing import Tuple
+from typing import List, Tuple
 from sklearn.svm import SVC
 from qmlab.utils import run_cv
 from qmlab.preprocessing import (
     parse_biomed_data_to_ndarray,
     subsample_features,
     scale_to_specified_interval,
+    downsample_biomed_data,
 )
 
 random_state = 42
@@ -17,6 +18,7 @@ random_state = 42
 kernels = ("rbf", "poly", "sigmoid")
 
 res_dir = os.path.join(os.path.dirname(__file__), "../res/")
+os.makedirs(res_dir, exist_ok=True)
 
 path_to_data = os.path.join(os.path.dirname(__file__), "../data_names.yaml")
 with open(path_to_data) as file:
@@ -32,7 +34,8 @@ def compute_svm_results(
 ) -> pd.DataFrame:
     results_summary = []
     X, y, feature_names = parse_biomed_data_to_ndarray(dataset, return_X_y=True)
-    X = scale_to_specified_interval(X, interval=(-np.pi / 2, np.pi / 2))
+    # X = scale_to_specified_interval(X, interval=(-np.pi / 2, np.pi / 2))
+    X, y = downsample_biomed_data(X, y, replace=True, random_state=random_state)
     for kernel in tqdm(kernels, desc=f"Kernels ({dataset})"):
         entry = {"Dataset": dataset, "Kernel": kernel}
         subsampled_results = subsample_features(
@@ -44,15 +47,18 @@ def compute_svm_results(
             results = run_cv(
                 svm, X_sub, y, num_splits=num_splits, random_state=random_state
             )
-            acc, pr, auc, mcc = tuple(results.values())
-            entry[group_name] = f"{acc:.9f}, {pr:.9f}, {auc:.9f}, {mcc:.9f}"
+            auc = results["auc"]
+            mean = auc["mean"]
+            CI = auc["CI"]
+            if isinstance(CI, list):
+                rounded_CI = [round(value, 5) for value in CI]
+            entry[group_name] = f"{mean:.5f}, CI: {rounded_CI}"
         results_summary.append(entry)
         del svm
     return pd.DataFrame(results_summary)
 
 
-datasets = ["haberman_new"]
-
+datasets = ["haberman_new", "nafld_new", "fertility_new", "sobar_new"]
 
 if __name__ == "__main__":
     for data in tqdm(datasets, desc="Datasets"):
