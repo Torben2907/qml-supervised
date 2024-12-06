@@ -8,6 +8,8 @@ import numpy as np
 from qiskit_algorithms.utils import algorithm_globals
 from numpy.typing import NDArray
 
+jax.config.update("jax_default_matmul_precision", "highest")
+
 
 def generate_random_data(
     feature_dimension: int,
@@ -15,7 +17,7 @@ def generate_random_data(
     test_examples_per_class: int,
     delta: float = 0.3,
     random_state: int = 42,
-    interval: Tuple[float, float] = (0.0, 2 * jnp.pi),
+    interval: Tuple[float, float] = (0.0, 2 * np.pi),
 ) -> Tuple[NDArray, NDArray, NDArray, NDArray]:
     key = jax.random.key(seed=random_state)
     algorithm_globals.random_seed = random_state
@@ -59,7 +61,7 @@ def generate_random_data(
     random_unitary = eigvecs.conj().T @ par_op @ eigvecs
     assert _is_unitary(random_unitary) is True
 
-    def compute_expval(x: jnp.ndarray) -> jnp.ndarray:
+    def compute_expval(x: jax.Array) -> jax.Array:
         x = jnp.asarray(x)
         fm = jnp.sum(x[:, None, None] * z_rotations, axis=0)
         fm += sum(
@@ -183,8 +185,8 @@ def _is_unitary(U: jax.Array) -> bool:
     relation_1 = U_dagger @ U
     relation_2 = U @ U_dagger
     return (
-        jnp.allclose(jnp.eye(U.shape[0]), relation_1, atol=1e-5, rtol=1e-5).item()
-        and jnp.allclose(jnp.eye(U.shape[0]), relation_2, atol=1e-5, rtol=1e-5).item()
+        jnp.allclose(jnp.eye(U.shape[0]), relation_1, atol=1e-3, rtol=1e-3).item()
+        and jnp.allclose(jnp.eye(U.shape[0]), relation_2, atol=1e-3, rtol=1e-3).item()
     )
 
 

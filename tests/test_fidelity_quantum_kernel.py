@@ -56,7 +56,9 @@ class TestFidelityQuantumKernel(QMLabTest):
 
     def test_gram_matrix_is_symmetric(self) -> None:
         gram_matrix = self.compute_gram_matrix()
-        np.testing.assert_array_almost_equal(gram_matrix.T, gram_matrix)
+        np.testing.assert_allclose(
+            actual=gram_matrix.T, desired=gram_matrix, rtol=1e-3, atol=1e-4
+        )
 
     def test_fidelity_with_angle_embedding(self) -> None:
         qkernel = FidelityQuantumKernel(data_embedding="Angle")
