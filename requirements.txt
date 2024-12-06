@@ -74,7 +74,7 @@ jupyterlab_server==2.27.3
 kiwisolver==1.4.7
 markdown-it-py==3.0.0
 MarkupSafe==3.0.2
-matplotlib==3.9.2
+matplotlib==3.9.3
 matplotlib-inline==0.1.7
 mdit-py-plugins==0.4.2
 mdurl==0.1.2
@@ -125,6 +125,7 @@ pyspnego==0.11.1
 pytest==8.3.3
 pytest-cov==6.0.0
 pytest-mock==3.14.0
+pytest-xdist==3.6.1
 python-dateutil==2.9.0.post0
 python-json-logger==2.0.7
 pytz==2024.2
@@ -134,7 +135,7 @@ qiskit==1.1.0
 qiskit-algorithms==0.3.1
 qiskit-ibm-runtime==0.33.1
 qiskit-machine-learning==0.8.0
--e git+https://github.com/Torben2907/qml-supervised.git@a022a6918e602a9ca4becb50c3911199f5a6cfb2#egg=QMLab
+-e git+https://github.com/Torben2907/qml-supervised.git@4bab996b9e518787ea7abc5f33fa2e2a076c2d30#egg=QMLab
 referencing==0.35.1
 requests==2.32.3
 requests_ntlm==1.3.0
