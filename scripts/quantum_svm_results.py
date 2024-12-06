@@ -53,7 +53,7 @@ path_to_data_names = os.path.join(os.path.dirname(__file__), "../data_names.yaml
 with open(path_to_data_names) as file:
     datasets: list[str] = yaml.safe_load(file)
 
-datasets = ["haberman_new", "nafld_new", "fertility_new", "sobar_new"]
+# datasets = ["haberman_new", "nafld_new", "fertility_new", "sobar_new"]
 data_embeddings = ("Angle", "IQP")
 
 if __name__ == "__main__":
