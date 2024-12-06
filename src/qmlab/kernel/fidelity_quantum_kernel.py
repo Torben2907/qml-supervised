@@ -11,6 +11,9 @@ from pennylane.measurements import ProbabilityMP
 from .kernel_utils import vmap_batch
 from ..exceptions import InvalidEmbeddingError, QMLabError
 
+# need to put this here for computation on GPUs
+jax.config.update("jax_default_matmul_precision", "highest")
+
 
 class FidelityQuantumKernel(QuantumKernel):
     def __init__(

@@ -11,6 +11,8 @@ from pennylane.operation import Operation
 from pennylane.capture import ABCCaptureMeta
 from ..exceptions import InvalidEmbeddingError
 
+jax.config.update("jax_default_matmul_precision", "highest")
+
 
 class QuantumKernel(ABC):
     """An abstract class for Quantum Kernels, every quantum kernel proposed by the thesis will
