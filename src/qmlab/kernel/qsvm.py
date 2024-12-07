@@ -9,8 +9,9 @@ from ..exceptions import NotFittedError, QMLabError
 
 
 class BaseQSVM(BaseEstimator, ClassifierMixin):
-    """An abstract class for a quantum support vector machine. Written with the intention
-    of making it extendable for regression problems in the future.
+    """An abstract class for a quantum support vector machine (QSVM).
+    Written with the intention of making it
+    extendable for regression or multiclass problems in the future.
 
     Parameters
     ----------
@@ -27,16 +28,16 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
         random_state: int = 42,
         **svm_kwargs,
     ) -> None:
-        """Constructor of the quantum support vector machine (QSVM).
+        """Constructor of the QSVM.
 
         Parameters
         ----------
-        svm : sklearn.svm.SVC for this study.
-            classical support vector machine.
+        svm : classical support vector machine (SVM).
         quantum_kernel : QuantumKernel
-            Quantum Kernel implementation, has to inherit from abstract class QuantumKernel.
+            A valid implementation of a quantum kernel, i.e.
+            has to inherit from abstract class QuantumKernel.
         random_state : int, optional
-            Fixing seed for reproducable results, by default 42
+            Fixing seed for reproducable results, by default 42.
 
         Raises
         ------
@@ -49,7 +50,7 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
             raise QMLabError("Parameter `quantum_kernel` must be provided.")
         elif not isinstance(quantum_kernel, QuantumKernel):
             raise QMLabError(
-                "Parameter `quantum_kernel` must be of type QuantumKernel."
+                "Parameter `quantum_kernel` must be of type `QuantumKernel`."
             )
         self._quantum_kernel = quantum_kernel
         self._random_state = random_state
@@ -96,10 +97,10 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
     def fit(
         self, X: NDArray, y: NDArray, sample_weight: NDArray | None = None
     ) -> "BaseQSVM":
-        """Fit the model to the training data. Ideally this will do 3 things:
-        1. save the feature matrix used for training so we can check if the model
-        is fitted later on,
-        2. Initialize a valid quantum kernel
+        """Fit the model to the training data. Ideally this will do three things:
+        1. Save the feature matrix used for training so we can check if the model
+        is fitted later on.
+        2. Initialize a valid quantum kernel.
         3. Evaluate the quantum kernel, i.e. obtain a real-valued kernel matrix, that can
         be used by the scikit-learn implementation of the traditional support vector machine.
 
@@ -115,9 +116,12 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
         Returns
         -------
         BaseQSVM
-            The model itself fitted on the data. This output can be safely ignored by the user.
+            The model itself fitted on the data.
+            This output can be safely ignored by the user.
         """
         self.classes_ = np.unique(y)
+        if self.classes_ is None:
+            raise QMLabError("Did you provide a correct label vector?")
         self._svm.random_state = self._random_state
         self.params_ = {"X_train": X}
         self._quantum_kernel.initialize_params(
@@ -129,7 +133,7 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
         return self
 
     def predict(self, X: NDArray) -> NDArray:
-        """Makes a prediction with the quantum support vector machine.
+        """Makes a prediction with the QSVM.
 
         Parameters
         ----------
@@ -160,13 +164,13 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
 class QSVC(BaseQSVM):
     """The classification implementation of the quantum support vector machine,
     making it a quantum support vector classifier. We pass in the classical
-    support vector classifier from scikit-learn, i.e. sklearn.svm.SVC.
+    support vector classifier from scikit-learn, i.e. `sklearn.svm.SVC`.
 
     Parameters
     ----------
     BaseQSVM : qsvm.BaseQSVM
-        The abstract class containing the fit, predict, and score methods of a
-        quantum based classifier.
+        The abstract class containing the `fit`-, `predict`-, `predict_proba`- and
+        `score`-methods of a QSVM.
     """
 
     def __init__(

@@ -57,7 +57,7 @@ class TestFidelityQuantumKernel(QMLabTest):
     def test_gram_matrix_is_symmetric(self) -> None:
         gram_matrix = self.compute_gram_matrix()
         np.testing.assert_allclose(
-            actual=gram_matrix.T, desired=gram_matrix, rtol=1e-3, atol=1e-4
+            actual=gram_matrix.T, desired=gram_matrix, rtol=1e-5, atol=1e-5
         )
 
     def test_fidelity_with_angle_embedding(self) -> None:
@@ -69,14 +69,15 @@ class TestFidelityQuantumKernel(QMLabTest):
         np.testing.assert_array_almost_equal(qkernel.evaluate(x1, x2), np.array(1.0))
 
     def compute_gram_matrix(self) -> NDArray:
-        """helper function that does the necessary steps to obtain the gram matrix
-        of the dummy data.
+        """Helper method that takes the necessary steps
+        to obtain the gram matrix for dummy data.
 
         Returns
         -------
         NDArray
-            Gram matrix, Array of shape (m,m) where m is the number of examples contained
-            in the dummy data.
+            The gram matrix, Array of shape (m,m),
+            where m is the number of examples of
+            the dummy data.
         """
         qkernel = FidelityQuantumKernel(data_embedding="IQP")
         qkernel.initialize_params(feature_dimension=self.X.shape[1])

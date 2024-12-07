@@ -11,11 +11,36 @@ from pennylane.measurements import ProbabilityMP
 from .kernel_utils import vmap_batch
 from ..exceptions import InvalidEmbeddingError, QMLabError
 
-# need to put this here for computation on GPUs
+# need to put this here for computation on a GPU
 jax.config.update("jax_default_matmul_precision", "highest")
 
 
 class FidelityQuantumKernel(QuantumKernel):
+    r"""Fidelity Quantum Kernel.
+
+    It is defined as the overlap of two pure quantum states (fidelity):
+
+    .. math::
+
+        \hat{\kappa}(\boldsymbol{x}, \boldsymbol{x}')
+        = \left|\Braket{\psi(\boldsymbol{x})|\psi(\boldsymbol{x}')}\right|^2.
+
+    These quantum states are created by applying a parameterized
+    unitary to the ground state of a quantum circuit:
+
+    ..math::
+        U(\boldsymbol{x}) \Ket{0} = \Ket{\psi({\boldsymbol{x})},
+        U(\boldsymbol{x}') \Ket{0} = \Ket{\psi(\boldsymbol{x})}.
+
+    For a detailed introduction to quantum kernels we refer to the main paper.
+
+    Parameters
+    ----------
+    QuantumKernel : Abstract class for a quantum kernel.
+        FidelityQuantumKernel inherits a lot of the functionality
+        from QuantumKernel.
+    """
+
     def __init__(
         self,
         *,
