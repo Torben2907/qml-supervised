@@ -277,6 +277,7 @@ class FidelityQuantumKernel(QuantumKernel):
         # for faster computation on multiple GPUs
         # hard-coded for now
         mesh_sharded = NamedSharding(jax.make_mesh((4, 1), ("a", "b")), P("a", "b"))
+        print(combined_input.shape)
         sharded_input = jax.device_put(combined_input, mesh_sharded)
         jax.debug.visualize_array_sharding(sharded_input)
 
