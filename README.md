@@ -48,16 +48,13 @@ A **quantum kernel** is a bivariate, positive semi-definite function that takes 
 
 $$ k(\mathbf{x}, \mathbf{y}) = \left|\left\langle \psi(\mathbf{x}) | \psi(\mathbf{y}) \right\rangle \right|^2, $$
 
-where $\phi(\mathbf{x})$ is a quantum feature map that is a mapping from classical data to a quantum state 
+where $\hat{\phi}$ is a data embedding, i.e. a mapping from classical data to a quantum state 
 
-$$ \phi: \mathbf{x} \longrightarrow \left|\right.\psi(\mathbf{x}) \rangle. $$
+$$ \hat{\phi}: \mathbf{x} \longrightarrow \left|\right.\psi(\mathbf{x}) \rangle. $$
 
 The quantum kernel is then calculated by taking the inner product of the two resulting quantum states. 
 
 We can pass the resulting Gram matrix to the traditional SVC making it a QSVC. 
-
-## Can we train a Quantum Kernel? 🤨
-
 
 ## Installation / Setup 👨‍🔧
 
@@ -82,7 +79,7 @@ You need this additional package (unix users do not need to have this installed 
 ```shell 
 pip install virtualenv
 ```
-Note that this command will install this globally for your python binary.
+Note that this command will install `virtualenv` globally for your python binary.
 Then create a virtual environment for installment of the required packages via
 ```shell 
 virtualenv --python C:\Path\To\Python\python.exe myvirtualenv
@@ -98,7 +95,8 @@ pip install -r requirements.txt
 ```
 
 ## Tests 🟢🤞
-After installation you should check that all tests of the project run (Add the `-v` flag for verbose output):
+After installation you should check that all tests of the project run 
+(Add the `-v` flag for verbose output):
 ```shell
 pytest -v 
 ```
@@ -108,8 +106,9 @@ pytest -v --cov=src/qmlab tests/
 ```
 
 Please note:
-The code reproducability has been tested with [Docker](https://github.com/docker). 
-Let me know if there are any issues!
+Code reproducability has been tested with [Docker](https://github.com/docker)
+but let me know if there are any issues!
+
 torben.heckes@uni-duesseldorf.de
 
 ---
