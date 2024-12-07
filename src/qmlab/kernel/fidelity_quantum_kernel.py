@@ -1,5 +1,6 @@
 from typing import List
 import jax
+import timeit
 import numpy as np
 from numpy.typing import NDArray
 import jax.numpy as jnp
@@ -8,7 +9,8 @@ from .quantum_kernel import QuantumKernel
 from pennylane import QNode
 from pennylane.operation import Operation
 from pennylane.measurements import ProbabilityMP
-from .kernel_utils import vmap_batch
+from jax.sharding import PartitionSpec as P, NamedSharding
+from .kernel_utils import vmap_batch, mesh_sharding
 from ..exceptions import InvalidEmbeddingError, QMLabError
 
 # need to put this here for computation on a GPU
@@ -145,7 +147,7 @@ class FidelityQuantumKernel(QuantumKernel):
         self.device = qml.device(self._device_type, wires=self.num_qubits)
 
         @qml.qnode(self.device, interface=self.interface, diff_method=None)
-        def circuit(concat_vec: jax.Array) -> ProbabilityMP:
+        def circuit(combined_input: jax.Array) -> ProbabilityMP:
             if self.num_qubits is None:
                 raise QMLabError(
                     "Number of qubits has not been specified before building the circuit!"
@@ -154,14 +156,14 @@ class FidelityQuantumKernel(QuantumKernel):
                 case qml.AngleEmbedding:
                     # noinspection PyCallingNonCallable
                     self._data_embedding(
-                        features=concat_vec[: self.num_qubits],
+                        features=combined_input[: self.num_qubits],
                         wires=range(self.num_qubits),
                         rotation=self.rotation,
                     )
                     # noinspection PyCallingNonCallable
                     qml.adjoint(
                         self._data_embedding(
-                            features=concat_vec[self.num_qubits :],
+                            features=combined_input[self.num_qubits :],
                             wires=range(self.num_qubits),
                             rotation=self.rotation,
                         )
@@ -169,14 +171,14 @@ class FidelityQuantumKernel(QuantumKernel):
                 case qml.IQPEmbedding:
                     # noinspection PyCallingNonCallable
                     self._data_embedding(
-                        features=concat_vec[: self.num_qubits],
+                        features=combined_input[: self.num_qubits],
                         wires=range(self.num_qubits),
                         n_repeats=self.reps,
                     )
                     # noinspection PyCallingNonCallable
                     qml.adjoint(
                         self._data_embedding(
-                            features=concat_vec[self.num_qubits :],
+                            features=combined_input[self.num_qubits :],
                             wires=range(self.num_qubits),
                             n_repeats=self.reps,
                         )
@@ -184,14 +186,14 @@ class FidelityQuantumKernel(QuantumKernel):
                 case qml.AmplitudeEmbedding:
                     # noinspection PyCallingNonCallable
                     self._data_embedding(
-                        features=concat_vec[: 2**self.num_qubits],
+                        features=combined_input[: 2**self.num_qubits],
                         normalize=True,
                         wires=range(self.num_qubits),
                     )
                     # noinspection PyCallingNonCallable
                     qml.adjoint(
                         self._data_embedding(
-                            features=concat_vec[2**self.num_qubits :],
+                            features=combined_input[2**self.num_qubits :],
                             normalize=True,
                             wires=range(self.num_qubits),
                         )
@@ -231,9 +233,11 @@ class FidelityQuantumKernel(QuantumKernel):
             len(y) if y is not None else len(x),
         )
 
-        Z = jnp.array(
+        combined_input = jnp.array(
             [np.concatenate((x[i], y[j])) for i in range(len(x)) for j in range(len(y))]
         )
+
+        Z = jax.device_put(combined_input, mesh_sharding(P("a", "b")))
 
         circuit = self.build_circuit()
         self.batched_circuit = vmap_batch(

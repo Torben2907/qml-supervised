@@ -1,7 +1,8 @@
 import jax
-from typing import Callable
+from typing import Callable, Tuple
 import jax.numpy as jnp
 from sklearn.utils import gen_batches
+from jax.sharding import Mesh, PartitionSpec, NamedSharding
 
 
 jax.config.update("jax_default_matmul_precision", "highest")
@@ -27,3 +28,16 @@ def vmap_batch(
             return jnp.concatenate(res)
 
     return chunked_fn
+
+
+def best_mesh_split(num_devices: int) -> Tuple[int, int]:
+    for i in range(int(jnp.sqrt(num_devices)), 0, -1):
+        if num_devices % i == 0:
+            return (i, num_devices // i)
+    raise ValueError(f"No valid mesh split found for {num_devices}.")
+
+
+def mesh_sharding(pspec: PartitionSpec, mesh_grid: Mesh | None = None) -> NamedSharding:
+    if mesh_grid is None:
+        mesh_grid = jax.make_mesh(best_mesh_split(len(jax.local_devices())), ("a", "b"))
+    return NamedSharding(mesh_grid, pspec)
