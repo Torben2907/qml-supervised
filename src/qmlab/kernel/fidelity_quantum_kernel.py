@@ -9,7 +9,7 @@ from .quantum_kernel import QuantumKernel
 from pennylane import QNode
 from pennylane.operation import Operation
 from pennylane.measurements import ProbabilityMP
-from jax.sharding import PartitionSpec as P, NamedSharding
+from jax.sharding import PartitionSpec as P, NamedSharding, PositionalSharding
 from .kernel_utils import vmap_batch, mesh_sharding
 from ..exceptions import InvalidEmbeddingError, QMLabError
 
@@ -274,12 +274,10 @@ class FidelityQuantumKernel(QuantumKernel):
             [np.concatenate((x[i], y[j])) for i in range(len(x)) for j in range(len(y))]
         )
 
-        # for faster computation on multiple GPUs
-        # hard-coded for now
-        mesh_sharded = NamedSharding(jax.make_mesh((4, 1), ("a", "b")), P("a", "b"))
-        print(combined_input.shape)
-        sharded_input = jax.device_put(combined_input, mesh_sharded)
-        jax.debug.visualize_array_sharding(sharded_input)
+        # for faster computation run on multiple GPUs
+        sharding = PositionalSharding(jax.devices())
+        num_devices = jax.local_device_count()
+        sharded_input = jax.device_put(combined_input, sharding.reshape(1, num_devices))
 
         circuit = self.build_circuit()
         self.batched_circuit = vmap_batch(
