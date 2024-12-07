@@ -1,5 +1,5 @@
 import os
-from typing import Dict, List, Union
+from typing import Dict, List
 import numpy as np
 from numpy.typing import NDArray
 from sklearn.model_selection import StratifiedKFold
@@ -13,6 +13,7 @@ from scipy.stats import norm
 matplotlib.use("pgf")
 import matplotlib.pyplot as plt
 
+# configuration for export to TeX.
 matplotlib.rcParams.update(
     {
         "pgf.texsystem": "pdflatex",
@@ -79,7 +80,7 @@ def run_cv_roc_analysis(
     aucs = []
     mean_fpr = np.linspace(0, 1, 100)
     fig, ax = plt.subplots(figsize=(3, 3))  # Smaller figure size
-    fig.set_size_inches(w=2.5, h=1.5)  # Half of the original size for LaTeX rendering
+    fig.set_size_inches(w=2.5, h=1.5)  # for LaTeX rendering
     plot_files = []
 
     for fold, (train, test) in enumerate(scv.split(X, y)):
@@ -106,7 +107,7 @@ def run_cv_roc_analysis(
     ax.plot(
         mean_fpr,
         mean_tpr,
-        color="#006ab3",
+        color="#006ab3",  # hhublue
         label=r"Mean ROC (AUC = %0.2f $\pm$ %0.2f)" % (mean_auc, std_auc),
         lw=2,
         alpha=0.8,
@@ -119,7 +120,7 @@ def run_cv_roc_analysis(
         mean_fpr,
         tprs_lower,
         tprs_upper,
-        color="#b5cbd6",
+        color="#b5cbd6",  # hhured
         alpha=0.2,
         label=r"$\pm$ 1 std. dev.",
     )
@@ -152,7 +153,7 @@ def generate_plot_filename(
     fold: int | None = None,
 ) -> str:
     """
-    Generate a concise filename for saving plots.
+    Generate the filename for saving plots.
 
     Args:
         dataset_name: Name of the dataset.
@@ -161,21 +162,18 @@ def generate_plot_filename(
         fold: Fold number (optional).
 
     Returns:
-        A string representing the filename.
+        Filename as string.
     """
     max_features_to_display = 3
-    # Create a short identifier for features (e.g., first 3 feature names)
     feature_summary = "_".join(feature_names[:max_features_to_display])
     if len(feature_names) > max_features_to_display:
         feature_summary += f"_and_{len(feature_names) - max_features_to_display}_more"
 
-    # Construct the filename
     filename = f"{dataset_name}_{kernel_name}_{feature_summary}"
     if fold is not None:
         filename += f"_fold{fold}"
     filename += ".pgf"
 
-    # Ensure filename is safe for the filesystem
     return filename.replace(" ", "_").replace(",", "").replace("/", "_")
 
 

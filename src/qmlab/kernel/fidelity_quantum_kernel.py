@@ -76,6 +76,25 @@ class FidelityQuantumKernel(QuantumKernel):
         feature_dimension: int,
         class_labels: List[int] | None = None,
     ) -> None:
+        """Initialization of the data dependent attributes, like number of features
+        and class labels. Depending on which data embedding has been specified by the user
+        it will also initialize the number of qubits. When working with a quantum kernel
+        it's mandatory to first call this method before trying to evaluate the gram matrix!
+
+        Parameters
+        ----------
+        feature_dimension : int
+            Number of features in the data domain.
+        class_labels : List[int] | None, optional
+            Class labels, by default None, will be [-1, +1] throughout the study.
+
+        Raises
+        ------
+        InvalidEmbeddingError
+            When an invalid embedding has been provided by the user.
+            Check `self._available_embeddings` for an overview of
+            all embeddings that are currently implemented.
+        """
         if class_labels is None:
             class_labels = [-1, 1]
 
@@ -100,6 +119,29 @@ class FidelityQuantumKernel(QuantumKernel):
             raise InvalidEmbeddingError("Invalid embedding. Stop.")
 
     def build_circuit(self) -> QNode:
+        """Builds the quantum circuit for computing the
+        fidelity.
+
+        This is based on the pseudocode of Algorithm 1 of the thesis.
+
+        Returns
+        -------
+        QNode
+            Object from PennyLane. To cite their documentation:
+            >>> A quantum node contains a quantum function [...] and the computational device it is
+            executed on. (https://docs.pennylane.ai/en/stable/code/api/pennylane.QNode.html)
+            We define a circuit function, i.e. what the
+            PennyLane devs refer to as quantum function, as well as a PennyLane-Device,
+            which the user can specify via setting the `device_str` parameter
+            in the construction of the fidelity quantum kernel.
+
+        Raises
+        ------
+        QMLabError
+            Thrown when the `initialize_params`-method hasn't been called before
+            constructing the circuit and therefore data-dependent
+            attributes haven't been set yet.
+        """
         self.device = qml.device(self._device_type, wires=self.num_qubits)
 
         @qml.qnode(self.device, interface=self.interface, diff_method=None)
@@ -163,6 +205,26 @@ class FidelityQuantumKernel(QuantumKernel):
         return circuit
 
     def evaluate(self, x: NDArray, y: NDArray) -> NDArray:
+        """Returns the quantum kernel matrix.
+        For x = y this is precisely the quantum gram matrix we refer to in the main text.
+        In the context of this study we only use x = y.
+
+        Parameters
+        ----------
+        x : NDArray
+            Dataset of shape (m, d), where m denotes the number of examples
+            and d the number of features.
+        y : NDArray
+            Dataset of shape (m', d'), where m' denotes the number of examples
+            and d' the number of features.
+
+
+        Returns
+        -------
+        NDArray
+            Quantum Kernel Matrix. In our case Quantum Gram matrix of shape
+            (m, m), where m denotes the number of examples.
+        """
         x, y = self._validate_inputs(x, y)
         kernel_matrix_shape = (
             len(x),

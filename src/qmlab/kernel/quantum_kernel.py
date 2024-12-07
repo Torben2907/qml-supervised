@@ -22,7 +22,7 @@ class QuantumKernel(ABC):
     ----------
     ABC : `abstract base class` used to show that this class cannot be instantiated on its
         own but rather serves as the blue print containing the necessary methods for
-        estimating a quantum kernel.
+        computing a quantum kernel.
     """
 
     def __init__(
