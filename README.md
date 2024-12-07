@@ -36,6 +36,10 @@ kernel.
 
 ## What is a Quantum Support Vector Machine? 🤔
 
+Short answer: A quantum-classical hybrid algorithm, where only the kernel is computed 
+on a quantum computer and the rest of the algorithm is completely managed classically.
+
+Long answer:
 Since real quantum hardware is noisy and prone for errors a whole field submerged of quantum hybrid algorithms 
 which are based on classical learning algorithms but outsource suitable parts to a quantum computer.
 
@@ -46,15 +50,13 @@ Therefore we are able to classify non-linearly separable data with a linear mode
 
 A **quantum kernel** is a bivariate, positive semi-definite function that takes on the form 
 
-$$ k(\boldsymbol{x}, \boldsymbol{x}') = \left|\left\langle \psi(\boldsymbol{x}) | \psi(\boldsymbol{y}) \right\rangle \right|^2, $$
+$$ k(\boldsymbol{x}, \boldsymbol{x}') = \left|\left\langle \psi(\boldsymbol{x}) | \psi(\boldsymbol{y}) \right\rangle \right|^2.$$
 
-where $\hat{\phi}$ is a data embedding, i.e. a mapping from classical data to a quantum state 
+The parameterized quantum states are obtained by a data embedding $\hat{\phi}$,  i.e. a mapping from classical data domain to a quantum hilbert space: 
 
 $$ \hat{\phi}: \boldsymbol{x} \longrightarrow \Ket{\psi(\boldsymbol{x})}. $$
 
-The quantum kernel is then calculated by taking the inner product of the two resulting quantum states. 
-
-We can pass the quantum kernel to the traditional SVC making it a QSVC. ☺️
+We pass the quantum kernel to the traditional SVC - that makes it a QSVC. ☺️
 
 ## Installation / Setup 👨‍🔧
 
@@ -112,4 +114,4 @@ but let me know if there are any issues!
 torben.heckes@uni-duesseldorf.de
 
 ---
-[1]: https://biodatamining.biomedcentral.com/articles/10.1186/s13040-021-00283-6#Tab1
+[1]: https://biodatamining.biomedcentral.com/articles/10.1186/s13040-021-00283-6#Tab1Where 
