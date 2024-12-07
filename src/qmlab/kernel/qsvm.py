@@ -166,6 +166,8 @@ class QSVC(BaseQSVM):
     making it a quantum support vector classifier. We pass in the classical
     support vector classifier from scikit-learn, i.e. `sklearn.svm.SVC`.
 
+    This is based on Algorithm 2 of the thesis.
+
     Parameters
     ----------
     BaseQSVM : qsvm.BaseQSVM

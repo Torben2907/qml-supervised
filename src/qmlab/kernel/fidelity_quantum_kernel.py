@@ -9,7 +9,7 @@ from .quantum_kernel import QuantumKernel
 from pennylane import QNode
 from pennylane.operation import Operation
 from pennylane.measurements import ProbabilityMP
-from jax.sharding import PartitionSpec as P
+from jax.sharding import PartitionSpec as P, NamedSharding
 from .kernel_utils import vmap_batch, mesh_sharding
 from ..exceptions import InvalidEmbeddingError, QMLabError
 
@@ -161,7 +161,7 @@ class FidelityQuantumKernel(QuantumKernel):
         """Builds the quantum circuit for computing the
         fidelity.
 
-        This is based on the pseudocode of Algorithm 1 of the thesis.
+        This is based on Algorithm 1 of the thesis.
 
         Returns
         -------
@@ -275,7 +275,10 @@ class FidelityQuantumKernel(QuantumKernel):
         )
 
         # for faster computation on multiple GPUs
-        sharded_input = jax.device_put(combined_input, mesh_sharding(P("a", "b")))
+        # hard-coded for now
+        mesh_sharded = NamedSharding(jax.make_mesh((4, 1), ("a", "b")), P("a", "b"))
+        sharded_input = jax.device_put(combined_input, mesh_sharded)
+        jax.debug.visualize_array_sharding(sharded_input)
 
         circuit = self.build_circuit()
         self.batched_circuit = vmap_batch(
