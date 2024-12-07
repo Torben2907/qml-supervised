@@ -46,15 +46,15 @@ Therefore we are able to classify non-linearly separable data with a linear mode
 
 A **quantum kernel** is a bivariate, positive semi-definite function that takes on the form 
 
-$$ k(\mathbf{x}, \mathbf{y}) = \left|\left\langle \psi(\mathbf{x}) | \psi(\mathbf{y}) \right\rangle \right|^2, $$
+$$ k(\boldsymbol{x}, \boldsymbol{x}') = \left|\left\langle \psi(\boldsymbol{x}) | \psi(\boldsymbol{y}) \right\rangle \right|^2, $$
 
 where $\hat{\phi}$ is a data embedding, i.e. a mapping from classical data to a quantum state 
 
-$$ \hat{\phi}: \mathbf{x} \longrightarrow \left|\right.\psi(\mathbf{x}) \rangle. $$
+$$ \hat{\phi}: \boldsymbol{x} \longrightarrow \Ket{\psi(\boldsymbol{x})}. $$
 
 The quantum kernel is then calculated by taking the inner product of the two resulting quantum states. 
 
-We can pass the resulting Gram matrix to the traditional SVC making it a QSVC. 
+We can pass the quantum kernel to the traditional SVC making it a QSVC. ☺️
 
 ## Installation / Setup 👨‍🔧
 
