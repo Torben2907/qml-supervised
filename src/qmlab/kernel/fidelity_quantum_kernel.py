@@ -9,7 +9,7 @@ from .quantum_kernel import QuantumKernel
 from pennylane import QNode
 from pennylane.operation import Operation
 from pennylane.measurements import ProbabilityMP
-from jax.sharding import PartitionSpec as P, NamedSharding
+from jax.sharding import PartitionSpec as P
 from .kernel_utils import vmap_batch, mesh_sharding
 from ..exceptions import InvalidEmbeddingError, QMLabError
 
@@ -56,6 +56,43 @@ class FidelityQuantumKernel(QuantumKernel):
         evaluate_duplicates: str = "off_diagonal",
         interface: str = "jax",
     ):
+        """Constructor of FidelityQuantumKernel.
+
+        Parameters
+        ----------
+        data_embedding : Operation | str
+            Data embedding just like we described in the main text.
+        device_type : str, optional
+            Quantum Device used for the simulation of the computations, by default "default.qubit"
+        reps : int, optional
+            Number of repitions by embeddings like IQP, by default 2. For embeddings
+            that don't specify a number of repititions like Angle this is ignored.
+        rotation : str, optional
+            The Axis about which the rotation will occur, by default "Z".
+            Use:
+            - "X" for the R_x gates,
+            - "Y" for the R_y gates,
+            - "Z" for the R_z gates.
+            For embeddings that don't specify rotations, this is ignored.
+        enforce_psd : bool, optional
+            Make gram matrix positive semi-definite, by default False
+        jit : bool, optional
+            Use JAX's just-in-time compilation, by default True
+        max_batch_size : int, optional
+            Maximum batch size that a JAX vmap function can process in a single call, by default 256
+                - Too small values will result to overhead
+                - Too large values may exceed memory or computational limits
+        evaluate_duplicates : str, optional
+            whether (in the case of the gram matrix) the symmetric values
+            should be computed too, by default "off_diagonal"
+        interface : str, optional
+            Interface used for the evaluation of kernel entries, by default "jax"
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
         super().__init__(
             data_embedding=data_embedding,
             device_type=device_type,
@@ -237,7 +274,8 @@ class FidelityQuantumKernel(QuantumKernel):
             [np.concatenate((x[i], y[j])) for i in range(len(x)) for j in range(len(y))]
         )
 
-        Z = jax.device_put(combined_input, mesh_sharding(P("a", "b")))
+        # for faster computation on multiple GPUs
+        sharded_input = jax.device_put(combined_input, mesh_sharding(P("a", "b")))
 
         circuit = self.build_circuit()
         self.batched_circuit = vmap_batch(
@@ -246,7 +284,7 @@ class FidelityQuantumKernel(QuantumKernel):
 
         # we are only interested in measuring |0^n>
         # n refers to the number of qubits.
-        kernel_values = self.batched_circuit(Z)[:, 0]
+        kernel_values = self.batched_circuit(sharded_input)[:, 0]
         kernel_matrix = np.reshape(kernel_values, kernel_matrix_shape)
 
         if self._enforce_psd:
@@ -257,6 +295,31 @@ class FidelityQuantumKernel(QuantumKernel):
     def _is_trivial(
         self, i: int, j: int, psi_i: NDArray, phi_j: NDArray, symmetric: bool
     ) -> bool:
+        """This method is experimental and hasn't been tested yet.
+        Neither is it used for the study for now.
+        The idea is to simplify computation by computing only the upper or
+        lower triangle in the case of the gram matrix.
+        For now computations are working just fine on the small-scale
+        datasets we use and number of qubits we simulate.
+
+        Parameters
+        ----------
+        i : int
+            _description_
+        j : int
+            _description_
+        psi_i : NDArray
+            _description_
+        phi_j : NDArray
+            _description_
+        symmetric : bool
+            _description_
+
+        Returns
+        -------
+        bool
+            _description_
+        """
         if self._evaluate_duplicates == "all":
             return False
         if symmetric and i == j and self._evaluate_duplicates == "off_diagonal":

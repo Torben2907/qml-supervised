@@ -42,7 +42,7 @@ class QuantumKernel(ABC):
         Parameters
         ----------
         data_embedding : Operation | str, optional
-            Data Embedding just as described in the text, by default None
+            Data Embedding just as described in the main text, by default None
         device_type : str, optional
             Quantum Device used for simulation of the computations, by default "default.qubit"
         reps : int, optional
@@ -61,8 +61,8 @@ class QuantumKernel(ABC):
             Activates or deactivates JAX's just-in-time compilation, by default True
         max_batch_size : int, optional
             Maximum batch size that a JAX vmap function can process in a single call, by default 256
-            - Too small values will result to overhead
-            - Too large values may exceed memory or computational limits
+                - Too small values will result to overhead
+                - Too large values may exceed memory or computational limits
         interface : str, optional
             Interface that will be used for computations, by default "jax"
         """

@@ -62,4 +62,4 @@ if __name__ == "__main__":
         res_name = f"QSVM_{data}_results.csv"
         path_out = os.path.join(res_dir, res_name)
         df.to_csv(path_out, index=False)
-        print(f"Results saved to {path_out}")
+        print(f"Results saved to {path_out}.")
