@@ -187,7 +187,7 @@ class FidelityQuantumKernel(QuantumKernel):
         def circuit(combined_input: jax.Array) -> ProbabilityMP:
             if self.num_qubits is None:
                 raise QMLabError(
-                    "Number of qubits has not been specified before building the circuit!"
+                    "Number of qubits hasn't been specified before building the circuit!"
                 )
             match self._data_embedding:
                 case qml.AngleEmbedding:

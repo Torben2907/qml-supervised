@@ -47,6 +47,8 @@ batched_circuit = vmap_batch(
     jax.vmap(circuit_jitted, 0), start=0, max_batch_size=max_batch_size
 )
 
+print(combined_input.shape)
+
 
 def visualize(batched_circuit: Callable, color_map: str = "Set3") -> None:
     jax.debug.visualize_array_sharding(
