@@ -1,6 +1,5 @@
 from typing import List
 import jax
-import timeit
 import numpy as np
 from numpy.typing import NDArray
 import jax.numpy as jnp
