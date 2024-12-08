@@ -275,7 +275,8 @@ class FidelityQuantumKernel(QuantumKernel):
 
         # for faster computation run on multiple GPUs
         sharding = PositionalSharding(jax.devices())
-        num_devices = jax.local_device_count()
+        # num_devices = jax.local_device_count()
+        num_devices = 1
         sharded_input = jax.device_put(combined_input, sharding.reshape(1, num_devices))
 
         circuit = self.build_circuit()
