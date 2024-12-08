@@ -28,6 +28,7 @@ def compute_qsvm_results(
     X = scale_to_specified_interval(X, interval=(-np.pi / 2, np.pi / 2))
     for embedding in tqdm(data_embeddings, desc=f"Embedding ({dataset})"):
         start_time = time.time()
+        time_elapsed = 0.0
         entry = {"Dataset": dataset, "Embedding": embedding}
         subsampling_results = subsample_features(
             X, feature_names, num_features_to_subsample
@@ -49,7 +50,7 @@ def compute_qsvm_results(
         time_elapsed = time.time() - start_time
         if times is not None:
             times.append(
-                {"Dataset": dataset, "Embedding": embedding, "Time(s)": time_elapsed}
+                {"Dataset": dataset, "Embedding": embedding, "Times": time_elapsed}
             )
         del (qkernel, qsvm)
     return pd.DataFrame(results_summary), pd.DataFrame(times)
@@ -70,5 +71,5 @@ if __name__ == "__main__":
         res_name = f"QSVM_{data}_results.csv"
         path_out = os.path.join(res_dir, res_name)
         results.to_csv(path_out, index=False)
-        times_df.to_csv(os.path.join(res_dir, f"QSVM_{data}_times"))
+        times_df.to_csv(os.path.join(res_dir, f"QSVM_{data}_times.csv"))
         print(f"Results saved to {path_out}.")
