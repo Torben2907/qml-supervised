@@ -297,8 +297,8 @@ class FidelityQuantumKernel(QuantumKernel):
     def _is_trivial(
         self, i: int, j: int, psi_i: NDArray, phi_j: NDArray, symmetric: bool
     ) -> bool:
-        """This method is experimental and hasn't been tested yet.
-        Neither is it used for the study for now.
+        """This method is experimental and hasn't been tested (yet),
+        neither is it used for the study (for now).
         The idea is to simplify computation by computing only the upper or
         lower triangle in the case of the gram matrix.
         For now computations are working just fine on the small-scale

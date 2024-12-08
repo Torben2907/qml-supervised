@@ -62,10 +62,10 @@ class TestFidelityQuantumKernel(QMLabTest):
 
     def test_fidelity_with_angle_embedding(self) -> None:
         qkernel = FidelityQuantumKernel(data_embedding="Angle")
-        x1 = np.array([[0, np.pi / 2, np.pi]])
-        x2 = np.array([[0, -np.pi, np.pi / 2]])
+        x1 = np.array([[0, np.pi / 2, np.pi]]).T
+        x2 = np.array([[0, -np.pi, np.pi / 2]]).T
         qkernel.initialize_params(feature_dimension=x1.shape[1])
-        # again we almost equal here because of the problem of finite precision
+        # again we use almost equal here because of the problem of finite precision
         np.testing.assert_array_almost_equal(qkernel.evaluate(x1, x2), np.array(1.0))
 
     def compute_gram_matrix(self) -> NDArray:
