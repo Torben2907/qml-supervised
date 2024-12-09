@@ -48,10 +48,9 @@ def compute_qsvm_results(
             entry[group_name] = f"{mean:.5f}, CI: {rounded_CI}"
         results_summary.append(entry)
         time_elapsed = time.time() - start_time
-        if times is not None:
-            times.append(
-                {"Dataset": dataset, "Embedding": embedding, "Times": time_elapsed}
-            )
+        times.append(
+            {"Dataset": dataset, "Embedding": embedding, "Times": time_elapsed}
+        )
         del (qkernel, qsvm)
     return pd.DataFrame(results_summary), pd.DataFrame(times)
 

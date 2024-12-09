@@ -30,7 +30,7 @@ def svm_roc_analysis(
     output_dir: str,
     num_splits: int = 5,
     random_state: int = 42,
-    num_features_to_subsample: int = 10,
+    num_features_to_subsample: int = 11,
 ) -> List:
     X, y, feature_names = parse_biomed_data_to_ndarray(dataset, return_X_y=True)
     X = scale_to_specified_interval(X, interval=(-np.pi / 2, np.pi / 2))
@@ -58,8 +58,6 @@ def svm_roc_analysis(
     print(f"All plots for {dataset} saved in {output_dir}")
     return all_plot_files
 
-
-datasets = ["haberman_new", "nafld_new", "sobar_new", "fertility_new"]
 
 if __name__ == "__main__":
     for data in tqdm(datasets, desc="Datasets"):
