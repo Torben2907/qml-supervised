@@ -40,9 +40,9 @@ def compute_qsvm_results(
             results = run_cv(
                 qsvm, X_sub, y, num_splits=num_splits, random_state=random_state
             )
-            auc = results["auc"]
-            mean = auc["mean"]
-            CI = auc["CI"]
+            mcc = results["mcc"]
+            mean = mcc["mean"]
+            CI = mcc["CI"]
             if isinstance(CI, list):
                 rounded_CI = [round(value, 5) for value in CI]
             entry[group_name] = f"{mean:.5f}, CI: {rounded_CI}"

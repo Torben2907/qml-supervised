@@ -36,6 +36,7 @@ def run_cv(
     scv = StratifiedKFold(n_splits=num_splits, random_state=random_state, shuffle=True)
     accuracies = []
     aucs = []
+    mccs = []
 
     for train_idx, test_idx in scv.split(X, y):
         X_train, X_test = X[train_idx], X[test_idx]
@@ -48,16 +49,20 @@ def run_cv(
 
         accuracy = metrics.accuracy_score(y_test, y_pred)
         auc = metrics.roc_auc_score(y_test, y_pred_proba)
+        mcc = metrics.matthews_corrcoef(y_test, y_pred)
 
         accuracies.append(accuracy)
         aucs.append(auc)
+        mccs.append(mcc)
 
     accuracy_ci = compute_confidence_interval(accuracies, confidence)
     auc_ci = compute_confidence_interval(aucs, confidence)
+    mcc_ci = compute_confidence_interval(mccs, confidence)
 
     results = {
         "accuracy": {"mean": np.mean(accuracies).tolist(), "CI": accuracy_ci},
         "auc": {"mean": np.mean(aucs).tolist(), "CI": auc_ci},
+        "mcc": {"mean": np.mean(mccs).tolist(), "CI": mcc_ci},
     }
 
     return results
