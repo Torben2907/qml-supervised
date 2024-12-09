@@ -188,9 +188,9 @@ def compute_confidence_interval(
     """
     Compute the confidence interval for a given data set.
     """
-    n = len(data)
+    k = len(data)  # k-folds
     mean = np.mean(data)
-    std_err = np.std(data, ddof=1) / np.sqrt(n)  # Standard error
+    std_err = np.std(data, ddof=1) / np.sqrt(k)  # Standard error
     z_score = norm.ppf((1 + confidence) / 2)  # Z-score for the confidence level
     margin = z_score * std_err
     CI = np.array([mean - margin, mean + margin])

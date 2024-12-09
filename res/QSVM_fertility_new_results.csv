@@ -1,3 +1,0 @@
-Dataset,Embedding,"['Season', 'Age', 'diseases', 'Accident', 'Surgical', 'fevers', 'alcohol', 'smoking', 'sitting']"
-fertility_new,Angle,"0.44069, CI: [0.28188, 0.59949]"
-fertility_new,IQP,"0.19297, CI: [0.11409, 0.27185]"

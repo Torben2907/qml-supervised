@@ -19,7 +19,7 @@ def compute_qsvm_results(
     dataset: str,
     data_embeddings: Tuple[str, ...],
     times: List[Dict[str, str | float]],
-    num_splits: int = 5,
+    num_splits: int = 10,
     random_state: int = 42,
     num_features_to_subsample: int = 11,
 ) -> pd.DataFrame:
@@ -33,7 +33,9 @@ def compute_qsvm_results(
         subsampling_results = subsample_features(
             X, feature_names, num_features_to_subsample
         )
-        qkernel = FidelityQuantumKernel(data_embedding=embedding, jit=True)
+        qkernel = FidelityQuantumKernel(
+            data_embedding=embedding, jit=True, rotation="X", reps=2
+        )
         qsvm = QSVC(quantum_kernel=qkernel, random_state=random_state)
         for X_sub, feature_names_sub in subsampling_results:
             group_name = str(feature_names_sub)
@@ -61,6 +63,7 @@ path_to_data_names = os.path.join(os.path.dirname(__file__), "../data_names.yaml
 with open(path_to_data_names) as file:
     datasets: list[str] = yaml.safe_load(file)
 
+datasets = ["sobar_new"]
 data_embeddings = ("Angle", "IQP")
 times: List = []
 
@@ -70,5 +73,5 @@ if __name__ == "__main__":
         res_name = f"QSVM_{data}_results.csv"
         path_out = os.path.join(res_dir, res_name)
         results.to_csv(path_out, index=False)
-        times_df.to_csv(os.path.join(res_dir, f"QSVM_{data}_times.csv"))
+        # times_df.to_csv(os.path.join(res_dir, f"QSVM_{data}_times.csv"))
         print(f"Results saved to {path_out}.")

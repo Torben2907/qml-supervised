@@ -1,0 +1,4 @@
+Dataset,Kernel,"['Age', 'Number_of_sexual_partners', 'First_sexual_intercourse', 'Num_of_pregnancies', 'Smokes', 'Smokes_years', 'Smokes_packs_year']"
+cervical_new,rbf,"0.32168, CI: [0.02341, 0.61994]"
+cervical_new,poly,"0.10159, CI: [-0.13725, 0.34044]"
+cervical_new,sigmoid,"0.00000, CI: [0.0, 0.0]"

@@ -3,7 +3,7 @@ import yaml
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 from sklearn.svm import SVC
 from qmlab.utils import run_cv
 from qmlab.preprocessing import (
@@ -28,13 +28,14 @@ with open(path_to_data) as file:
 def compute_svm_results(
     dataset: str,
     kernels: Tuple[str, ...],
+    times: List[Dict[str, str | float]],
     num_splits: int = 5,
     random_state: int = 42,
-    num_features_to_subsample: int = 10,
+    num_features_to_subsample: int = 11,
 ) -> pd.DataFrame:
     results_summary = []
     X, y, feature_names = parse_biomed_data_to_ndarray(dataset, return_X_y=True)
-    # X = scale_to_specified_interval(X, interval=(-np.pi / 2, np.pi / 2))
+    X = scale_to_specified_interval(X, interval=(-np.pi / 2, np.pi / 2))
     X, y = downsample_biomed_data(X, y, replace=True, random_state=random_state)
     for kernel in tqdm(kernels, desc=f"Kernels ({dataset})"):
         entry = {"Dataset": dataset, "Kernel": kernel}
@@ -47,9 +48,9 @@ def compute_svm_results(
             results = run_cv(
                 svm, X_sub, y, num_splits=num_splits, random_state=random_state
             )
-            auc = results["auc"]
-            mean = auc["mean"]
-            CI = auc["CI"]
+            mcc = results["mcc"]
+            mean = mcc["mean"]
+            CI = mcc["CI"]
             if isinstance(CI, list):
                 rounded_CI = [round(value, 5) for value in CI]
             entry[group_name] = f"{mean:.5f}, CI: {rounded_CI}"
@@ -58,11 +59,11 @@ def compute_svm_results(
     return pd.DataFrame(results_summary)
 
 
-datasets = ["haberman_new", "nafld_new", "fertility_new", "sobar_new"]
+times: List = []
 
 if __name__ == "__main__":
     for data in tqdm(datasets, desc="Datasets"):
-        df = compute_svm_results(data, kernels)
+        df = compute_svm_results(data, kernels, times)
         res_name = f"SVM_{data}_results.csv"
         path_out = os.path.join(res_dir, res_name)
         df.to_csv(path_out, index=False)

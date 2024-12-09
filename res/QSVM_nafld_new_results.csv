@@ -1,3 +1,0 @@
-Dataset,Embedding,"['Geschlecht', 'Alter', 'M30', 'M65', 'Adiponektin', 'TNFa', 'AST', 'ALT', 'ALT_AST_ratio']"
-nafld_new,Angle,"0.37736, CI: [0.26218, 0.49255]"
-nafld_new,IQP,"0.68473, CI: [0.50377, 0.86568]"
