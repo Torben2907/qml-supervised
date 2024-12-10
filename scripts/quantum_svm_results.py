@@ -63,7 +63,7 @@ path_to_data_names = os.path.join(os.path.dirname(__file__), "../data_names.yaml
 with open(path_to_data_names) as file:
     datasets: list[str] = yaml.safe_load(file)
 
-datasets = ["sobar_new"]
+# datasets = ["sobar_new"]
 data_embeddings = ("Angle", "IQP")
 times: List = []
 
@@ -73,5 +73,5 @@ if __name__ == "__main__":
         res_name = f"QSVM_{data}_results.csv"
         path_out = os.path.join(res_dir, res_name)
         results.to_csv(path_out, index=False)
-        # times_df.to_csv(os.path.join(res_dir, f"QSVM_{data}_times.csv"))
+        times_df.to_csv(os.path.join(res_dir, f"QSVM_{data}_times.csv"))
         print(f"Results saved to {path_out}.")
