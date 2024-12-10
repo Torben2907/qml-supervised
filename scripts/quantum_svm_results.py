@@ -19,7 +19,7 @@ def compute_qsvm_results(
     dataset: str,
     data_embeddings: Tuple[str, ...],
     times: List[Dict[str, str | float]],
-    num_splits: int = 10,
+    num_splits: int = 5,
     random_state: int = 42,
     num_features_to_subsample: int = 11,
 ) -> pd.DataFrame:
