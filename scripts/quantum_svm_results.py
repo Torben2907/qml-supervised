@@ -42,9 +42,9 @@ def compute_qsvm_results(
             results = run_cv(
                 qsvm, X_sub, y, num_splits=num_splits, random_state=random_state
             )
-            auc = results["auc"]
-            mean = auc["mean"]
-            CI = auc["CI"]
+            mcc = results["mcc"]
+            mean = mcc["mean"]
+            CI = mcc["CI"]
             if isinstance(CI, list):
                 rounded_CI = [round(value, 5) for value in CI]
             entry[group_name] = f"{mean:.5f}, CI: {rounded_CI}"
@@ -63,7 +63,7 @@ path_to_data_names = os.path.join(os.path.dirname(__file__), "../data_names.yaml
 with open(path_to_data_names) as file:
     datasets: list[str] = yaml.safe_load(file)
 
-datasets = ["ctg_new"]
+datasets.remove("ctg")
 data_embeddings = ("Angle", "IQP")
 times: List = []
 
