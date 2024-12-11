@@ -19,7 +19,7 @@ def compute_qsvm_results(
     dataset: str,
     data_embeddings: Tuple[str, ...],
     times: List[Dict[str, str | float]],
-    num_splits: int = 5,
+    num_splits: int = 10,
     random_state: int = 42,
     num_features_to_subsample: int = 11,
 ) -> pd.DataFrame:
@@ -63,7 +63,7 @@ path_to_data_names = os.path.join(os.path.dirname(__file__), "../data_names.yaml
 with open(path_to_data_names) as file:
     datasets: list[str] = yaml.safe_load(file)
 
-# datasets = ["sobar_new"]
+datasets.remove("ctg_new")
 data_embeddings = ("Angle", "IQP")
 times: List = []
 
