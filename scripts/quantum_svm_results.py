@@ -21,7 +21,7 @@ def compute_qsvm_results(
     times: List[Dict[str, str | float]],
     num_splits: int = 10,
     random_state: int = 42,
-    num_features_to_subsample: int = 11,
+    num_features_to_subsample: int = 10,
 ) -> pd.DataFrame:
     results_summary = []
     X, y, feature_names = parse_biomed_data_to_ndarray(dataset, return_X_y=True)
@@ -63,7 +63,7 @@ path_to_data_names = os.path.join(os.path.dirname(__file__), "../data_names.yaml
 with open(path_to_data_names) as file:
     datasets: list[str] = yaml.safe_load(file)
 
-datasets.remove("ctg_new")
+datasets = ["ctg_new"]
 data_embeddings = ("Angle", "IQP")
 times: List = []
 
