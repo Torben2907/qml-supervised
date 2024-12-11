@@ -1,6 +1,7 @@
 import os
 import yaml
 import numpy as np
+import time
 import pandas as pd
 from tqdm import tqdm
 from typing import Dict, List, Tuple
@@ -38,6 +39,7 @@ def compute_svm_results(
     X = scale_to_specified_interval(X, interval=(-np.pi / 2, np.pi / 2))
     X, y = downsample_biomed_data(X, y, replace=True, random_state=random_state)
     for kernel in tqdm(kernels, desc=f"Kernels ({dataset})"):
+        start = time.time()
         entry = {"Dataset": dataset, "Kernel": kernel}
         subsampled_results = subsample_features(
             X, feature_names, num_features_to_subsample
@@ -54,17 +56,20 @@ def compute_svm_results(
             if isinstance(CI, list):
                 rounded_CI = [round(value, 5) for value in CI]
             entry[group_name] = f"{mean:.5f}, CI: {rounded_CI}"
+            time_elapsed = time.time() - start
+            times.append({"Dataset": dataset, "Kernel": kernel, "Times": time_elapsed})
         results_summary.append(entry)
         del svm
-    return pd.DataFrame(results_summary)
+    return pd.DataFrame(results_summary), pd.DataFrame(times)
 
 
 times: List = []
 
 if __name__ == "__main__":
     for data in tqdm(datasets, desc="Datasets"):
-        df = compute_svm_results(data, kernels, times)
+        df, times_df = compute_svm_results(data, kernels, times)
         res_name = f"SVM_{data}_results.csv"
         path_out = os.path.join(res_dir, res_name)
         df.to_csv(path_out, index=False)
+        times_df.to_csv(os.path.join(res_dir, f"QSVM_{data}_times.csv"))
         print(f"Results saved to {path_out}")

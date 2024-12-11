@@ -16,15 +16,15 @@ from qmlab.preprocessing import (
 https://biodatamining.biomedcentral.com/articles/10.1186/s13040-021-00283-6
 """
 datasets_with_associated_attrs = [
-    {"name": "wdbc_new", "shape": (569, 30), "pos": 212, "neg": 357},
+    {"name": "sobar_new", "shape": (72, 19), "pos": 21, "neg": 51},
+    {"name": "nafld_new", "shape": (74, 9), "pos": 22, "neg": 52},
     {"name": "fertility_new", "shape": (100, 9), "pos": 12, "neg": 88},
     {"name": "haberman_new", "shape": (306, 3), "pos": 81, "neg": 225},
-    {"name": "cervical_new", "shape": (761, 7), "pos": 17, "neg": 744},
     {"name": "hcv_new", "shape": (546, 12), "pos": 20, "neg": 526},
-    {"name": "nafld_new", "shape": (74, 9), "pos": 22, "neg": 52},
+    {"name": "wdbc_new", "shape": (569, 30), "pos": 212, "neg": 357},
+    {"name": "cervical_new", "shape": (761, 7), "pos": 17, "neg": 744},
     {"name": "heroin_new", "shape": (942, 11), "pos": 97, "neg": 845},
     {"name": "ctg_new", "shape": (1831, 22), "pos": 176, "neg": 1655},
-    {"name": "sobar_new", "shape": (72, 19), "pos": 21, "neg": 51},
 ]
 
 
