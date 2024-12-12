@@ -38,6 +38,10 @@ fig.set_size_inches(w=5.90666, h=3.0)
 for ax, name in zip(axes, datasets):
     X, y, _ = parse_biomed_data_to_ndarray(name, return_X_y=True)
     name = name.removesuffix("_new").upper()  # make it fancyyyyy
+    if name == "SOBAR":
+        name = "CCBR"
+    if name == "CERVICAL":
+        name = "CCRF"
     # colors are hhublue and turquoise!
     labels_pie_chart(
         y,

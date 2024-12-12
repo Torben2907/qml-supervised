@@ -38,7 +38,7 @@ def labels_pie_chart(
         autopct="%1.2f%%",
         startangle=90,
         colors=colors,
-        pctdistance=1.25,
+        pctdistance=1.3,
         labeldistance=0.6,
     )
     ax.set_title(title)
