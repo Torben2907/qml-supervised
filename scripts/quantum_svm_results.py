@@ -34,7 +34,7 @@ def compute_qsvm_results(
             X, feature_names, num_features_to_subsample
         )
         qkernel = FidelityQuantumKernel(
-            data_embedding=embedding, jit=True, rotation="X", reps=2
+            data_embedding=embedding, jit=True, rotation="Z", reps=2
         )
         qsvm = QSVC(quantum_kernel=qkernel, random_state=random_state)
         for X_sub, feature_names_sub in subsampling_results:
@@ -63,7 +63,7 @@ path_to_data_names = os.path.join(os.path.dirname(__file__), "../data_names.yaml
 with open(path_to_data_names) as file:
     datasets: list[str] = yaml.safe_load(file)
 
-datasets = ["ctg_new"]
+# datasets = ["ctg_new"]
 data_embeddings = ("Angle", "IQP")
 times: List = []
 
