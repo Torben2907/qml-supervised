@@ -13,7 +13,7 @@ from qmlab.preprocessing import (
 
 random_state = 42
 
-embeddings = ("IQP", "Angle")
+embeddings = ("Angle", "IQP")
 
 res_dir = os.path.join(os.path.dirname(__file__), "../roc-analysis/")
 os.makedirs(res_dir, exist_ok=True)
@@ -28,9 +28,10 @@ def svm_roc_analysis(
     dataset: str,
     embeddings: Tuple[str, ...],
     output_dir: str,
-    num_splits: int = 5,
+    num_splits: int = 10,
     random_state: int = 42,
-    num_features_to_subsample: int = 11,
+    num_features_to_subsample: int = 10,
+    rotation_for_angle: str = "X",
 ) -> List:
     X, y, feature_names = parse_biomed_data_to_ndarray(dataset, return_X_y=True)
     X = scale_to_specified_interval(X, interval=(-np.pi / 2, np.pi / 2))
@@ -39,7 +40,9 @@ def svm_roc_analysis(
         subsampled_results = subsample_features(
             X, feature_names, num_features_to_subsample
         )
-        qkernel = FidelityQuantumKernel(data_embedding=embedding, jit=True)
+        qkernel = FidelityQuantumKernel(
+            data_embedding=embedding, jit=True, rotation=rotation_for_angle
+        )
         qsvm = QSVC(quantum_kernel=qkernel, random_state=random_state)
         for X_sub, feature_names_sub in subsampled_results:
             plot_files = run_cv_roc_analysis(
@@ -52,11 +55,17 @@ def svm_roc_analysis(
                 output_dir=output_dir,
                 kernel_name=embedding,
                 dataset_name=dataset,
+                rotation_for_angle=rotation_for_angle,
             )
             all_plot_files.extend(plot_files)
         del qsvm
     print(f"All plots for {dataset} saved in {output_dir}")
     return all_plot_files
+
+
+datasets = [
+    "ctg_new",
+]
 
 
 if __name__ == "__main__":

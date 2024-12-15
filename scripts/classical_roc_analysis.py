@@ -28,7 +28,7 @@ def svm_roc_analysis(
     dataset: str,
     kernels: Tuple[str, ...],
     output_dir: str,
-    num_splits: int = 5,
+    num_splits: int = 10,
     random_state: int = 42,
     num_features_to_subsample: int = 10,
 ) -> List:

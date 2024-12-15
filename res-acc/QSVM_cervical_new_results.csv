@@ -1,3 +1,0 @@
-Dataset,Kernel,"['Age', 'Number_of_sexual_partners', 'First_sexual_intercourse']","['Num_of_pregnancies', 'Smokes', 'Smokes_years']","['Smokes_packs_year', 'Age', 'Number_of_sexual_partners']"
-cervical_new,IQP,"0.97767, 0.37175, 0.00000, 0.00000","0.97767, 0.35874, 0.00000, 0.00000","0.97767, 0.58507, 0.00000, 0.00000"
-cervical_new,Angle,"0.97767, 0.39110, 0.00000, 0.00000","0.97767, 0.35841, 0.00000, 0.00000","0.97767, 0.62981, 0.00000, 0.00000"

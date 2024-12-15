@@ -1,3 +1,0 @@
-Dataset,Kernel,"['Season', 'Age', 'diseases', 'Accident', 'Surgical', 'fevers', 'alcohol', 'smoking', 'sitting']"
-fertility_new,Angle,"0.88000, CI: [0.856, 0.904]"
-fertility_new,IQP,"0.88000, CI: [0.856, 0.904]"

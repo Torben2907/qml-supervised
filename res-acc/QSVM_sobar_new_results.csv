@@ -1,3 +1,0 @@
-Dataset,Kernel,"['behavior_sexualRisk', 'behavior_eating', 'behavior_personalHygine', 'intention_aggregation', 'intention_commitment', 'attitude_consistency', 'attitude_spontaneity', 'norm_significantPerson', 'norm_fulfillment', 'perception_vulnerability']","['perception_severity', 'motivation_strength', 'motivation_willingness', 'socialSupport_emotionality', 'socialSupport_appreciation', 'socialSupport_instrumental', 'empowerment_knowledge', 'empowerment_abilities', 'empowerment_desires', 'behavior_sexualRisk']"
-sobar_new,Angle,"0.70857, CI: [0.6868, 0.73034]","0.70857, CI: [0.6868, 0.73034]"
-sobar_new,IQP,"0.70857, CI: [0.6868, 0.73034]","0.70857, CI: [0.6868, 0.73034]"

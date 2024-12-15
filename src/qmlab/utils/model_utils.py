@@ -18,7 +18,7 @@ matplotlib.rcParams.update(
     {
         "pgf.texsystem": "pdflatex",
         "font.family": "serif",
-        "font.size": 8,
+        "font.size": 6,
         # "text.usetex": True,
         "pgf.rcfonts": False,
     }
@@ -78,6 +78,7 @@ def run_cv_roc_analysis(
     output_dir: str = "roc_plots",
     kernel_name: str = "kernel",
     dataset_name: str = "dataset",
+    rotation_for_angle: str = "X",
 ) -> List:
 
     scv = StratifiedKFold(n_splits=num_splits, random_state=random_state, shuffle=True)
@@ -130,11 +131,19 @@ def run_cv_roc_analysis(
         label=r"$\pm$ 1 std. dev.",
     )
 
-    ax.set(
-        xlabel="FPR",
-        ylabel="TPR",
-        title=f"{kernel_name}",
-    )
+    if kernel_name == "Angle":
+        ax.set(
+            xlabel="FPR",
+            ylabel="TPR",
+            title=f"{kernel_name}($\sigma = {rotation_for_angle}$)",
+        )
+    else:
+        ax.set(
+            xlabel="FPR",
+            ylabel="TPR",
+            title=f"{kernel_name}",
+        )
+
     ax.legend(loc="lower right")
 
     # Save the overall plot

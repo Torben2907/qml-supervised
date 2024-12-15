@@ -30,9 +30,9 @@ def compute_svm_results(
     dataset: str,
     kernels: Tuple[str, ...],
     times: List[Dict[str, str | float]],
-    num_splits: int = 5,
+    num_splits: int = 10,
     random_state: int = 42,
-    num_features_to_subsample: int = 11,
+    num_features_to_subsample: int = 10,
 ) -> pd.DataFrame:
     results_summary = []
     X, y, feature_names = parse_biomed_data_to_ndarray(dataset, return_X_y=True)
@@ -71,5 +71,4 @@ if __name__ == "__main__":
         res_name = f"SVM_{data}_results.csv"
         path_out = os.path.join(res_dir, res_name)
         df.to_csv(path_out, index=False)
-        times_df.to_csv(os.path.join(res_dir, f"QSVM_{data}_times.csv"))
         print(f"Results saved to {path_out}")
