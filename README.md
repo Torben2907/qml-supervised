@@ -6,7 +6,11 @@ This is the implementation / codebase for comparing classical kernel models with
 
 The package created is called `QMLab` - written entirely in Python, using [Pennylane](https://github.com/PennyLaneAI/pennylane) for the simulation of a quantum mechanical backend and [Sklearn](https://github.com/scikit-learn/scikit-learn) for the classical backend. The main class we use is [`QSVC`](https://github.com/Torben2907/qml-supervised/blob/master/src/qmlab/kernel/qsvm.py#L164) - short for **Q**uantum **S**upport **V**ector **C**lassifier. It inherits from the [`SVC`](https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/svm/_classes.py#L604) class of Scikit-Learn and extends its functionality by allowing a quantum kernel as well as classical ones.
 
-![image](./figures/Workflow.pdf)
+<!-- When render to pdf uncomment this & comment line below! -->
+<!-- ⬇️ -->
+<!-- ![image](./figures/Workflow.svg) -->
+![image](./figures/Workflow.png)
+
 
 [Get started with the Jupyter-Tutorial-Series here!](./tutorials/01_classical_kernel_methods.ipynb)
 
@@ -14,8 +18,8 @@ The package created is called `QMLab` - written entirely in Python, using [Penny
 
 We're dealing with 9 different biomedical datasets in the thesis. The collection is coming from the study of <cite>Beinecke & Heider [[1]]</cite> that compares different augmentation methods for 
 dealing with the imbalance in biomedical data.
-All of the datasets don't consist of a large number of examples $m$, but have the high class imbalance and 
-a large number of features $d$. 
+All the datasets don't consist of many examples $m$, but have the high class imbalance and 
+numerous features $d$. 
 
 | **NAME**      | $m$  | Cases (+1)   | Controls (-1)   | $d$ |
 |---------------|------|--------------|-----------------|-----|                 
@@ -105,7 +109,7 @@ After installation you should check that all tests of the project run
 ```shell
 pytest -v 
 ```
-Additionally run all tests with coverage:
+Additionally, run all tests with coverage:
 ```shell
 pytest -v --cov=src/qmlab tests/   
 ```
@@ -113,7 +117,7 @@ pytest -v --cov=src/qmlab tests/
 Please note:
 - Code reproducibility has been tested with [Docker](https://github.com/docker)
 but let me know if there are any issues!
-- Opening a notebook in Google Colab 
+- Opening a notebook in **Google Colab**
 the same steps in [installation](#installation--setup-) 
 as for your local machine!
 

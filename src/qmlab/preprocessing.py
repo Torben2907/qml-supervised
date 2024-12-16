@@ -42,7 +42,7 @@ def parse_biomed_data_to_ndarray(
        Consistent with the the thesis the notation
         - :math:`m` for the number of examples in the dataset,
         - :math:`d` for the number of features in the dataset,
-        - :math:`k` for the number of classes in the dataset
+        - :math:`c` for the number of classes in the dataset
         is used.
 
     Args:
