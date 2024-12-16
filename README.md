@@ -110,15 +110,12 @@ Additionally run all tests with coverage:
 pytest -v --cov=src/qmlab tests/   
 ```
 
-
-<span style="background-color: #FFFF00">
 Please note:
 - Code reproducibility has been tested with [Docker](https://github.com/docker)
 but let me know if there are any issues!
 - Opening a notebook in Google Colab 
 the same steps in [installation](#installation--setup-) 
 as for your local machine!
-</span
 
 torben.heckes@uni-duesseldorf.de
 
