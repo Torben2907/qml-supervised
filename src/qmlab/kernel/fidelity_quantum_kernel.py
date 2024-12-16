@@ -120,7 +120,7 @@ class FidelityQuantumKernel(QuantumKernel):
         Initialization of the data dependent attributes, like the number of features
         and class labels. Depending on which data embedding has been specified by the user
         it will also initialize the number of qubits. When working with a quantum kernel
-        it's mandatory to first call this method before trying to evaluate the gram matrix!
+        it is mandatory to first call this method before trying to evaluate the gram matrix!
 
         Parameters
         ----------
@@ -188,7 +188,8 @@ class FidelityQuantumKernel(QuantumKernel):
 
         @qml.qnode(self.device, interface=self.interface, diff_method=None)
         def circuit(combined_input: jax.Array) -> ProbabilityMP:
-            """Inversion test (Algorithm 1 in the thesis).
+            """
+            Inversion test (Algorithm 1 in the thesis).
 
                 Here displayed for 3 Qubits (marked by q_0, q_1 & q_2):
 
@@ -199,7 +200,6 @@ class FidelityQuantumKernel(QuantumKernel):
                             │    ││     │
                        q_2: ┤2   ├┤2    ├
                             └────┘└─────┘
-
 
             Parameters
                 ----------

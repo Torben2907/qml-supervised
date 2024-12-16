@@ -1,3 +1,12 @@
+"""
+Produces ROC-curve-plots
+for the quantum kernels.
+
+Returns
+-------
+plots.
+"""
+
 import os
 import yaml
 import numpy as np
@@ -13,7 +22,7 @@ from qmlab.preprocessing import (
 
 random_state = 42
 
-embeddings = ("Angle", "IQP")
+embeddings = ("IQP", "Angle")
 
 res_dir = os.path.join(os.path.dirname(__file__), "../roc-analysis/")
 os.makedirs(res_dir, exist_ok=True)

@@ -6,7 +6,7 @@ This is the implementation / codebase for comparing classical kernel models with
 
 The package created is called `QMLab` - written entirely in Python, using [Pennylane](https://github.com/PennyLaneAI/pennylane) for the simulation of a quantum mechanical backend and [Sklearn](https://github.com/scikit-learn/scikit-learn) for the classical backend. The main class we use is [`QSVC`](https://github.com/Torben2907/qml-supervised/blob/master/src/qmlab/kernel/qsvm.py#L164) - short for **Q**uantum **S**upport **V**ector **C**lassifier. It inherits from the [`SVC`](https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/svm/_classes.py#L604) class of Scikit-Learn and extends its functionality by allowing a quantum kernel as well as classical ones.
 
-![image](./figures/Workflow.png)
+![image](./figures/Workflow-2.png)
 
 [Get started with the Jupyter-Tutorial-Series here!](./tutorials/01_classical_kernel_methods.ipynb)
 

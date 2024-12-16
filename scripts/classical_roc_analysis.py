@@ -1,3 +1,12 @@
+"""
+Produces ROC-curve-plots
+for the classical kernels.
+
+Returns
+-------
+plots.
+"""
+
 import os
 import yaml
 import numpy as np

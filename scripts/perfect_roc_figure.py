@@ -1,3 +1,7 @@
+"""Creates figure of a perfect model that has a sensitivity of 1 and 
+specificity of 0.
+"""
+
 import matplotlib
 import matplotlib.pyplot as plt
 

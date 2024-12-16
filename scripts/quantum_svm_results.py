@@ -1,3 +1,11 @@
+"""Script for the results for the classical kernels.
+
+Returns
+-------
+_type_
+    results for classical kernels.
+"""
+
 import os
 import numpy as np
 import pandas as pd

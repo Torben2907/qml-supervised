@@ -1,6 +1,6 @@
 """script to create 2-dimensional plots of all datasets with train and 
     test split. I'm keeping this for completeness but I didn't use those further,
-    since scaling down the dimensions so vastly wasn't a good approach.
+    since scaling down the dimensions so vastly using PCA wasn't a good approach.
 """
 
 import os
