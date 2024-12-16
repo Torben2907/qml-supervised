@@ -17,7 +17,8 @@ jax.config.update("jax_default_matmul_precision", "highest")
 
 
 class FidelityQuantumKernel(QuantumKernel):
-    r"""Fidelity Quantum Kernel.
+    r"""
+    Fidelity Quantum Kernel.
 
     It is defined as the overlap of two pure quantum states (fidelity):
 
@@ -55,7 +56,8 @@ class FidelityQuantumKernel(QuantumKernel):
         evaluate_duplicates: str = "off_diagonal",
         interface: str = "jax",
     ):
-        """Constructor of FidelityQuantumKernel.
+        """
+        Constructor of FidelityQuantumKernel.
 
         Parameters
         ----------
@@ -114,7 +116,8 @@ class FidelityQuantumKernel(QuantumKernel):
         feature_dimension: int,
         class_labels: List[int] | None = None,
     ) -> None:
-        """Initialization of the data dependent attributes, like number of features
+        """
+        Initialization of the data dependent attributes, like the number of features
         and class labels. Depending on which data embedding has been specified by the user
         it will also initialize the number of qubits. When working with a quantum kernel
         it's mandatory to first call this method before trying to evaluate the gram matrix!
@@ -157,7 +160,8 @@ class FidelityQuantumKernel(QuantumKernel):
             raise InvalidEmbeddingError("Invalid embedding. Stop.")
 
     def build_circuit(self) -> QNode:
-        """Builds the quantum circuit for computing the
+        """
+        Builds the quantum circuit for computing the
         fidelity.
 
         This is based on Algorithm 1 of the thesis.
@@ -184,6 +188,46 @@ class FidelityQuantumKernel(QuantumKernel):
 
         @qml.qnode(self.device, interface=self.interface, diff_method=None)
         def circuit(combined_input: jax.Array) -> ProbabilityMP:
+            """Inversion test (Algorithm 1 in the thesis).
+
+                Here displayed for 3 Qubits (marked by q_0, q_1 & q_2):
+
+                            ┌────┐┌─────┐
+                       q_0: ┤0   ├┤0    ├
+                            │    ││     │
+                       q_1: ┤1 U ├┤1 U† ├
+                            │    ││     │
+                       q_2: ┤2   ├┤2    ├
+                            └────┘└─────┘
+
+
+            Parameters
+                ----------
+                combined_input : jax.Array
+                    Contains all combination {i, j} of pairs of
+                    the feature matrix for the evaluation
+                    of the gram matrix.
+
+                    Example given:
+
+                    >>> X = jnp.asarray([[0, 0], [1, 1]]) # dummy data.
+                    >>> concat_vec = jnp.asarray(
+                            [[0, 0, 0, 0], [0, 0, 1, 1],
+                            [1, 1, 0, 0], [1, 1, 1, 1]]
+                        )
+
+                Returns
+                -------
+                ProbabilityMP
+                    From the PennyLane docs:
+                    >>> Measurement process that computes the probability of each computational basis state.
+
+                Raises
+                ------
+                QMLabError
+                    When the number of qubits wasn't specified before the circuit
+                    is built.
+            """
             if self.num_qubits is None:
                 raise QMLabError(
                     "Number of qubits hasn't been specified before building the circuit!"
@@ -243,7 +287,8 @@ class FidelityQuantumKernel(QuantumKernel):
         return circuit
 
     def evaluate(self, x: NDArray, y: NDArray) -> NDArray:
-        """Returns the quantum kernel matrix.
+        """
+        Returns the quantum kernel matrix.
         For x = y this is precisely the quantum gram matrix we refer to in the main text.
         In the context of this study we only use x = y.
 
@@ -296,7 +341,8 @@ class FidelityQuantumKernel(QuantumKernel):
     def _is_trivial(
         self, i: int, j: int, psi_i: NDArray, phi_j: NDArray, symmetric: bool
     ) -> bool:
-        """This method is experimental and hasn't been tested (yet),
+        """
+        This method is experimental and hasn't been tested (yet),
         neither is it used for the study (for now).
         The idea is to simplify computation by computing only the upper or
         lower triangle in the case of the gram matrix.
