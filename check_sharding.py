@@ -1,3 +1,15 @@
+"""This script tests the sharding 
+    (dividing the computations onto multiple GPUs)
+    of JAX for PennyLane QNodes.  
+
+    Returns
+    -------
+    Any
+        Grid displaying the sharded devices,
+        Correctly computed gram matrix by multiple devices at 
+        the same time.
+"""
+
 from typing import Callable
 import jax
 import matplotlib as mpl
