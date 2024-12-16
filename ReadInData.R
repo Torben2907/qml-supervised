@@ -1,3 +1,8 @@
+# this script was provided by Beinecke & Heider 
+# and used in their study to clean up the collection 
+# of biomedical data, see
+# https://biodatamining.biomedcentral.com/articles/10.1186/s13040-021-00283-6#Tab1Where
+
 rm(list=ls())
 setwd("/Users/dominikheider/Desktop/GNUS/")
 library(DMwR)
