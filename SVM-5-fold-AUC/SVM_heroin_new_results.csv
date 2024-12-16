@@ -1,0 +1,4 @@
+Dataset,Kernel,"['V2', 'V4', 'V5', 'V6', 'V7', 'V8', 'V9', 'V10', 'V11', 'V12', 'V13']"
+heroin_new,rbf,"0.84620, CI: [0.77716, 0.91525]"
+heroin_new,poly,"0.83202, CI: [0.75391, 0.91013]"
+heroin_new,sigmoid,"0.81499, CI: [0.74731, 0.88266]"

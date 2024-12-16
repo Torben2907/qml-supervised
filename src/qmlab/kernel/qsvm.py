@@ -1,8 +1,8 @@
 import time
+import numpy as np
 from typing import Any, Dict
 from sklearn.svm import SVC
 from .quantum_kernel import QuantumKernel
-import numpy as np
 from numpy.typing import NDArray
 from sklearn.base import BaseEstimator, ClassifierMixin
 from ..exceptions import NotFittedError, QMLabError
@@ -151,14 +151,75 @@ class BaseQSVM(BaseEstimator, ClassifierMixin):
         return self._svm.predict(X)
 
     def predict_proba(self, X: NDArray) -> NDArray:
+        """Compute probabilities of possible outcomes for all samples
+        in X.
+
+        Parameters
+        ----------
+        X : NDArray
+            Feature matrix of shape (m, d), where m is the number of samples
+            used for testing and d is the number of features.
+
+        Returns
+        -------
+        NDArray
+            of shape (m, c), where m is the number of samples used for testing
+            and c is the number of class labels (here always c = 2).
+            Contains the probabilites for each sample to lay in one of the
+            classes. Columns respond to the classes in sorted order, i.e.
+            here [-1, +1].
+        """
         self.check_if_fitted()
         return self._svm.predict_proba(X)
 
     def score(
         self, X: NDArray, y: NDArray, sample_weight: NDArray | None = None
     ) -> float:
+        r"""Uses the metric that can be specified when running a cross-validation
+        to estimate the performance of the model on the dataset.
+
+        Parameters
+        ----------
+        X : NDArray
+            Feature matrix of shape (m, d), m are the number of samples and d the
+            number of features.
+        y : NDArray
+            Row vector of shape (1, m) containing the corresponding labels.
+
+        Returns
+        -------
+        float
+            The result of the metric indicating how well the model performs
+            on the task of regression or classification.
+            By default the accuracy (ACC) will be used:
+
+            \text{ACC}(h_{\bm{\theta}}(\boldsymbol{x}), \boldsymbol{y}) = \frac{1}{m} \sum_{j=1}^m
+            I[h(x_j) = y_j], \qquad \text{where} \qquad
+            h(\boldsymbol{x}), \boldsymbol{y} \in \mathbb{R}^{1 \times m}.
+
+        """
         self.check_if_fitted()
         return self._svm.score(X, y, sample_weight)
+
+    def decision_function(self, X: NDArray) -> NDArray:
+        r"""Signed distance to the separating hyperplane.
+
+        :math:
+            h_{\bm{\theta}}(\bm{x})
+            = \text{sign} \left( \left\langle \bm{w}, \bm{x} \right\rangle + b \right).
+
+        Parameters
+        ----------
+        X : NDArray
+            Feature matrix of shape (m, d), where m is the number of
+            samples and d the number of features.
+
+        Returns
+        -------
+        NDArray: of shape (m,) (the decision function for the complete dataset).
+
+        """
+        return self._svm.decision_function(X)
 
 
 class QSVC(BaseQSVM):

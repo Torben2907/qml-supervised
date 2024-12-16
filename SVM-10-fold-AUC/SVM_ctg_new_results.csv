@@ -1,0 +1,4 @@
+Dataset,Kernel,"['LB', 'AC', 'FM', 'UC', 'DL', 'DS', 'DP', 'ASTV', 'MSTV', 'ALTV']","['MLTV', 'Width', 'Min', 'Max', 'Nmax', 'Nzeros', 'Mode', 'Mean', 'Median', 'Variance']","['Tendency', 'CLASS', 'LB', 'AC', 'FM', 'UC', 'DL', 'DS', 'DP', 'ASTV']"
+ctg_new,rbf,"0.99354, CI: [0.98484, 1.00224]","0.93771, CI: [0.9126, 0.96281]","0.99871, CI: [0.99676, 1.00066]"
+ctg_new,poly,"0.98962, CI: [0.97877, 1.00046]","0.93896, CI: [0.91417, 0.96375]","0.99902, CI: [0.9971, 1.00094]"
+ctg_new,sigmoid,"0.50240, CI: [0.4611, 0.54369]","0.48775, CI: [0.44926, 0.52623]","0.96839, CI: [0.95344, 0.98335]"

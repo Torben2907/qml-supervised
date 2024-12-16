@@ -1,0 +1,4 @@
+Dataset,Kernel,"['Age', 'Sex', 'ALB', 'ALP', 'ALT', 'AST', 'BIL', 'CHE', 'CHOL', 'CREA']","['GGT', 'PROT', 'Age', 'Sex', 'ALB', 'ALP', 'ALT', 'AST', 'BIL', 'CHE']"
+hcv_new,rbf,"0.92500, CI: [0.82042, 1.02958]","0.97500, CI: [0.926, 1.024]"
+hcv_new,poly,"0.95000, CI: [0.852, 1.048]","1.00000, CI: [1.0, 1.0]"
+hcv_new,sigmoid,"0.95000, CI: [0.88467, 1.01533]","0.87500, CI: [0.74332, 1.00668]"

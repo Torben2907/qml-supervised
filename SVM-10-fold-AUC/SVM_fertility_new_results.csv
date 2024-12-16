@@ -1,0 +1,4 @@
+Dataset,Kernel,"['Season', 'Age', 'diseases', 'Accident', 'Surgical', 'fevers', 'alcohol', 'smoking', 'sitting']"
+fertility_new,rbf,"0.25000, CI: [0.03087, 0.46913]"
+fertility_new,poly,"0.10000, CI: [-0.03066, 0.23066]"
+fertility_new,sigmoid,"0.85000, CI: [0.70031, 0.99969]"

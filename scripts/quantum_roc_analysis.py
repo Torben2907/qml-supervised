@@ -64,7 +64,7 @@ def svm_roc_analysis(
 
 
 datasets = [
-    "ctg_new",
+    "hcv_new",
 ]
 
 
