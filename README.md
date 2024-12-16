@@ -39,10 +39,10 @@ kernel.
 
 ## What is a Quantum Support Vector Machine? 🤔
 
-Short answer: A quantum-classical hybrid algorithm, where only the kernel is computed 
+*Short answer*: A quantum-classical hybrid algorithm, where only the kernel is computed 
 on a quantum computer and the rest of the algorithm is completely managed classically.
 
-Long answer:
+*Long answer*:
 Since real quantum hardware is noisy and prone for errors a whole field submerged of quantum hybrid algorithms 
 which are based on classical learning algorithms but outsource suitable parts to a quantum computer.
 

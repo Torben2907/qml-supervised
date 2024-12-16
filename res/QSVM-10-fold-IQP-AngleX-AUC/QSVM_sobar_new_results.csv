@@ -1,0 +1,3 @@
+Dataset,Embedding,"['behavior_sexualRisk', 'behavior_eating', 'behavior_personalHygine', 'intention_aggregation', 'intention_commitment', 'attitude_consistency', 'attitude_spontaneity', 'norm_significantPerson', 'norm_fulfillment', 'perception_vulnerability']","['perception_severity', 'motivation_strength', 'motivation_willingness', 'socialSupport_emotionality', 'socialSupport_appreciation', 'socialSupport_instrumental', 'empowerment_knowledge', 'empowerment_abilities', 'empowerment_desires', 'behavior_sexualRisk']"
+sobar_new,Angle,"0.42333, CI: [0.24553, 0.60114]","0.45000, CI: [0.33303, 0.56697]"
+sobar_new,IQP,"0.43833, CI: [0.21518, 0.66149]","0.70000, CI: [0.54266, 0.85734]"

@@ -1,0 +1,3 @@
+Dataset,Embedding,"['LB', 'AC', 'FM', 'UC', 'DL', 'DS', 'DP', 'ASTV', 'MSTV', 'ALTV']","['MLTV', 'Width', 'Min', 'Max', 'Nmax', 'Nzeros', 'Mode', 'Mean', 'Median', 'Variance']","['Tendency', 'CLASS', 'LB', 'AC', 'FM', 'UC', 'DL', 'DS', 'DP', 'ASTV']"
+ctg_new,Angle,"0.45911, CI: [0.42163, 0.4966]","0.50825, CI: [0.47059, 0.54591]","0.52676, CI: [0.49136, 0.56217]"
+ctg_new,IQP,"0.98594, CI: [0.97339, 0.9985]","0.95721, CI: [0.93789, 0.97653]","0.99740, CI: [0.99528, 0.99952]"

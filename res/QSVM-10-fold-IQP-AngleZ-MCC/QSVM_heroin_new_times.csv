@@ -1,0 +1,15 @@
+,Dataset,Embedding,Times
+0,cervical_new,Angle,72.32310009002686
+1,cervical_new,IQP,194.11890482902527
+2,ctg_new,Angle,819.2943348884583
+3,ctg_new,IQP,3685.823387145996
+4,fertility_new,Angle,36.20845174789429
+5,fertility_new,IQP,260.30751872062683
+6,haberman_new,Angle,20.969367027282715
+7,haberman_new,IQP,37.60675263404846
+8,hcv_new,Angle,117.23914504051208
+9,hcv_new,IQP,780.9770495891571
+10,nafld_new,Angle,34.69681429862976
+11,nafld_new,IQP,240.19096779823303
+12,heroin_new,Angle,189.6372458934784
+13,heroin_new,IQP,1030.9230544567108

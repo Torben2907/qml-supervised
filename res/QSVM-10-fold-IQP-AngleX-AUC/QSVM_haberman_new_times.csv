@@ -1,0 +1,9 @@
+,Dataset,Embedding,Times
+0,cervical_new,Angle,71.35087370872498
+1,cervical_new,IQP,195.2299017906189
+2,ctg_new,Angle,818.4287927150726
+3,ctg_new,IQP,3654.422874689102
+4,fertility_new,Angle,34.71396088600159
+5,fertility_new,IQP,249.2270429134369
+6,haberman_new,Angle,21.040469646453857
+7,haberman_new,IQP,37.5484721660614

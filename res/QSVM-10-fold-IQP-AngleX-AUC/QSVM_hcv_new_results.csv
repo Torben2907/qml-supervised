@@ -1,0 +1,3 @@
+Dataset,Embedding,"['Age', 'Sex', 'ALB', 'ALP', 'ALT', 'AST', 'BIL', 'CHE', 'CHOL', 'CREA']","['GGT', 'PROT', 'Age', 'Sex', 'ALB', 'ALP', 'ALT', 'AST', 'BIL', 'CHE']"
+hcv_new,Angle,"0.45373, CI: [0.31192, 0.59554]","0.46189, CI: [0.30523, 0.61856]"
+hcv_new,IQP,"0.92101, CI: [0.88436, 0.95766]","0.90515, CI: [0.82458, 0.98573]"
