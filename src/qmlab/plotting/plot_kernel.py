@@ -29,11 +29,11 @@ def plot_kernel_heatmap(kernel_train: np.ndarray, kernel_test: np.ndarray):
     axs[0].imshow(
         np.asmatrix(kernel_train), interpolation="nearest", origin="upper", cmap="Blues"
     )
-    axs[0].set_title("Training kernel matrix")
+    axs[0].set_title(r"$\hat{\boldsymbol{K}}$ for Training.")
 
     axs[1].imshow(
         np.asmatrix(kernel_test), interpolation="nearest", origin="upper", cmap="Reds"
     )
-    axs[1].set_title("Testing kernel matrix")
+    axs[1].set_title(r"$\hat{\boldsymbol{K}}$ for Testing.")
 
     plt.show()
