@@ -12,7 +12,7 @@ The package created is called `QMLab` - written entirely in Python, using [Penny
 
 ## Information about the data 🧬
 
-We're dealing with 9 different biomedical datasets in the thesis. The collection is coming from the study of <cite>Jacqueline Beinecke & Dominik Heider [[1]]</cite> that compares different augmentation methods for 
+We're dealing with 9 different biomedical datasets in the thesis. The collection is coming from the study of <cite>Beinecke & Heider [[1]]</cite> that compares different augmentation methods for 
 dealing with the imbalance in biomedical data.
 All of the datasets don't consist of a large number of examples $m$, but have the high class imbalance and 
 a large number of features $d$. 
@@ -32,7 +32,8 @@ a large number of features $d$.
 
 In the original paper different algorithms for data augmentation in order to deal with the imbalance 
 have been compared.
-We have implemented a quantum kernel classifier from {\cite havlicek here} and compared its performance 
+We have implemented a quantum kernel classifier based on <cite>Havlivcek et al.~[[2]]</cite> 
+and compared its performance 
 to common kernel classifiers known from traditional machine learning, like the rbf or polynomial 
 kernel.
 
@@ -73,13 +74,13 @@ Activate that environment via
 ```shell 
 source myvirtualenv/bin/activate
 ```
-and then install all of the required packages via:
+and then install all the required packages via:
 ```shell
 pip install -r requirements.txt
 ```
 
 ### For Windows OS 
-You need this additional package (unix users do not need to have this installed apparently)
+You need this additional package (Unix users do not need to have this installed apparently)
 ```shell 
 pip install virtualenv
 ```
@@ -110,10 +111,11 @@ pytest -v --cov=src/qmlab tests/
 ```
 
 Please note:
-Code reproducability has been tested with [Docker](https://github.com/docker)
+Code reproducibility has been tested with [Docker](https://github.com/docker)
 but let me know if there are any issues!
 
 torben.heckes@uni-duesseldorf.de
 
 ---
 [1]: https://biodatamining.biomedcentral.com/articles/10.1186/s13040-021-00283-6#Tab1Where 
+[2]: https://arxiv.org/pdf/1804.11326
