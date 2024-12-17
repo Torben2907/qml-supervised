@@ -22,7 +22,7 @@ from qmlab.preprocessing import (
 
 random_state = 42
 
-embeddings = ("IQP", "Angle")
+embeddings = ("Angle",)
 
 res_dir = os.path.join(os.path.dirname(__file__), "../roc-analysis/")
 os.makedirs(res_dir, exist_ok=True)
@@ -40,7 +40,7 @@ def svm_roc_analysis(
     num_splits: int = 10,
     random_state: int = 42,
     num_features_to_subsample: int = 10,
-    rotation_for_angle: str = "X",
+    rotation_for_angle: str = "Z",
 ) -> List:
     X, y, feature_names = parse_biomed_data_to_ndarray(dataset, return_X_y=True)
     X = scale_to_specified_interval(X, interval=(-np.pi / 2, np.pi / 2))

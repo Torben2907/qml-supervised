@@ -33,6 +33,34 @@ def run_cv(
     random_state: int = 42,
     confidence: float = 0.95,
 ) -> Dict[str, Dict[str, float | List[float]]]:
+    """
+    Runs Cross-Validation (CV) on a dataset.
+    Computes AUC and MCC score in each run
+    and averages all values as well as computes
+    a confidence interval for those.
+
+    Parameters
+    ----------
+    clf : SVC | QSVC
+        The classifier used for CV.
+    X : NDArray
+        The feature matrix of shape (m,d)
+        - m number of samples,
+        - d number of fearures.
+    y : NDArray
+        Label vector of shape (m, )
+    num_splits : int, optional
+        The number of folds in CV, by default 10
+    random_state : int, optional
+        The random state for reproducability, by default 42
+    confidence : float, optional
+        The confidence amount, by default 0.95
+
+    Returns
+    -------
+    Dict[str, Dict[str, float | List[float]]]
+        All results of CV.
+    """
     scv = StratifiedKFold(n_splits=num_splits, random_state=random_state, shuffle=True)
     accuracies = []
     aucs = []
@@ -80,6 +108,45 @@ def run_cv_roc_analysis(
     dataset_name: str = "dataset",
     rotation_for_angle: str = "X",
 ) -> List:
+    """
+    Runs a stratified Cross-Validation on a
+    dataset with a classical or quantum-based kernel
+    and creates a ROC-curve figure.
+
+    Parameters
+    ----------
+    clf : SVC | QSVC
+        The classifier used in the CV.
+    X : NDArray
+        Feature matrix of shape (m,d), where m is the number
+        of samples and d is the number of features that may
+        been reduced by a function in preprocessing.
+    feature_names : List[str]
+        A list of the feature names used in the CV.
+        This is important because for datasets that contain
+        a large number of features not enough qubits could have
+        been simulated and we therefore subsampled a
+        smaller portion.
+    y : NDArray
+        Row vector containing the labels to the feature matrix.
+    num_splits : int, optional
+        Number of folds in the cross-validation, by default 10
+    random_state : int, optional
+        The random state used for reproducable results, by default 42
+    output_dir : str, optional
+        the directory that's used for saving the figure, by default "roc_plots"
+    kernel_name : str, optional
+        The name of the (classical or quantum) kernel, by default "kernel"
+    dataset_name : str, optional
+        The dataset that CV is performed on, by default "dataset"
+    rotation_for_angle : str, optional
+        The rotation angle used in Angle embedding (Angle kernel), by default "X"
+
+    Returns
+    -------
+    List
+        A list which contains where the file was saved.
+    """
 
     scv = StratifiedKFold(n_splits=num_splits, random_state=random_state, shuffle=True)
     tprs = []
@@ -196,6 +263,19 @@ def compute_confidence_interval(
 ) -> List[float]:
     """
     Compute the confidence interval for a given data set.
+
+    Parameters
+    ----------
+    data : list[float]
+        All values from the CV.
+    confidence : float, optional
+        The confidence amount, by default 0.95
+
+    Returns
+    -------
+    List[float]
+        containing the lower and upper bound of the
+        confidence interval.
     """
     k = len(data)  # k-folds
     mean = np.mean(data)

@@ -53,7 +53,7 @@ which are based on classical learning algorithms but outsource suitable parts to
 The traditional support vector machine algorithm can only classify data that is linearly separable. 
 It becomes way more powerful when we introduce a class of positive semi-definite functions called **kernels**. 
 Kernels allow us to map our data in a higher, perhaps infinite dimensional space where it is linearly separable. 
-Therefore we are able to classify non-linearly separable data with a linear model.
+Therefore, we are able to classify non-linearly separable data with a linear model.
 
 A **quantum kernel** is a bivariate, positive semi-definite function that takes on the form 
 
